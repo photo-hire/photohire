@@ -42,10 +42,48 @@ class _ChoosingState extends State<Choosing> {
           ),
           Column(
             children: [
-              Text(
-                "I am",
-                style: GoogleFonts.poppins(textStyle: TextStyle(fontSize: 32)),
-              )
+              Padding(
+                padding: const EdgeInsets.only(top: 250),
+                child: Text(
+                  "I WANT TO",
+                  style: GoogleFonts.poppins(
+                      textStyle: TextStyle(fontSize: 30, color: Colors.white,fontWeight: FontWeight.bold)),
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: Size(175, 60),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                  onPressed: () {},
+                  child: Text(
+                    "HIRE",
+                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                  )),
+              SizedBox(
+                height: 20,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                    gradient: LinearGradient(
+                        colors: [Color(0xffFFDD85), Color(0xffF8B500)])),
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        fixedSize: Size(175, 60),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15))),
+                    onPressed: () {},
+                    child: Text(
+                      "BE HIRED",
+                      style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                    )),
+              ),
             ],
           ),
           Positioned(

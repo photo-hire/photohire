@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "973277722131",
+    "project_id": "photohire-4c7a4",
+    "storage_bucket": "photohire-4c7a4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:973277722131:android:5c98e208d78463f88f31e6",
+        "android_client_info": {
+          "package_name": "com.example.photohire"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjs2sWsdM_vLHLW_Eg9bYkrb51BxHbV6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
