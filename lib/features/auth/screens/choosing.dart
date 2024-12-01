@@ -43,7 +43,7 @@ class _ChoosingState extends State<Choosing> {
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 250),
+                padding:  EdgeInsets.only(top: 200.h),
                 child: Text(
                   "I WANT TO",
                   style: GoogleFonts.poppins(
@@ -84,6 +84,21 @@ class _ChoosingState extends State<Choosing> {
                       style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
                     )),
               ),
+
+              SizedBox(height: 30,),
+
+
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: Size(175, 60),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                  onPressed: () {
+                  },
+                  child: Text(
+                    "Admin",
+                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                  )),
             ],
           ),
           Positioned(
@@ -97,5 +112,7 @@ class _ChoosingState extends State<Choosing> {
         ],
       ),
     );
+  
+  
   }
 }

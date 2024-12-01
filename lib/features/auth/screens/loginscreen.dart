@@ -10,7 +10,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return  Scaffold(
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
@@ -32,6 +32,13 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             SizedBox(height: 24.0),
             SizedBox(height: 16.0),
+
+            TextButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
+              },
+              child: Text('Create an Account'),
+            )
 
           ],
         ),
