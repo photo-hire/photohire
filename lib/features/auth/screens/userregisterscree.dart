@@ -1,25 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:photohire/features/auth/screens/choosing.dart';
-import 'package:photohire/features/auth/screens/userregisterscree.dart';
-import 'package:photohire/photographer/explore_screen.dart';
-import 'package:photohire/photographer/photographer_root_screen.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/user/photographer_details_screen.dart';
 
-class UserLoginScreen extends StatefulWidget {
-  const UserLoginScreen({super.key});
+class UserRegisterScreen extends StatefulWidget {
+  const UserRegisterScreen({super.key});
 
   @override
-  State<UserLoginScreen> createState() => _UserLoginScreenState();
+  State<UserRegisterScreen> createState() => _UserRegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _UserRegisterScreenState extends State<UserRegisterScreen> {
+  TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool _isPasswordVisible = false;
+  TextEditingController phoneController = TextEditingController();
   bool isLoading = false;
-
+  bool _isPasswordVisible = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,13 +29,14 @@ class _LoginScreenState extends State<LoginScreen> {
         height: MediaQuery.of(context).size.height,
         fit: BoxFit.cover,
       ),
+
       Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'Login Now',
+              'Register Now',
               style: TextStyle(
                   color: Colors.white,
                   fontSize: 30,
@@ -45,6 +45,48 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               height: 24.0,
             ),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Name',
+                filled: true,
+                fillColor: Colors.white,
+                border: InputBorder.none,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
+            TextField(
+              controller: phoneController,
+              decoration: InputDecoration(
+                labelText: 'Phone Number',
+                filled: true,
+                fillColor: Colors.white,
+                border: InputBorder.none,
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            SizedBox(height: 16.0),
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -105,47 +147,27 @@ class _LoginScreenState extends State<LoginScreen> {
                 try {
                   isLoading = true;
                   setState(() {});
-                  UserCredential userCredential = await FirebaseAuth.instance
-                      .signInWithEmailAndPassword(
-                          email: emailController.text,
-                          password: passwordController.text);
+                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: emailController.text,
+                      password: passwordController.text);
 
-                  final userId = userCredential.user?.uid;
+                      String uid = FirebaseAuth.instance.currentUser!.uid;
 
-                  // Check in Photographer collection
-                  final photographerDoc = await FirebaseFirestore.instance
-                      .collection('photgrapher')
-                      .doc(userId)
-                      .get();
 
-                  if (photographerDoc.exists) {
-                    // Navigate to PhotographerDetailsScreen
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => PhotographerRootScreen(),
-                      ),
-                    );
-                    return; // Exit after successful navigation
-                  }
-                  final userDoc = await FirebaseFirestore.instance
+                  await FirebaseFirestore.instance
                       .collection('users')
-                      .doc(userId)
-                      .get();
-
-
-                  if (userDoc.exists) {
-                    // Navigate to UserRegisterScreen (replace with the correct screen for users)
-                    Navigator.pushReplacement(
+                      .doc(uid)
+                      .set({
+                    'name': nameController.text,
+                    'email': emailController.text,
+                    'phone': phoneController.text,
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('User Registered Successffully')));
+                  Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PhotographerDetailsScreen(),
-                      ),
-                    );
-                    return; // Exit after successful navigation
-                  }
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User Not found')));
-
+                          builder: (context) => PhotographerDetailsScreen()));
                 } catch (e) {
                   print(e);
                 } finally {
@@ -166,14 +188,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.white,
                     )
                   : Text(
-                      'Login',
+                      'Register',
                       style:
                           TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                     ),
             ),
             SizedBox(height: 16.0),
             Text(
-              'Create an Account',
+              'Already have an account',
               style: TextStyle(
                   color: Colors.yellow[700],
                   fontSize: 18,
@@ -182,10 +204,10 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
                 onPressed: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Choosing()));
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: Text(
-                  'Sign Up',
+                  'Sign In',
                   style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,

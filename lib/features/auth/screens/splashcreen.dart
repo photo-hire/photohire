@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -70,7 +71,7 @@ class SplashScreen extends StatelessWidget {
                 Center(
                     child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Choosing(),));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -83,7 +84,7 @@ class SplashScreen extends StatelessWidget {
                       Icon(Icons.arrow_right_alt_sharp)
                     ],
                   ),
-                  style: ElevatedButton.styleFrom(fixedSize: Size(250, 50)),
+                  style: ElevatedButton.styleFrom(fixedSize: Size(250, 50),),
                 )),
               ],
             ),
