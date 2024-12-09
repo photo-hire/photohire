@@ -25,7 +25,7 @@ void main() async {
         theme: ThemeData(
           textTheme: GoogleFonts.poppinsTextTheme(),
         ),
-        home: AdminHomeScreen(),
+        home: Choosing(),
       );
     }
   ));
