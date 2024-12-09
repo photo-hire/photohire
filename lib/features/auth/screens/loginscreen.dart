@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
-import 'package:photohire/features/auth/screens/userregisterscree.dart';
-import 'package:photohire/photographer/explore_screen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/user/photographer_details_screen.dart';
 
@@ -14,7 +12,7 @@ class UserLoginScreen extends StatefulWidget {
   State<UserLoginScreen> createState() => _UserLoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _UserLoginScreenState extends State<UserLoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -133,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       .doc(userId)
                       .get();
 
-
                   if (userDoc.exists) {
                     // Navigate to UserRegisterScreen (replace with the correct screen for users)
                     Navigator.pushReplacement(
@@ -144,10 +141,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                     return; // Exit after successful navigation
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User Not found')));
-
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('User Not found'),
+                  ));
                 } catch (e) {
                   print(e);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Login Failed: $e'),
+                  ));
                 } finally {
                   isLoading = false;
                   setState(() {});

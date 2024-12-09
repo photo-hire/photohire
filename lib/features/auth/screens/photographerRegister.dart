@@ -109,9 +109,10 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                         activeColor: Colors.white, // Fill color
                         checkColor: Colors.blue[900],
                       ),
-                      const Text("Professional",style: TextStyle(
-                        color: Colors.white
-                      ),),
+                      const Text(
+                        "Professional",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ],
                   ),
                   Row(
@@ -127,9 +128,10 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                         activeColor: Colors.white, // Fill color
                         checkColor: Colors.blue[900],
                       ),
-                      const Text("Freelancer",style: TextStyle(
-                        color: Colors.white
-                      ),),
+                      const Text(
+                        "Freelancer",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ],
                   ),
                 ],
@@ -215,14 +217,15 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
               ElevatedButton(
                 onPressed: () async {
                   try {
-                    String userType = isProfessional ? 'Professional' : 'Freelancer';
+                    String userType =
+                        isProfessional ? 'Professional' : 'Freelancer';
 
                     isLoading = true;
                     setState(() {});
                     await FirebaseAuth.instance.createUserWithEmailAndPassword(
                         email: emailController.text,
                         password: passwordController.text);
-                        String uid = FirebaseAuth.instance.currentUser!.uid;
+                    String uid = FirebaseAuth.instance.currentUser!.uid;
 
                     await FirebaseFirestore.instance
                         .collection('photgrapher')
@@ -232,14 +235,14 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       'email': emailController.text,
                       'phone': phoneController.text,
                       'company': companyController.text,
-                      'role':userType
+                      'role': userType
                     });
                     ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Registered Successffully')));
                     Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                            builder: (context) =>PhotographerRootScreen()));
+                            builder: (context) => PhotographerRootScreen()));
                   } catch (e) {
                     print(e);
                   } finally {
@@ -276,8 +279,10 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
               ),
               TextButton(
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UserLoginScreen()));
                   },
                   child: Text(
                     'Sign In',

@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
+import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/user/photographer_details_screen.dart';
 
 class UserRegisterScreen extends StatefulWidget {
@@ -35,6 +37,22 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            Positioned(
+              top: 30.h,
+              left: 10.w,
+              child: IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SplashScreen(),
+                        ));
+                  },
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  )),
+            ),
             Text(
               'Register Now',
               style: TextStyle(
@@ -151,8 +169,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       email: emailController.text,
                       password: passwordController.text);
 
-                      String uid = FirebaseAuth.instance.currentUser!.uid;
-
+                  String uid = FirebaseAuth.instance.currentUser!.uid;
 
                   await FirebaseFirestore.instance
                       .collection('users')
@@ -203,8 +220,8 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
             ),
             TextButton(
                 onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                  // Navigator.push(context,
+                  //     MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: Text(
                   'Sign In',
