@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photohire/features/auth/screens/photographerRegister.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
+import 'package:photohire/features/auth/screens/userregisterscree.dart';
 
 class Choosing extends StatefulWidget {
   const Choosing({super.key});
@@ -58,7 +60,9 @@ class _ChoosingState extends State<Choosing> {
                       fixedSize: Size(175, 60),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PhotographerRegister()));
+                  },
                   child: Text(
                     "HIRE",
                     style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
@@ -78,7 +82,9 @@ class _ChoosingState extends State<Choosing> {
                         fixedSize: Size(175, 60),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>UserRegisterScreen()));
+                    },
                     child: Text(
                       "BE HIRED",
                       style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
