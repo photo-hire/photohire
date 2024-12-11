@@ -42,10 +42,7 @@ class SplashScreen extends StatelessWidget {
                   "Welcome to",
                   style: GoogleFonts.poppins(
                     textStyle: TextStyle(
-                      fontSize: 25.sp,
-                      color: Colors.white,
-                      height: 1
-                    ),
+                        fontSize: 25.sp, color: Colors.white, height: 1),
                   ),
                 ),
                 // SizedBox(height: 0.h),
@@ -66,25 +63,38 @@ class SplashScreen extends StatelessWidget {
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w300)),
                 ),
-                Center(child: Image.asset("asset/image/firsticon.png",height: 300.h,width: 300.w)),
-                SizedBox(height: 30.h,),
+                Center(
+                    child: Image.asset("asset/image/firsticon.png",
+                        height: 300.h, width: 300.w)),
+                SizedBox(
+                  height: 30.h,
+                ),
                 Center(
                     child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => LoginScreen(),));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Choosing(),
+                        ));
                   },
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         "Get Started",
-                        style: TextStyle(fontWeight: FontWeight.bold,fontSize:20.sp ),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20.sp),
                       ),
-                      SizedBox(width: 10.w,),
+                      SizedBox(
+                        width: 10.w,
+                      ),
                       Icon(Icons.arrow_right_alt_sharp)
                     ],
                   ),
-                  style: ElevatedButton.styleFrom(fixedSize: Size(250, 50),),
+                  style: ElevatedButton.styleFrom(
+                    fixedSize: Size(250, 50),
+                  ),
                 )),
               ],
             ),

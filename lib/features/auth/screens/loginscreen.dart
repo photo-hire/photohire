@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _UserLoginScreenState extends State<UserLoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -133,7 +133,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       .doc(userId)
                       .get();
 
-
                   if (userDoc.exists) {
                     // Navigate to UserRegisterScreen (replace with the correct screen for users)
                     Navigator.pushReplacement(
@@ -161,10 +160,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                     return; // Exit after successful navigation
                   }
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('User Not found')));
-
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('User Not found'),
+                  ));
                 } catch (e) {
                   print(e);
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Login Failed: $e'),
+                  ));
                 } finally {
                   isLoading = false;
                   setState(() {});

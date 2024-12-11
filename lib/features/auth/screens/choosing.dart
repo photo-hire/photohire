@@ -46,11 +46,14 @@ class _ChoosingState extends State<Choosing> {
           Column(
             children: [
               Padding(
-                padding:  EdgeInsets.only(top: 200.h),
+                padding: EdgeInsets.only(top: 200.h),
                 child: Text(
                   "I WANT TO",
                   style: GoogleFonts.poppins(
-                      textStyle: TextStyle(fontSize: 30, color: Colors.white,fontWeight: FontWeight.bold)),
+                      textStyle: TextStyle(
+                          fontSize: 30,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
                 ),
               ),
               SizedBox(
@@ -62,33 +65,45 @@ class _ChoosingState extends State<Choosing> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PhotographerRegister()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => UserRegisterScreen()));
                   },
                   child: Text(
                     "HIRE",
-                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Color(0xff03399E),
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold),
                   )),
               SizedBox(
                 height: 20,
               ),
               Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15),
                     gradient: LinearGradient(
                         colors: [Color(0xffFFDD85), Color(0xffF8B500)])),
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
+                        backgroundColor: Colors.transparent,
                         elevation: 0,
                         fixedSize: Size(175, 60),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context)=>UserRegisterScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => PhotographerRegister()));
                     },
                     child: Text(
                       "BE HIRED",
-                      style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Color(0xff03399E),
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold),
                     )),
               ),
               SizedBox(
@@ -116,11 +131,13 @@ class _ChoosingState extends State<Choosing> {
                       fixedSize: Size(175, 60),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15))),
-                  onPressed: () {
-                  },
+                  onPressed: () {},
                   child: Text(
                     "Admin",
-                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        color: Color(0xff03399E),
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold),
                   )),
             ],
           ),
@@ -134,11 +151,6 @@ class _ChoosingState extends State<Choosing> {
               )),
         ],
       ),
-    
-    
-    
     );
-  
-  
   }
 }
