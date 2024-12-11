@@ -5,30 +5,26 @@ import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:location/location.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
-import 'package:photohire/photographer/photographer_root_screen.dart';
+import 'package:photohire/rentalStore/rental_store_home_screen.dart';
+import 'package:photohire/rentalStore/store_root_screen.dart';
 
-class PhotographerRegister extends StatefulWidget {
-  const PhotographerRegister({super.key});
+class RentalStoreRegisterScreen extends StatefulWidget {
+  const RentalStoreRegisterScreen({super.key});
 
   @override
-  State<PhotographerRegister> createState() => _PhotographerRegisterState();
+  State<RentalStoreRegisterScreen> createState() => _RentalStoreRegisterScreenState();
 }
 
-class _PhotographerRegisterState extends State<PhotographerRegister> {
-  TextEditingController nameController = TextEditingController();
+class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
+  TextEditingController storeNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
-  TextEditingController companyController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
-  TextEditingController address1Controller = TextEditingController();
-  TextEditingController address2Controller = TextEditingController();
   TextEditingController descController = TextEditingController();
   bool isLoading = false;
   bool _isPasswordVisible = false;
-  bool isFreelancer = false;
-  bool isProfessional = false;
   String? downloadURL;
   XFile? image;
   File? imageFile;
@@ -38,6 +34,50 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
     apiSecret: '2_MaDsMn0MLW5jqxKvxep_tvVJk', // Replace with your API secret
     cloudName: 'dm3mcgkch', // Replace with your Cloudinary cloud name
   );
+
+  final TextEditingController _latitudeController = TextEditingController();
+  final TextEditingController _longitudeController = TextEditingController();
+  double? latitude;
+  double? longitude;
+
+  // Function to get the current location
+  Future<void> _getCurrentLocation() async {
+    try {
+      Location location = Location();
+
+      // Check if location services are enabled
+      bool serviceEnabled = await location.serviceEnabled();
+      if (!serviceEnabled) {
+        serviceEnabled = await location.requestService();
+        if (!serviceEnabled) {
+          return;
+        }
+      }
+
+      // Check if location permissions are granted
+      PermissionStatus permissionGranted = await location.hasPermission();
+      if (permissionGranted == PermissionStatus.denied) {
+        permissionGranted = await location.requestPermission();
+        if (permissionGranted != PermissionStatus.granted) {
+          return;
+        }
+      }
+
+      // Fetch the current location
+      LocationData currentLocation = await location.getLocation();
+      setState(() {
+        latitude = currentLocation.latitude;
+        longitude = currentLocation.longitude;
+        _latitudeController.text = latitude?.toStringAsFixed(6) ?? '';
+        _longitudeController.text = longitude?.toStringAsFixed(6) ?? '';
+      });
+    } catch (e) {
+      print('Error getting location: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to fetch location: $e')),
+      );
+    }
+  }
 
   Future<void> _pickImage() async {
    
@@ -137,9 +177,9 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   height: 16.0,
                 ),
                 TextField(
-                  controller: nameController,
+                  controller: storeNameController,
                   decoration: InputDecoration(
-                    labelText: 'Name',
+                    labelText: 'Store Name',
                     filled: true,
                     fillColor: Colors.white,
                     border: InputBorder.none,
@@ -155,74 +195,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 16.0,
-                ),
-                TextField(
-                  controller: companyController,
-                  decoration: InputDecoration(
-                    labelText: 'Company Name',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16.0),
-                // Checkboxes for Professional and Freelancer
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isProfessional,
-                          onChanged: (value) {
-                            setState(() {
-                              isProfessional = value!;
-                              isFreelancer = false; // Only one can be selected
-                            });
-                          },
-                          activeColor: Colors.white, // Fill color
-                          checkColor: Colors.blue[900],
-                        ),
-                        const Text(
-                          "Professional",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        Checkbox(
-                          value: isFreelancer,
-                          onChanged: (value) {
-                            setState(() {
-                              isFreelancer = value!;
-                              isProfessional =
-                                  false; // Only one can be selected
-                            });
-                          },
-                          activeColor: Colors.white, // Fill color
-                          checkColor: Colors.blue[900],
-                        ),
-                        const Text(
-                          "Freelancer",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                
+                
                 SizedBox(
                   height: 16.4,
                 ),
@@ -300,69 +274,9 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
-
-                TextField(
-                  controller: priceController,
-                  decoration: InputDecoration(
-                    labelText: 'Starting Price',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.0),
-
-                TextField(
-                  controller: address1Controller,
-                  decoration: InputDecoration(
-                    labelText: 'Address Line 1',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 16.0),
-
-                TextField(
-                  controller: address2Controller,
-                  decoration: InputDecoration(
-                    labelText: 'Address Line 2',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: InputBorder.none,
-                    contentPadding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
+                
+                
+                
                 SizedBox(height: 16.0),
 
                 TextField(
@@ -385,12 +299,62 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     ),
                   ),
                 ),
+                SizedBox(height: 16,),
+                                  TextField(
+              controller: _latitudeController,
+              decoration: InputDecoration(
+                labelText: 'Latitude',
+                filled: true,
+                    fillColor: Colors.white,
+                    border: InputBorder.none,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.location_on),
+                  onPressed: _getCurrentLocation,
+                ),
+              ),
+              readOnly: true,
+            ),
+            SizedBox(height: 16),
+            // Longitude TextField
+            TextField(
+              controller: _longitudeController,
+              decoration: InputDecoration(
+                labelText: 'Longitude',
+                filled: true,
+                    fillColor: Colors.white,
+                    border: InputBorder.none,
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      borderSide: BorderSide.none,
+                    ),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.location_on),
+                  onPressed: _getCurrentLocation,
+                ),
+              ),
+              readOnly: true,
+            ),
                 SizedBox(height: 24.0),
                 ElevatedButton(
                   onPressed: () async {
                     try {
-                      String userType =
-                          isProfessional ? 'Professional' : 'Freelancer';
+                      
 
                       isLoading = true;
                       setState(() {});
@@ -403,27 +367,24 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       await _uploadImage();
 
                       await FirebaseFirestore.instance
-                          .collection('photgrapher')
+                          .collection('rentalStore')
                           .doc(uid)
                           .set({
-                        'name': nameController.text,
                         'email': emailController.text,
                         'phone': phoneController.text,
-                        'company': companyController.text,
-                        'role': userType,
+                        'storeName': storeNameController.text,
                         'companyLogo': downloadURL,
-                        'startingPrice': priceController.text,
                         'isApproved': false,
-                        'addressLine1': address1Controller.text,
-                        'addressLine2': address2Controller.text,
-                        'Description': descController.text,
+                        'description': descController.text,
+                        'latitude':latitude,
+                        'longitude':longitude
                       });
                       ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Registered Successffully')));
                       Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => PhotographerRootScreen()));
+                              builder: (context) => StoreRootScreen()));
                     } on FirebaseAuthException catch (e) {
                       if (e.code == 'email-already-in-use') {
                         // Display a user-friendly message

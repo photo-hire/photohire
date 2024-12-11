@@ -1,28 +1,22 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photohire/photographer/explore_screen.dart';
-import 'package:photohire/photographer/photographer_services_screen.dart';
-import 'package:photohire/photographer/photographer_manage_profile_screen.dart';
-import 'package:photohire/photographer/photographer_profile_screen.dart';
+import 'package:photohire/rentalStore/rental_store_home_screen.dart';
+import 'package:photohire/rentalStore/store_add_product_screen.dart';
+import 'package:photohire/rentalStore/store_profile_screen.dart';
 
-class PhotographerRootScreen extends StatefulWidget {
-      int? index;
-
-  PhotographerRootScreen({super.key,this.index = 0});
+class StoreRootScreen extends StatefulWidget {
+  const StoreRootScreen({super.key});
 
   @override
-  State<PhotographerRootScreen> createState() => _PhotographerRootScreenState();
+  State<StoreRootScreen> createState() => _StoreRootScreenState();
 }
 
-class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
-
-  int selectedIndex = 0;
+class _StoreRootScreenState extends State<StoreRootScreen> {
+int selectedIndex = 0;
 
   List<Widget> pages =[
-    ExploreScreen(),
-    PhotographerManageProfileScreen(),
-    PhotoGrapherServiceScreen(),
-    PhotoggrapherProfileScreen(),
+    RentalStoreHomeScreen(),
+    StoreAddProductScreen(),
+    StoreProfileScreen(),
   ];
   @override
   Widget build(BuildContext context) {
@@ -42,7 +36,6 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
           items:[
             BottomNavigationBarItem(icon: Icon(Icons.lightbulb_outlined),label: "idea",),
             BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline),label: "add",),
-            BottomNavigationBarItem(icon: Icon(Icons.miscellaneous_services_outlined),label: 'service'),
             BottomNavigationBarItem(icon: Icon(Icons.account_circle_outlined),label: "profile",),
           ] ,
           type: BottomNavigationBarType.fixed,

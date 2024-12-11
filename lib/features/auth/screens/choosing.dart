@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photohire/features/auth/rental_store_register_screen.dart';
 import 'package:photohire/features/auth/screens/photographerRegister.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/features/auth/screens/userregisterscree.dart';
@@ -90,7 +91,23 @@ class _ChoosingState extends State<Choosing> {
                       style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
                     )),
               ),
+              SizedBox(
+                height: 20,
+              ),
 
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                      fixedSize: Size(175, 70),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15))),
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>RentalStoreRegisterScreen()));
+                  },
+                  child: Text(
+                    "RENTAL STORE",
+                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                  )),
+              
               SizedBox(height: 30,),
 
 

@@ -1,6 +1,32 @@
 import 'package:flutter/material.dart';
 
-class PhotographerDetailsScreen extends StatelessWidget {
+class PhotographerDetailsScreen extends StatefulWidget {
+  Map<String,dynamic> studioDetails;
+
+  PhotographerDetailsScreen({super.key,required this.studioDetails});
+
+  @override
+  State<PhotographerDetailsScreen> createState() => _PhotographerDetailsScreenState();
+}
+
+class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
+  List images = ['asset/image/weddingphoto.jpg','asset/image/weddingphoto.jpg','asset/image/weddingphoto.jpg'];
+
+ late PageController _pageController;
+  int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,16 +39,52 @@ class PhotographerDetailsScreen extends StatelessWidget {
               child: Stack(
                 children: [
                   // Background Image
-                  Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('asset/image/weddingphoto.jpg'), // Replace with your asset
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ),
+                  PageView.builder(
+                    controller: _pageController,
+        itemCount: images.length, // Length of images array
+         onPageChanged: (index) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                },
+        itemBuilder: (context, index) {
+          // Displaying image from the list of images (if available)
+          String imageUrl = images[index];
+          
+          return Container(
+            height: double.infinity,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage(imageUrl),
+                fit: BoxFit.cover,
+              ),
+            ),
+          );
+        },
+      ),
+              // Dots Indicator
+        Positioned(
+          top: 280,
+          left: 160,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              images.length,
+              (index) => AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                margin: EdgeInsets.symmetric(horizontal: 4),
+                width: _currentIndex == index ? 12 : 8, // Larger dot for the current index
+                height: 8,
+                decoration: BoxDecoration(
+                  color: _currentIndex == index ? Colors.white : Colors.grey,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+          ),
+        ),
+
                   // Back Button
                   Positioned(
                     top: 40,
@@ -36,6 +98,7 @@ class PhotographerDetailsScreen extends StatelessWidget {
                     bottom: 0,
                     left: 0,
                     right: 0,
+                    top: 300,
                     child: Container(
                       
                       padding: EdgeInsets.all(15),
@@ -49,20 +112,30 @@ class PhotographerDetailsScreen extends StatelessWidget {
                       child: Column(
                         children: [
                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              CircleAvatar(
+                                radius: 25,
+                                backgroundImage: widget.studioDetails['companyLogo']!=null?
+                                NetworkImage(widget.studioDetails['companyLogo']):null,
+                                child: widget.studioDetails['companyLogo'] == null?
+                                Text('Logo here',style: TextStyle(
+                                  fontSize: 8
+                                ),):null,
+                              ),
+                              SizedBox(width: 10,),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  
                                   Text(
-                                    'Studio One',
+                                    widget.studioDetails['company'],
                                     style: TextStyle(
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
-                                    'Professional Photographer',
+                                    '${widget.studioDetails['role']} Photographer',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey,
@@ -70,11 +143,12 @@ class PhotographerDetailsScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
+                              Spacer(),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '\$500',
+                                    '\$${widget.studioDetails['startingPrice']}',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -106,7 +180,7 @@ class PhotographerDetailsScreen extends StatelessWidget {
                               SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Address line 1\nAddress line 2',
+                                  '${widget.studioDetails['addressLine1']}\n${widget.studioDetails['addressLine2']}',
                                   style: TextStyle(fontSize: 14),
                                 ),
                               ),
@@ -119,7 +193,7 @@ class PhotographerDetailsScreen extends StatelessWidget {
                               Icon(Icons.phone, color: Colors.blue),
                               SizedBox(width: 8),
                               Text(
-                                '1234567891',
+                                widget.studioDetails['phone'],
                                 style: TextStyle(fontSize: 14),
                               ),
                               Spacer(),
@@ -172,7 +246,7 @@ class PhotographerDetailsScreen extends StatelessWidget {
                               ),
                               SizedBox(height: 8),
                               Text(
-                                'We specialize in wedding photography, corporate, family, and senior portraits...',
+                                widget.studioDetails['Description'],
                                 style: TextStyle(fontSize: 14, color: Colors.grey),
                               ),
                             ],

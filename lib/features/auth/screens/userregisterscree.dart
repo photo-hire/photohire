@@ -1,9 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
-import 'package:photohire/user/photographer_details_screen.dart';
+import 'package:photohire/user/user_home_screen.dart';
 
 class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});
@@ -167,7 +166,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => PhotographerDetailsScreen()));
+                          builder: (context) => UserHomeScreen()));
                 } catch (e) {
                   print(e);
                 } finally {

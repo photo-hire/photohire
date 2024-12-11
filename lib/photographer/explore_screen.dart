@@ -32,6 +32,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(15, 20, 15,0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text('Explore',style: TextStyle(
                 color: Colors.black,

@@ -2,16 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
-import 'package:photohire/features/auth/screens/userregisterscree.dart';
-import 'package:photohire/photographer/explore_screen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
-import 'package:photohire/user/photographer_details_screen.dart';
+import 'package:photohire/rentalStore/rental_store_home_screen.dart';
+import 'package:photohire/rentalStore/store_root_screen.dart';
+import 'package:photohire/user/user_home_screen.dart';
 
-class UserLoginScreen extends StatefulWidget {
-  const UserLoginScreen({super.key});
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
 
   @override
-  State<UserLoginScreen> createState() => _UserLoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
 class _LoginScreenState extends State<LoginScreen> {
@@ -139,7 +139,24 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => PhotographerDetailsScreen(),
+                        builder: (context) => UserHomeScreen(),
+                      ),
+                    );
+                    return; // Exit after successful navigation
+                  }
+
+                  final storeDoc = await FirebaseFirestore.instance
+                      .collection('rentalStore')
+                      .doc(userId)
+                      .get();
+
+
+                  if (storeDoc.exists) {
+                    // Navigate to UserRegisterScreen (replace with the correct screen for users)
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StoreRootScreen(),
                       ),
                     );
                     return; // Exit after successful navigation
