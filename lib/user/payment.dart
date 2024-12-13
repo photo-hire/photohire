@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/customwidgets/payment_method_widget.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           title: Text('Payment'),
           titleTextStyle: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
           centerTitle: true,
@@ -31,15 +32,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
             child: Column(
               children: [
                 Container(
-                  height: 200,
+                  height: 200.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                     boxShadow: [
                       BoxShadow(
                         offset: Offset(10, 10),
-                        blurRadius: 10,
+                        blurRadius: 10.r,
                         color: Colors.grey,
                       ),
                     ],
@@ -56,7 +57,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 PaymentMethodWidget(
                   value: 'paypal',
                   groupValue: selectedPaymentMethod,
@@ -68,7 +69,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 PaymentMethodWidget(
                   value: 'googlepay',
                   groupValue: selectedPaymentMethod,
@@ -80,7 +81,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 PaymentMethodWidget(
                   value: 'applepay',
                   groupValue: selectedPaymentMethod,
@@ -92,18 +93,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     });
                   },
                 ),
-                SizedBox(height: 140,),
+                SizedBox(height: 140.h,),
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(15),
                   decoration: BoxDecoration(
                     color: Colors.blue[900],
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Center(
                     child: Text('Continue',style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold
                     ),),
                   ),

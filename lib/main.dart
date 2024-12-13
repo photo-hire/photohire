@@ -2,11 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:photohire/features/auth/screens/loginscreen.dart';
-import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/features/services/authcheck.dart';
 import 'package:photohire/firebase_options.dart';
-import 'package:photohire/photographer/photographer_root_screen.dart';
 
 
 void main() async {

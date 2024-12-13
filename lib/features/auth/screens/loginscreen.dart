@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
-import 'package:photohire/rentalStore/rental_store_home_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
 import 'package:photohire/user/user_home_screen.dart';
 
@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _UserLoginScreenState extends State<UserLoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -39,11 +39,11 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
               'Login Now',
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 30,
+                  fontSize: 30.sp,
                   fontWeight: FontWeight.bold),
             ),
             SizedBox(
-              height: 24.0,
+              height: 24.0.h,
             ),
             TextField(
               controller: emailController,
@@ -55,16 +55,16 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0.h),
             TextField(
               controller: passwordController,
               obscureText: !_isPasswordVisible,
@@ -76,11 +76,11 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 suffixIcon: IconButton(
@@ -99,7 +99,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24.0),
+            SizedBox(height: 24.0.h),
             ElevatedButton(
               onPressed: () async {
                 try {
@@ -177,7 +177,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                 backgroundColor: Colors.yellow,
                 foregroundColor: Colors.blue[900],
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                 ),
                 padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
               ),
@@ -188,15 +188,15 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                   : Text(
                       'Login',
                       style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
                     ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0.h),
             Text(
               'Create an Account',
               style: TextStyle(
                   color: Colors.yellow[700],
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold),
             ),
             TextButton(
@@ -208,7 +208,7 @@ class _UserLoginScreenState extends State<UserLoginScreen> {
                   'Sign Up',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold),
                 ))
           ],

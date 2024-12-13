@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:photohire/features/auth/rental_store_register_screen.dart';
+import 'package:photohire/features/auth/screens/rental_store_register_screen.dart';
 import 'package:photohire/features/auth/screens/photographerRegister.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/features/auth/screens/userregisterscree.dart';
@@ -51,19 +51,19 @@ class _ChoosingState extends State<Choosing> {
                   "I WANT TO",
                   style: GoogleFonts.poppins(
                       textStyle: TextStyle(
-                          fontSize: 30,
+                          fontSize: 30.sp,
                           color: Colors.white,
                           fontWeight: FontWeight.bold)),
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       fixedSize: Size(175, 60),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
+                          borderRadius: BorderRadius.circular(15.r))),
                   onPressed: () {
                     Navigator.push(
                         context,
@@ -74,15 +74,15 @@ class _ChoosingState extends State<Choosing> {
                     "HIRE",
                     style: TextStyle(
                         color: Color(0xff03399E),
-                        fontSize: 25,
+                        fontSize: 25.sp,
                         fontWeight: FontWeight.bold),
                   )),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               Container(
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15.r),
                     gradient: LinearGradient(
                         colors: [Color(0xffFFDD85), Color(0xffF8B500)])),
                 child: ElevatedButton(
@@ -91,7 +91,7 @@ class _ChoosingState extends State<Choosing> {
                         elevation: 0,
                         fixedSize: Size(175, 60),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15))),
+                            borderRadius: BorderRadius.circular(15.r))),
                     onPressed: () {
                       Navigator.push(
                           context,
@@ -102,12 +102,12 @@ class _ChoosingState extends State<Choosing> {
                       "BE HIRED",
                       style: TextStyle(
                           color: Color(0xff03399E),
-                          fontSize: 25,
+                          fontSize: 25.sp,
                           fontWeight: FontWeight.bold),
                     )),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
 
               ElevatedButton(
@@ -120,23 +120,23 @@ class _ChoosingState extends State<Choosing> {
                   },
                   child: Text(
                     "RENTAL STORE",
-                    style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                    style: TextStyle(color: Color(0xff03399E), fontSize: 25.sp,fontWeight: FontWeight.bold),
                   )),
               
-              SizedBox(height: 30,),
+              SizedBox(height: 30.h,),
 
 
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
                       fixedSize: Size(175, 60),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15))),
+                          borderRadius: BorderRadius.circular(15.r))),
                   onPressed: () {},
                   child: Text(
                     "Admin",
                     style: TextStyle(
                         color: Color(0xff03399E),
-                        fontSize: 25,
+                        fontSize: 25.sp,
                         fontWeight: FontWeight.bold),
                   )),
             ],

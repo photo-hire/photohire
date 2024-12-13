@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:location/location.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
-import 'package:photohire/rentalStore/google_map_screen.dart';
 
 class StoreProfileScreen extends StatefulWidget {
   const StoreProfileScreen({super.key});
@@ -120,19 +119,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                     Icons.settings_outlined,
                   ),
                   SizedBox(
-                    width: 10,
+                    width: 10.w,
                   ),
                   Text(
                     'Settings',
                     style: TextStyle(
                         color: Colors.black,
-                        fontSize: 22,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
               SizedBox(
-                height: 30,
+                height: 30.h,
               ),
               GestureDetector(
                 onTap: () async {
@@ -153,10 +152,10 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         labelText: 'Email',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10))),
+                                                BorderRadius.circular(10.r))),
                                   ),
                                   SizedBox(
-                                    height: 16,
+                                    height: 16.h,
                                   ),
                                   TextField(
                                     controller: descController,
@@ -164,9 +163,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         labelText: 'Description',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10))),
+                                                BorderRadius.circular(10.r))),
                                   ),
-                                  SizedBox(height: 16,),
+                                  SizedBox(height: 16.h,),
                                   TextField(
               controller: _latitudeController,
               decoration: InputDecoration(
@@ -178,7 +177,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
               ),
               readOnly: true,
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 16.h),
             // Longitude TextField
             TextField(
               controller: _longitudeController,
@@ -192,7 +191,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
               readOnly: true,
             ),
                                   SizedBox(
-                                    height: 24,
+                                    height: 24.h,
                                   ),
                                   GestureDetector(
                                     onTap: () async {
@@ -251,7 +250,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                       width: double.infinity,
                                       decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(10),
+                                              BorderRadius.circular(10.r),
                                           color: Colors.blue[900]),
                                       child: Center(
                                         child: isLoading
@@ -282,20 +281,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                       color: Colors.grey,
                     ),
                     SizedBox(
-                      width: 10,
+                      width: 10.w,
                     ),
                     Text(
                       'Edit Your Profile',
                       style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
-                          fontSize: 16),
+                          fontSize: 16.sp),
                     )
                   ],
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               GestureDetector(
                 onTap: () {
@@ -315,10 +314,10 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                     labelText: 'Phone Number',
                                     border: OutlineInputBorder(
                                         borderRadius:
-                                            BorderRadius.circular(10))),
+                                            BorderRadius.circular(10.r))),
                               ),
                               SizedBox(
-                                height: 24,
+                                height: 24.h,
                               ),
                               GestureDetector(
                                 onTap: () async {
@@ -352,7 +351,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   padding: EdgeInsets.all(10),
                                   width: double.infinity,
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(10.r),
                                       color: Colors.blue[900]),
                                   child: Center(
                                     child: isLoading
@@ -381,20 +380,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                       color: Colors.grey,
                     ),
                     SizedBox(
-                      width: 10,
+                      width: 10.w,
                     ),
                     Text(
                       'Change Mobile Number',
                       style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
-                          fontSize: 16),
+                          fontSize: 16.sp),
                     )
                   ],
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               GestureDetector(
                 onTap: () {
@@ -409,14 +408,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                       color: Colors.grey,
                     ),
                     SizedBox(
-                      width: 10,
+                      width: 10.w,
                     ),
                     Text(
                       'Logout',
                       style: TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.w600,
-                          fontSize: 15),
+                          fontSize: 15.sp),
                     )
                   ],
                 ),

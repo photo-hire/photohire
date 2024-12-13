@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photohire/rentalStore/orders_screen.dart';
 import 'package:photohire/rentalStore/rental_store_home_screen.dart';
 import 'package:photohire/rentalStore/store_add_product_screen.dart';
 import 'package:photohire/rentalStore/store_profile_screen.dart';
@@ -16,6 +17,7 @@ int selectedIndex = 0;
   List<Widget> pages =[
     RentalStoreHomeScreen(),
     StoreAddProductScreen(),
+    OrdersScreen(),
     StoreProfileScreen(),
   ];
   @override
@@ -36,6 +38,7 @@ int selectedIndex = 0;
           items:[
             BottomNavigationBarItem(icon: Icon(Icons.lightbulb_outlined),label: "idea",),
             BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline),label: "add",),
+            BottomNavigationBarItem(icon: Icon(Icons.layers),label: "orders",),
             BottomNavigationBarItem(icon: Icon(Icons.account_circle_outlined),label: "profile",),
           ] ,
           type: BottomNavigationBarType.fixed,

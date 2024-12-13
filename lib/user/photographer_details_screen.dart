@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PhotographerDetailsScreen extends StatefulWidget {
   Map<String,dynamic> studioDetails;
@@ -35,7 +36,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
           children: [
             // Top Image Section
             Container(
-              height: 1000, // Height for the stack
+              height: 1000.h, // Height for the stack
               child: Stack(
                 children: [
                   // Background Image
@@ -74,11 +75,11 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
               (index) => AnimatedContainer(
                 duration: Duration(milliseconds: 300),
                 margin: EdgeInsets.symmetric(horizontal: 4),
-                width: _currentIndex == index ? 12 : 8, // Larger dot for the current index
-                height: 8,
+                width: _currentIndex == index ? 12.w : 8.w, // Larger dot for the current index
+                height: 8.h,
                 decoration: BoxDecoration(
                   color: _currentIndex == index ? Colors.white : Colors.grey,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
               ),
             ),
@@ -105,8 +106,8 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
+                          topLeft: Radius.circular(20.r),
+                          topRight: Radius.circular(20.r),
                         ),
                       ),
                       child: Column(
@@ -114,15 +115,15 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           Row(
                             children: [
                               CircleAvatar(
-                                radius: 25,
+                                radius: 25.r,
                                 backgroundImage: widget.studioDetails['companyLogo']!=null?
                                 NetworkImage(widget.studioDetails['companyLogo']):null,
                                 child: widget.studioDetails['companyLogo'] == null?
                                 Text('Logo here',style: TextStyle(
-                                  fontSize: 8
+                                  fontSize: 8.sp
                                 ),):null,
                               ),
-                              SizedBox(width: 10,),
+                              SizedBox(width: 10.w,),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -130,14 +131,14 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   Text(
                                     widget.studioDetails['company'],
                                     style: TextStyle(
-                                      fontSize: 20,
+                                      fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   Text(
                                     '${widget.studioDetails['role']} Photographer',
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 14.sp,
                                       color: Colors.grey,
                                     ),
                                   ),
@@ -150,7 +151,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   Text(
                                     '\$${widget.studioDetails['startingPrice']}',
                                     style: TextStyle(
-                                      fontSize: 18,
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.green,
                                     ),
@@ -161,7 +162,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                       Text(
                                         '4.5',
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           color: Colors.grey,
                                         ),
                                       ),
@@ -171,30 +172,30 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           // Address Section
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Icon(Icons.location_on, color: Colors.blue),
-                              SizedBox(width: 8),
+                              SizedBox(width: 8.w),
                               Expanded(
                                 child: Text(
                                   '${widget.studioDetails['addressLine1']}\n${widget.studioDetails['addressLine2']}',
-                                  style: TextStyle(fontSize: 14),
+                                  style: TextStyle(fontSize: 14.sp),
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 8.h),
                           // Contact Section
                           Row(
                             children: [
                               Icon(Icons.phone, color: Colors.blue),
-                              SizedBox(width: 8),
+                              SizedBox(width: 8.w),
                               Text(
                                 widget.studioDetails['phone'],
-                                style: TextStyle(fontSize: 14),
+                                style: TextStyle(fontSize: 14.sp),
                               ),
                               Spacer(),
                               ElevatedButton.icon(
@@ -204,7 +205,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue[900],
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                             ),
                           ),
@@ -212,7 +213,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           ),
                     
                           
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           // Image Carousel Section
                           Container(
                             height: 100,
@@ -225,14 +226,14 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   padding: const EdgeInsets.only(right: 8.0),
                                   child: Image.asset(
                                     'asset/image/image1.jpg',
-                                    width: 100,
-                                    height: 100,
+                                    width: 100.w,
+                                    height: 100.h,
                                   ),
                                 );
                               },
                             ),
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.sp),
                           // About Us Section
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,18 +241,18 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                               Text(
                                 'About us',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               Text(
                                 widget.studioDetails['Description'],
-                                style: TextStyle(fontSize: 14, color: Colors.grey),
+                                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
                               ),
                             ],
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.sp),
                           // Buttons Section
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -262,7 +263,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                 label: Text('Get in Touch', style: TextStyle(color: Colors.white)),
                                 style: ElevatedButton.styleFrom(
                                    shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                                   backgroundColor: Colors.green,
                                 ),
@@ -276,7 +277,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                 ),
                                 style: ElevatedButton.styleFrom(
                                    shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                                   backgroundColor: Colors.blue[900],
                                 ),

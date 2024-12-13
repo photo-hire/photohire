@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class RentalStoreHomeScreen extends StatefulWidget {
   const RentalStoreHomeScreen({super.key});
@@ -39,11 +40,11 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                 'Explore',
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 25,
+                    fontSize: 25.sp,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(
-                height: 10,
+                height: 10.h,
               ),
               TextField(
                 controller: searchController,
@@ -51,11 +52,11 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                     fillColor: Colors.white,
                     filled: true,
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 10),
@@ -71,7 +72,7 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                     )),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -124,18 +125,18 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                                     return Container(
                       decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(10)),
+                          borderRadius: BorderRadius.circular(10.r)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10),
-                                topRight: Radius.circular(10)),
+                                topLeft: Radius.circular(10.r),
+                                topRight: Radius.circular(10.r)),
                             child: Image.network(
                               product['image'],
                               fit: BoxFit.cover,
-                              height: 150,
+                              height: 150.h,
                               width: double.infinity,
                             ),
                           ),
@@ -147,13 +148,13 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                                 Text(
                                   product['name'],
                                   style: TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 15.sp,
                                       fontWeight: FontWeight.bold),
                                 ),
                                 Text(
                                   '\$${product['price']}',
                                   style: TextStyle(
-                                      fontSize: 15,
+                                      fontSize: 15.sp,
                                       fontWeight: FontWeight.bold),
                                 ),
                               ],

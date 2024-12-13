@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
@@ -106,18 +107,18 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   'Register Now',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 30,
+                      fontSize: 30.sp,
                       fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
-                  height: 24.0,
+                  height: 24.0.h,
                 ),
                 GestureDetector(
                     onTap: () async {
                       _pickImage();
                     },
                     child: CircleAvatar(
-                      radius: 60,
+                      radius: 60.r,
                       backgroundColor: Colors.white,
 
                       backgroundImage: image == null
@@ -129,12 +130,12 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                               child: Text(
                               'Company logo here',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 13),
+                              style: TextStyle(fontSize: 13.sp),
                             ))
                           : null, // Display text only when no image is present
                     )),
                 SizedBox(
-                  height: 16.0,
+                  height: 16.0.h,
                 ),
                 TextField(
                   controller: nameController,
@@ -146,17 +147,17 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
                 SizedBox(
-                  height: 16.0,
+                  height: 16.0.h,
                 ),
                 TextField(
                   controller: companyController,
@@ -168,16 +169,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                const SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
                 // Checkboxes for Professional and Freelancer
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -224,7 +225,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   ],
                 ),
                 SizedBox(
-                  height: 16.4,
+                  height: 16.4.h,
                 ),
                 TextField(
                   controller: phoneController,
@@ -236,16 +237,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
@@ -256,16 +257,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
                 TextField(
                   controller: passwordController,
                   obscureText: !_isPasswordVisible,
@@ -277,11 +278,11 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     suffixIcon: IconButton(
@@ -300,7 +301,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
 
                 TextField(
                   controller: priceController,
@@ -312,16 +313,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
 
                 TextField(
                   controller: address1Controller,
@@ -333,16 +334,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
 
                 TextField(
                   controller: address2Controller,
@@ -354,16 +355,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
 
                 TextField(
                   maxLines: 4,
@@ -376,16 +377,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     contentPadding:
                         EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                SizedBox(height: 24.0),
+                SizedBox(height: 24.0.h),
                 ElevatedButton(
                   onPressed: () async {
                     try {
@@ -454,7 +455,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     backgroundColor: Colors.yellow,
                     foregroundColor: Colors.blue[900],
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
+                      borderRadius: BorderRadius.circular(10.0.r),
                     ),
                     padding:
                         EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
@@ -466,15 +467,15 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       : Text(
                           'Register',
                           style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.bold),
+                              fontSize: 15.sp, fontWeight: FontWeight.bold),
                         ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 16.0.h),
                 Text(
                   'Already have an account',
                   style: TextStyle(
                       color: Colors.yellow[700],
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold),
                 ),
                 TextButton(
@@ -488,7 +489,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       'Sign In',
                       style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold),
                     ))
               ],

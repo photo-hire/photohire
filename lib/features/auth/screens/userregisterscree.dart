@@ -56,11 +56,11 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               'Register Now',
               style: TextStyle(
                   color: Colors.white,
-                  fontSize: 30,
+                  fontSize: 30.sp,
                   fontWeight: FontWeight.bold),
             ),
             SizedBox(
-              height: 24.0,
+              height: 24.0.h,
             ),
             TextField(
               controller: nameController,
@@ -72,17 +72,17 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
             SizedBox(
-              height: 16.0,
+              height: 16.0.h,
             ),
             TextField(
               controller: phoneController,
@@ -94,16 +94,16 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0.h),
             TextField(
               controller: emailController,
               decoration: InputDecoration(
@@ -114,16 +114,16 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0.h),
             TextField(
               controller: passwordController,
               obscureText: !_isPasswordVisible,
@@ -135,11 +135,11 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 contentPadding:
                     EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10.0.r),
                   borderSide: BorderSide.none,
                 ),
                 suffixIcon: IconButton(
@@ -158,7 +158,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 24.0),
+            SizedBox(height: 24.0.h),
             ElevatedButton(
               onPressed: () async {
                 try {
@@ -206,27 +206,27 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   : Text(
                       'Register',
                       style:
-                          TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
                     ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 16.0.h),
             Text(
               'Already have an account',
               style: TextStyle(
                   color: Colors.yellow[700],
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.bold),
             ),
             TextButton(
                 onPressed: () {
-                  // Navigator.push(context,
-                  //     MaterialPageRoute(builder: (context) => LoginScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 child: Text(
                   'Sign In',
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold),
                 ))
           ],

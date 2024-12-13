@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photohire/admin/admin_home_screen.dart';
 
 class PhotoGrapherServiceScreen extends StatefulWidget {
   const PhotoGrapherServiceScreen({super.key});
@@ -97,11 +99,11 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                       'Manage Your Services',
                       style: TextStyle(
                           color: Colors.black,
-                          fontSize: 22,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
-                      height: 30,
+                      height: 30.h,
                     ),
                     GestureDetector(
                       onTap: () {
@@ -123,13 +125,13 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                             setDialogState(() {});
                                           },
                                           child: Container(
-                                            height: 190,
+                                            height: 190.h,
                                             decoration: BoxDecoration(
                                               borderRadius:
-                                                  BorderRadius.circular(10),
+                                                  BorderRadius.circular(10.r),
                                               border: Border.all(
                                                   color: Colors.black,
-                                                  width: 2,
+                                                  width: 2.w,
                                                   style: BorderStyle.solid),
                                             ),
                                             child: imageFile == null
@@ -138,14 +140,14 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                       'Upload Image',
                                                       style: TextStyle(
                                                         color: Colors.grey,
-                                                        fontSize: 16,
+                                                        fontSize: 16.sp,
                                                       ),
                                                     ),
                                                   )
                                                 : ClipRRect(
                                                     borderRadius:
                                                         BorderRadius.circular(
-                                                            8),
+                                                            8.r),
                                                     child: Image.file(
                                                       imageFile!,
                                                       fit: BoxFit.cover,
@@ -154,7 +156,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                           ),
                                         ),
                                         SizedBox(
-                                          height: 16,
+                                          height: 16.h,
                                         ),
                                         TextField(
                                           controller: titleController,
@@ -163,10 +165,10 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                               border: OutlineInputBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                          10))),
+                                                          10.r))),
                                         ),
                                         SizedBox(
-                                          height: 16,
+                                          height: 16.h,
                                         ),
                                         TextField(
                                           controller: descController,
@@ -175,10 +177,10 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                               border: OutlineInputBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                          10))),
+                                                          10.r))),
                                         ),
                                         SizedBox(
-                                          height: 16,
+                                          height: 16.h,
                                         ),
                                         TextField(
                                           controller: priceController,
@@ -187,10 +189,10 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                               border: OutlineInputBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
-                                                          10))),
+                                                          10.r))),
                                         ),
                                         SizedBox(
-                                          height: 24,
+                                          height: 24.h,
                                         ),
                                         GestureDetector(
                                           onTap: () async {
@@ -259,7 +261,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                             width: double.infinity,
                                             decoration: BoxDecoration(
                                                 borderRadius:
-                                                    BorderRadius.circular(10),
+                                                    BorderRadius.circular(10.r),
                                                 color: Colors.blue[900]),
                                             child: Center(
                                               child: isLoading
@@ -284,11 +286,11 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                         );
                       },
                       child: Container(
-                        height: 200,
+                        height: 200.h,
                         width: double.infinity,
                         decoration: BoxDecoration(
                             color: Colors.blue[900],
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(10.r)),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -298,31 +300,31 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                               color: Colors.white,
                             ),
                             SizedBox(
-                              width: 10,
+                              width: 10.w,
                             ),
                             Text(
                               'Add a new service',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 25),
+                                  fontSize: 25.sp),
                             )
                           ],
                         ),
                       ),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 20.h,
                     ),
                     Text(
                       'Your Services',
                       style: TextStyle(
                           color: Colors.black,
-                          fontSize: 22,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.bold),
                     ),
                     SizedBox(
-                      height: 20,
+                      height: 20.h,
                     ),
                     Expanded(
                         child: StreamBuilder<
@@ -384,7 +386,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                             decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 borderRadius:
-                                                    BorderRadius.circular(10)),
+                                                    BorderRadius.circular(10.r)),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -392,13 +394,13 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                 ClipRRect(
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                        topLeft: Radius.circular(10),
-                                                        topRight: Radius.circular(10)
+                                                        topLeft: Radius.circular(10.r),
+                                                        topRight: Radius.circular(10.r)
                                                       ),
                                                   child: Image.network(
                                                     service['image'],
                                                     fit: BoxFit.cover,
-                                                    height: 150,
+                                                    height: 150.h,
                                                     width: double.infinity,
                                                   ),
                                                 ),
@@ -411,7 +413,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                       Text(
                                                         service['title'],
                                                         style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 15.sp,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
@@ -419,7 +421,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                       Text(
                                                         '\$${service['price']}',
                                                         style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 15.sp,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),

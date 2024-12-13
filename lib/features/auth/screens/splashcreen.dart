@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -9,7 +8,6 @@ class SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(36.sp);
 
     return Scaffold(
       body: Stack(
@@ -75,7 +73,7 @@ class SplashScreen extends StatelessWidget {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Choosing(),
+                          builder: (context) => LoginScreen(),
                         ));
                   },
                   child: Row(

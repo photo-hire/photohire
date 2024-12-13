@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 
 class StoreAddProductScreen extends StatefulWidget {
@@ -122,12 +123,12 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                       setDialogState(() {});
                                     },
                                     child: Container(
-                                      height: 190,
+                                      height: 190.h,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(10.r),
                                         border: Border.all(
                                             color: Colors.black,
-                                            width: 2,
+                                            width: 2.w,
                                             style: BorderStyle.solid),
                                       ),
                                       child: imageFile == null
@@ -136,13 +137,13 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                                 'Upload Image',
                                                 style: TextStyle(
                                                   color: Colors.grey,
-                                                  fontSize: 16,
+                                                  fontSize: 16.sp,
                                                 ),
                                               ),
                                             )
                                           : ClipRRect(
                                               borderRadius:
-                                                  BorderRadius.circular(8),
+                                                  BorderRadius.circular(8.r),
                                               child: Image.file(
                                                 imageFile!,
                                                 fit: BoxFit.cover,
@@ -151,7 +152,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                     ),
                                   ),
                                   SizedBox(
-                                    height: 16,
+                                    height: 16.h,
                                   ),
                                   TextField(
                                     controller: titleController,
@@ -159,10 +160,10 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                         labelText: 'Name',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10))),
+                                                BorderRadius.circular(10.r))),
                                   ),
                                   SizedBox(
-                                    height: 16,
+                                    height: 16.h,
                                   ),
                                   TextField(
                                     controller: descController,
@@ -170,10 +171,10 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                         labelText: 'Description',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10))),
+                                                BorderRadius.circular(10.r))),
                                   ),
                                   SizedBox(
-                                    height: 16,
+                                    height: 16.h,
                                   ),
                                   TextField(
                                     controller: priceController,
@@ -181,10 +182,10 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                         labelText: 'Price',
                                         border: OutlineInputBorder(
                                             borderRadius:
-                                                BorderRadius.circular(10))),
+                                                BorderRadius.circular(10.r))),
                                   ),
                                   SizedBox(
-                                    height: 24,
+                                    height: 24.h,
                                   ),
                                   GestureDetector(
                                     onTap: () async {
@@ -245,7 +246,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                       padding: EdgeInsets.all(10),
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(10.r),
                                           color: Colors.blue[900]),
                                       child: Center(
                                         child: isLoading
@@ -270,11 +271,11 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                   );
                 },
                 child: Container(
-                  height: 200,
+                  height: 200.h,
                   width: double.infinity,
                   decoration: BoxDecoration(
                       color: Colors.blue[900],
-                      borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10.r)),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -284,31 +285,31 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                         color: Colors.white,
                       ),
                       SizedBox(
-                        width: 10,
+                        width: 10.w,
                       ),
                       Text(
                         'Add a new product',
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
-                            fontSize: 25),
+                            fontSize: 25.sp),
                       )
                     ],
                   ),
                 ),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               Text(
                 'Your Products',
                 style: TextStyle(
                     color: Colors.black,
-                    fontSize: 22,
+                    fontSize: 22.sp,
                     fontWeight: FontWeight.bold),
               ),
               SizedBox(
-                height: 20,
+                height: 20.h,
               ),
               Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -362,7 +363,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                             decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 borderRadius:
-                                                    BorderRadius.circular(10)),
+                                                    BorderRadius.circular(10.r)),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -370,13 +371,13 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                                 ClipRRect(
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                        topLeft: Radius.circular(10),
-                                                        topRight: Radius.circular(10)
+                                                        topLeft: Radius.circular(10.r),
+                                                        topRight: Radius.circular(10.r)
                                                       ),
                                                   child: Image.network(
                                                     product['image'],
                                                     fit: BoxFit.cover,
-                                                    height: 150,
+                                                    height: 150.h,
                                                     width: double.infinity,
                                                   ),
                                                 ),
@@ -389,7 +390,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                                       Text(
                                                         product['name'],
                                                         style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 15.sp,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
@@ -397,7 +398,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                                       Text(
                                                         '\$${product['price']}',
                                                         style: TextStyle(
-                                                            fontSize: 15,
+                                                            fontSize: 15.sp,
                                                             fontWeight:
                                                                 FontWeight
                                                                     .bold),
