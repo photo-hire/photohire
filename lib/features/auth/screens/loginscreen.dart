@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
+import 'package:photohire/user/route_screen.dart';
 import 'package:photohire/user/user_home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -138,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => UserHomeScreen(),
+                        builder: (context) => RootScreen(),
                       ),
                     );
                     return; // Exit after successful navigation

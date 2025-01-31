@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cloudinary/cloudinary.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -32,5 +33,35 @@ class CloudinaryHelper {
     } catch (e) {
       throw Exception("Error: $e");
     }
+  }
+}
+
+
+
+Future<String> uploadImageToCloudinary(File image) async {
+  // Your Cloudinary credentials
+  final cloudinary = Cloudinary.signedConfig(
+    apiKey: '976747581113527',
+    apiSecret: 'hOJ8rFPYe6E0ILThBPHLulv4BE0',
+    cloudName: 'darkzcjm0'
+     // Replace with your Cloudinary API Secret
+  );
+
+  try {
+    // Upload the image
+    final response = await cloudinary.upload(
+      file: image.path,
+      resourceType: CloudinaryResourceType.image,
+    );
+
+    if (response.isSuccessful) {
+      // Return the secure URL of the uploaded image
+      return response.secureUrl!;
+    } else {
+      throw Exception('Image upload failed');
+    }
+  } catch (e) {
+    print('Error uploading image: $e');
+    throw Exception('Error uploading image');
   }
 }

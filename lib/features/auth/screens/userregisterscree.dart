@@ -162,6 +162,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
             ElevatedButton(
               onPressed: () async {
                 try {
+                  print('Registering user...');
                   isLoading = true;
                   setState(() {});
                   await FirebaseAuth.instance.createUserWithEmailAndPassword(

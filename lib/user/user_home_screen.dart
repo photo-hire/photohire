@@ -27,7 +27,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       // Extract data from each document and return as a list of maps
       studioData = snapshot.docs
           .where((doc) => doc.data()['isApproved'] == true)
-          .map((doc) => doc.data())
+          .map((doc) => {'data':doc.data(), 'id': doc.id})
           .toList();
       isLoading = false;
       setState(() {});
@@ -173,7 +173,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             itemCount:
                                 studioData.length, // The filtered data count
                             itemBuilder: (context, index) {
-                              final photographer = studioData[index];
+                              final photographer = studioData[index]['data'];
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
@@ -182,6 +182,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           builder: (context) =>
                                               PhotographerDetailsScreen(
                                                 studioDetails: photographer,
+                                                pid:studioData[index]['id'],
                                               )));
                                 },
                                 child: Card(

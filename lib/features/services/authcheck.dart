@@ -5,6 +5,7 @@ import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/rentalStore/rental_store_home_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
+import 'package:photohire/user/route_screen.dart';
 import 'package:photohire/user/user_home_screen.dart';
 
 class AuthCheck extends StatelessWidget {
@@ -37,7 +38,7 @@ class AuthCheck extends StatelessWidget {
                             }
 
                     if (userSnapshot.hasData && userSnapshot.data!.exists) {
-                      return UserHomeScreen();
+                      return RootScreen();
                     } else {
                       return FutureBuilder(
                           future: FirebaseFirestore.instance
