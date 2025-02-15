@@ -22,14 +22,26 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background Image
+          /// Background Image
           Image.asset(
             "asset/image/frontscreen.jpg",
             height: MediaQuery.of(context).size.height,
             fit: BoxFit.cover,
           ),
 
-          // Foreground Elements
+          /// Back Button (Top Left Corner)
+          Positioned(
+            top: 40.h,
+            left: 15.w,
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(Icons.arrow_back, color: Colors.white, size: 30.sp),
+            ),
+          ),
+
+          /// Foreground Elements
           Positioned(
             top: 100.h,
             bottom: 0,
@@ -38,7 +50,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Title
+                  /// Title
                   Text(
                     "Register Now",
                     style: TextStyle(
@@ -49,12 +61,12 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                   ),
                   SizedBox(height: 20.h),
 
-                  // Form Fields
+                  /// Form Fields
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        // Name Field
+                        /// Name Field
                         SizedBox(
                           width: 300.w,
                           child: TextFormField(
@@ -63,8 +75,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: 'Enter your name',
-                              hintStyle:
-                                  TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, fontSize: 14.sp),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -80,7 +92,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                         ),
                         SizedBox(height: 20.h),
 
-                        // Phone Field
+                        /// Phone Field
                         SizedBox(
                           width: 300.w,
                           child: TextFormField(
@@ -90,8 +102,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: 'Enter your phone',
-                              hintStyle:
-                                  TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, fontSize: 14.sp),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -110,7 +122,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                         ),
                         SizedBox(height: 20.h),
 
-                        // Password Field
+                        /// Password Field
                         SizedBox(
                           width: 300.w,
                           child: TextFormField(
@@ -120,8 +132,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: 'Enter your password',
-                              hintStyle:
-                                  TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, fontSize: 14.sp),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -140,7 +152,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                         ),
                         SizedBox(height: 20.h),
 
-                        // Confirm Password Field
+                        /// Confirm Password Field
                         SizedBox(
                           width: 300.w,
                           child: TextFormField(
@@ -150,8 +162,8 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                               filled: true,
                               fillColor: Colors.white,
                               hintText: 'Confirm your password',
-                              hintStyle:
-                                  TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, fontSize: 14.sp),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -173,7 +185,7 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                   ),
                   SizedBox(height: 30.h),
 
-                  // Register Button
+                  /// Register Button
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
@@ -203,53 +215,44 @@ class _UserRegistrationScreenState extends State<UserRegistrationScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
-
-                  
                     ),
                   ),
-                  SizedBox(height: 20,),
+                  SizedBox(height: 20.h),
+
+                  /// Already Have an Account? (Login Now)
                   Text(
-                  "Don't have an account?",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.sp,
+                    "Already have an account?",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.sp,
+                    ),
                   ),
-                ),
-                SizedBox(height: 5.h),
+                  SizedBox(height: 5.h),
 
-               
-                    TextButton(
-                  onPressed: () {
-                    print('fff');
-
-                    Navigator.pop(context);
-                    // Handle Register Now action
-                  },
-                  child: ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      colors: [Color(0xffFFDD85), Color(0xffF8B500)],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(bounds),
-                    child: Text(
-                      "Login Now",
-                      style: TextStyle(
-                        color: Colors
-                            .white, // This color is a fallback and won't affect the gradient
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [Color(0xffFFDD85), Color(0xffF8B500)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ).createShader(bounds),
+                      child: Text(
+                        "Login Now",
+                        style: TextStyle(
+                          color: Colors.white, // Fallback color
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
-                ),
-
                 ],
               ),
             ),
           ),
-
-          
         ],
       ),
     );

@@ -36,7 +36,10 @@ class StudioManagementScreen extends StatelessWidget {
             child: Column(
               children: [
                 AppBar(
-                  title: Text("Studio Management",style: TextStyle(color: Colors.white),),
+                  title: Text(
+                    "Studio Management",
+                    style: TextStyle(color: Colors.white),
+                  ),
                   backgroundColor: Colors.black54,
                   elevation: 0,
                 ),
@@ -128,5 +131,3 @@ class StudioManagementScreen extends StatelessWidget {
     );
   }
 }
-
-
