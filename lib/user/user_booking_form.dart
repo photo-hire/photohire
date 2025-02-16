@@ -82,7 +82,7 @@ class _BookingFormState extends State<BookingForm> {
             SizedBox(height: 16.h),
             _buildTextField(_phoneController, 'Phone', Icons.phone),
             SizedBox(height: 16.h),
-            _buildTextField(_notesController, 'Notes (Optional)', Icons.note),
+            _buildTextField(_notesController, 'Notes', Icons.note),
             SizedBox(height: 24.h),
             _buildSubmitButton(),
           ],

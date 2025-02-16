@@ -30,28 +30,41 @@ class _UserChatScreenState extends State<UserChatScreen> {
 
   // Send message to Firestore
   void _sendMessage() async {
-    if (_messageController.text.trim().isNotEmpty) {
-      await _firestore
-          .collection('chats')
-          .doc(widget.studioId)
-          .collection('messages')
-          .add({
-        'message': _messageController.text.trim(),
-        'sender': widget.userId, // Use userId as the sender
-        'timestamp': Timestamp.now(),
-      });
+  if (_messageController.text.trim().isNotEmpty) {
+    // Add message to Firestore
+    await _firestore
+        .collection('chats')
+        .doc(widget.studioId)
+        .collection('messages')
+        .add({
+      'message': _messageController.text.trim(),
+      'sender': widget.userId,
+      'timestamp': Timestamp.now(),
+    });
 
-      _messageController.clear();
+    // Update chat metadata
+    await _firestore
+        .collection('chatMetadata')
+        .doc('${widget.userId}_${widget.studioId}')
+        .set({
+      'userId': widget.userId,
+      'studioId': widget.studioId,
+      'studioName': widget.studioName,
+      'studioLogo': widget.studioLogo,
+      'lastMessage': _messageController.text.trim(),
+      'timestamp': Timestamp.now(),
+    }, SetOptions(merge: true));
 
-      // Scroll to the bottom after sending a message
-      _scrollController.animateTo(
-        0,
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    _messageController.clear();
+
+    // Scroll to the bottom after sending a message
+    _scrollController.animateTo(
+      0,
+      duration: Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
-
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

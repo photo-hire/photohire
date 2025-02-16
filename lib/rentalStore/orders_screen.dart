@@ -23,7 +23,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     for (var rentalProduct in rentalProductsQuery.docs) {
       final productId = rentalProduct.id;
       final bookedProductQuery = await FirebaseFirestore.instance
-          .collection('bookedProducts')
+          .collection('orders')
           .where('productId', isEqualTo: productId)
           .get();
 

@@ -159,57 +159,88 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
               ),
             ),
             SizedBox(height: 24.0.h),
+
             ElevatedButton(
-              onPressed: () async {
-                try {
-                  print('Registering user...');
-                  isLoading = true;
-                  setState(() {});
-                  await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                      email: emailController.text,
-                      password: passwordController.text);
+  onPressed: () async {
+    // Check if the password is at least 6 characters long
+    if (passwordController.text.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Password must be at least 6 characters long'),
+          backgroundColor: Colors.red, // Optional: Change the background color to red for error
+        ),
+      );
+      return; // Exit the function if the password is too short
+    }
 
-                  String uid = FirebaseAuth.instance.currentUser!.uid;
+    try {
+      print('Registering user...');
+      isLoading = true;
+      setState(() {});
+      
+      // Create user with email and password
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
 
-                  await FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(uid)
-                      .set({
-                    'name': nameController.text,
-                    'email': emailController.text,
-                    'phone': phoneController.text,
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('User Registered Successffully')));
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => UserHomeScreen()));
-                } catch (e) {
-                  print(e);
-                } finally {
-                  isLoading = false;
-                  setState(() {});
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.yellow,
-                foregroundColor: Colors.blue[900],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-              ),
-              child: isLoading
-                  ? CircularProgressIndicator(
-                      color: Colors.white,
-                    )
-                  : Text(
-                      'Register',
-                      style:
-                          TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
-                    ),
-            ),
+      // Get the user ID
+      String uid = FirebaseAuth.instance.currentUser!.uid;
+
+      // Save user details to Firestore
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'name': nameController.text,
+        'email': emailController.text,
+        'phone': phoneController.text,
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('User Registered Successfully'),
+          backgroundColor: Colors.green, // Optional: Change the background color to green for success
+        ),
+      );
+
+      // Navigate to the home screen
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => UserHomeScreen()),
+      );
+    } catch (e) {
+      print(e);
+      // Show error message if something goes wrong
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red, // Optional: Change the background color to red for error
+        ),
+      );
+    } finally {
+      isLoading = false;
+      setState(() {});
+    }
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.yellow,
+    foregroundColor: Colors.blue[900],
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10.0),
+    ),
+    padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+  ),
+  child: isLoading
+      ? CircularProgressIndicator(
+          color: Colors.white,
+        )
+      : Text(
+          'Register',
+          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+        ),
+),
+           
+           
+           
             SizedBox(height: 16.0.h),
             Text(
               'Already have an account',

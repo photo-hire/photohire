@@ -30,12 +30,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (user != null) {
       DocumentSnapshot userDoc =
           await _firestore.collection('users').doc(user.uid).get();
+          print(user.uid);
+      print(userDoc);
       if (userDoc.exists) {
         setState(() {
-          _email = userDoc['email'];
-          _name = userDoc['name'];
-          _phone = userDoc['phone'];
-          _profileImageUrl = userDoc['profileImage']; // Fetch profile image URL
+          _email = userDoc['email'] ?? 'No email';
+          _name = userDoc['name'] ?? 'No name';
+          _phone = userDoc['phone'] ?? 'No phone';
+         
+          
         });
       }
     }
@@ -108,12 +111,17 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                       child: _profileImageUrl != null
                           ? ClipOval(
-                              child: Image.network(
-                                 _profileImageUrl!,
+                              child: CachedNetworkImage(
+                                imageUrl: _profileImageUrl!,
                                 fit: BoxFit.cover,
                                 width: 120,
                                 height: 120,
-                                
+                                placeholder: (context, url) => CircularProgressIndicator(),
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.person,
+                                  size: 60,
+                                  color: Colors.blueAccent,
+                                ),
                               ),
                             )
                           : Icon(
@@ -195,6 +203,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                     ),
                   ],
+                
+                
+                
+                
                 ),
               ),
             ),

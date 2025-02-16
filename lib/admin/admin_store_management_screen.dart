@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class StudioManagementScreen extends StatefulWidget {
+class StoreManagementScreen extends StatefulWidget {
   @override
-  _StudioManagementScreenState createState() => _StudioManagementScreenState();
+  _StoreManagementScreenState createState() => _StoreManagementScreenState();
 }
 
-class _StudioManagementScreenState extends State<StudioManagementScreen> with SingleTickerProviderStateMixin {
+class _StoreManagementScreenState extends State<StoreManagementScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -23,20 +24,29 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
   }
 
   Future<void> _updateApprovalStatus(String docId, bool isApproved) async {
-    await _firestore.collection('photgrapher').doc(docId).update({
+    await _firestore.collection('stores').doc(docId).update({
       'isApproved': isApproved,
     });
   }
 
-  Future<void> _deleteStudio(String docId) async {
-    await _firestore.collection('photgrapher').doc(docId).delete();
+  Future<void> _deleteStore(String docId) async {
+    await _firestore.collection('stores').doc(docId).delete();
+  }
+
+  Future<void> _openMap(double latitude, double longitude) async {
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+    );
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Studio Management", style: TextStyle(color: Colors.white)),
+        title: Text("Store Management", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
         bottom: TabBar(
@@ -63,8 +73,8 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildStudioList(false),
-                    _buildStudioList(true),
+                    _buildStoreList(false),
+                    _buildStoreList(true),
                   ],
                 ),
               ),
@@ -75,25 +85,25 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
     );
   }
 
-  Widget _buildStudioList(bool isApproved) {
+  Widget _buildStoreList(bool isApproved) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('photgrapher').where('isApproved', isEqualTo: isApproved).snapshots(),
+      stream: _firestore.collection('rentalStore').where('isApproved', isEqualTo: isApproved).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No studios found'));
+          return Center(child: Text('No stores found'));
         }
 
-        final studios = snapshot.data!.docs;
+        final stores = snapshot.data!.docs;
 
         return ListView.builder(
-          itemCount: studios.length,
+          itemCount: stores.length,
           itemBuilder: (context, index) {
-            final studio = studios[index].data() as Map<String, dynamic>;
-            final docId = studios[index].id;
+            final store = stores[index].data() as Map<String, dynamic>;
+            final docId = stores[index].id;
 
             return Card(
               margin: EdgeInsets.all(10),
@@ -105,23 +115,23 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
                   children: [
                     Row(
                       children: [
-                        // Studio Photo
+                        // Store Logo
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: studio['companyLogo'] != null
+                          child: store['companyLogo'] != null
                               ? Image.network(
-                                  studio['companyLogo'],
+                                  store['companyLogo'],
                                   width: 80,
                                   height: 80,
                                   fit: BoxFit.cover,
                                 )
-                              : Icon(Icons.business, size: 80),
+                              : Icon(Icons.store, size: 80),
                         ),
                         SizedBox(width: 10),
-                        // Studio Name
+                        // Store Name
                         Expanded(
                           child: Text(
-                            studio['name'] ?? 'No Name',
+                            store['storeName'] ?? 'No Name',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -132,18 +142,29 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
                     ),
                     SizedBox(height: 10),
                     // Description
-                    Text(studio['Description'] ?? 'No Description'),
+                    Text(store['description'] ?? 'No Description'),
                     SizedBox(height: 10),
-                    // Document Link
-                    TextButton.icon(
+                    // Email
+                    Text("Email: ${store['email'] ?? 'No Email'}"),
+                    SizedBox(height: 10),
+                    // Phone
+                    Text("Phone: ${store['phone'] ?? 'No Phone'}"),
+                    SizedBox(height: 10),
+                    // Location (Latitude and Longitude)
+                    Text("Location: (${store['latitude']}, ${store['longitude']})"),
+                    SizedBox(height: 10),
+                    // Button to View Location on Google Maps
+                    ElevatedButton.icon(
                       onPressed: () {
-                        print("View document: ${studio['document']}");
+                        final double latitude = store['latitude'];
+                        final double longitude = store['longitude'];
+                        _openMap(latitude, longitude);
                       },
-                      icon: Icon(Icons.description),
-                      label: Text("View Document"),
+                      icon: Icon(Icons.map),
+                      label: Text("View on Map"),
                     ),
                     SizedBox(height: 10),
-                    // Buttons for Pending and Accepted Studios
+                    // Buttons for Pending and Accepted Stores
                     if (!isApproved)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -166,23 +187,13 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
                             ),
                             child: Text("Reject"),
                           ),
-                          // Delete Button for Pending Studios
-                          ElevatedButton(
-                            onPressed: () {
-                              _deleteStudio(docId);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: Text("Delete"),
-                          ),
                         ],
                       ),
                     if (isApproved)
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            _deleteStudio(docId);
+                            _deleteStore(docId);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,

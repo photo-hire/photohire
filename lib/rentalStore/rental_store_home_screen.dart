@@ -13,7 +13,22 @@ class RentalStoreHomeScreen extends StatefulWidget {
 class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
   TextEditingController searchController = TextEditingController();
   String userId = FirebaseAuth.instance.currentUser!.uid;
-  
+
+  Future<void> deleteProduct(String productId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('storeProducts')
+          .doc(userId)
+          .update({
+        'productDetails': FieldValue.arrayRemove([
+          {'id': productId}
+        ])
+      });
+    } catch (e) {
+      print('Error deleting product: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -25,9 +40,9 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
             begin: Alignment.topLeft,
             end: Alignment.bottomCenter,
             colors: [
-              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-              Colors.white, // White (Bottom)
+              Color.fromARGB(255, 200, 148, 249),
+              Color.fromARGB(255, 162, 213, 255),
+              Colors.white,
             ],
           ),
         ),
@@ -36,16 +51,7 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Explore',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
+              SizedBox(height: 10.h),
               TextField(
                 controller: searchController,
                 decoration: InputDecoration(
@@ -62,18 +68,10 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                     contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     hintText: 'search...',
                     hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Colors.grey,
-                    ),
-                    suffixIcon: Icon(
-                      Icons.tune,
-                      color: Colors.grey,
-                    )),
+                    prefixIcon: Icon(Icons.search, color: Colors.grey),
+                    suffixIcon: Icon(Icons.tune, color: Colors.grey)),
               ),
-              SizedBox(
-                height: 20.h,
-              ),
+              SizedBox(height: 20.h),
               Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                       stream: FirebaseFirestore.instance
@@ -113,56 +111,80 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                                 child: GridView.builder(
                                   gridDelegate:
                                       const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2, // Number of columns
+                                    crossAxisCount: 2,
                                     crossAxisSpacing: 10,
                                     mainAxisSpacing: 10,
-                                    childAspectRatio:
-                                        0.75, // Adjust this to fit your design
+                                    childAspectRatio: 0.75,
                                   ),
                                   itemCount: productDetails.length,
                                   itemBuilder: (context, index) {
                                     final product = productDetails[index];
                                     return Container(
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10.r)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(10.r),
-                                topRight: Radius.circular(10.r)),
-                            child: Image.network(
-                              product['image'],
-                              fit: BoxFit.cover,
-                              height: 150.h,
-                              width: double.infinity,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(left: 10, top: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  product['name'],
-                                  style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  '\$${product['price']}',
-                                  style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    );
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10.r)),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Stack(
+                                            children: [
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(10.r),
+                                                    topRight:
+                                                        Radius.circular(10.r)),
+                                                child: Image.network(
+                                                  product['image'],
+                                                  fit: BoxFit.cover,
+                                                  height: 150.h,
+                                                  width: double.infinity,
+                                                ),
+                                              ),
+                                              Positioned(
+                                                right: 5,
+                                                top: 5,
+                                                child: IconButton(
+                                                  icon: Icon(
+                                                    Icons.delete,
+                                                    color: Colors.red,
+                                                  ),
+                                                  onPressed: () {
+                                                    deleteProduct(product['id']);
+                                                  },
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.only(
+                                                left: 10, top: 10),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  product['name'],
+                                                  style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                Text(
+                                                  '\$${product['price']}',
+                                                  style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    );
                                   },
                                 ),
                               );

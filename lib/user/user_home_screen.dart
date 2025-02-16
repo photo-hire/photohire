@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:photohire/admin/admin_home_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:photohire/user/photographer_details_screen.dart';
+import 'package:photohire/user/user_google_map_explore_screen.dart';
 
 class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
@@ -15,6 +18,81 @@ class UserHomeScreen extends StatefulWidget {
 class _UserHomeScreenState extends State<UserHomeScreen> {
   bool isLoading = false;
   List<Map<String, dynamic>> studioData = [];
+  String _currentLocation = "Fetching location...";
+  double lat = 0.0;
+  double lng = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+    _getCurrentLocation();
+  }
+
+  // Fetch current location
+  Future<void> _getCurrentLocation() async {
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() {
+          _currentLocation = "Location services are disabled.";
+        });
+        return;
+      }
+
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() {
+            _currentLocation = "Location permissions are denied.";
+          });
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        setState(() {
+          _currentLocation = "Location permissions are permanently denied.";
+        });
+        return;
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      // Convert coordinates to address
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      lat = position.latitude;
+      lng = position.longitude;
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          _currentLocation = "${place.locality}, ${place.administrativeArea}";
+        });
+      } else {
+        setState(() {
+          _currentLocation = "Location not found.";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _currentLocation = "Failed to fetch location.";
+      });
+    }
+  }
+
+  List<LatLng> ? latLngList;
+
   Future<List<Map<String, dynamic>>> getData() async {
     try {
       isLoading = true;
@@ -27,8 +105,24 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       // Extract data from each document and return as a list of maps
       studioData = snapshot.docs
           .where((doc) => doc.data()['isApproved'] == true)
-          .map((doc) => {'data':doc.data(), 'id': doc.id})
+          .map((doc) => {'data': doc.data(), 'id': doc.id})
           .toList();
+
+
+       latLngList = studioData
+        .map((studio) {
+          var data = studio['data']; // Extract document data
+          if (data.containsKey('latitude') && data.containsKey('longitude')) {
+            double lat = (data['latitude'] as num).toDouble();
+            double lng = (data['longitude'] as num).toDouble();
+            return LatLng(lat, lng);
+          }
+          return null;
+        })
+        .where((latLng) => latLng != null) // Remove any null values
+        .cast<LatLng>()
+        .toList();
+
       isLoading = false;
       setState(() {});
       return studioData;
@@ -37,12 +131,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
       setState(() {});
       throw Exception('Failed to fetch data');
     }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    getData();
   }
 
   @override
@@ -85,7 +173,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               ),
                             ),
                             Text(
-                              "Kozhikode, Kerala",
+                              _currentLocation, // Display current location
                               style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                             ),
                           ],
@@ -108,13 +196,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                           value: 'Sign out',
                           child: Text('Sign out'),
                         ),
-                      ], 
+                      ],
                     ),
                   ],
                 ),
               ),
               SizedBox(height: 10.sp),
-          
+
               // Search Bar and Toggle Button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -138,24 +226,26 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                     SizedBox(width: 10.w),
                     // Toggle Button
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 10),
-                      child: const Text(
-                        "LIST",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => UserGoogleMapScreen(latlnglist: latLngList, latlong: LatLng(lat, lng),)));
+                        
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 10),
+                        child: Icon(Icons.map)
                       ),
                     ),
                   ],
                 ),
               ),
               SizedBox(height: 20.h),
-          
+
               // Grid View of Items
               isLoading
                   ? const Center(child: CircularProgressIndicator())
@@ -170,8 +260,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                               mainAxisSpacing: 5,
                               childAspectRatio: 0.7,
                             ),
-                            itemCount:
-                                studioData.length, // The filtered data count
+                            itemCount: studioData.length,
                             itemBuilder: (context, index) {
                               final photographer = studioData[index]['data'];
                               return GestureDetector(
@@ -182,7 +271,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                           builder: (context) =>
                                               PhotographerDetailsScreen(
                                                 studioDetails: photographer,
-                                                pid:studioData[index]['id'],
+                                                pid: studioData[index]['id'],
                                               )));
                                 },
                                 child: Card(
@@ -215,7 +304,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                     fit: BoxFit.fill,
                                                   )),
                                       ),
-          
+
                                       Padding(
                                         padding: EdgeInsets.all(10),
                                         child: Column(
@@ -254,7 +343,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                                   fontSize: 12),
                                             ),
                                             SizedBox(height: 5.h),
-          
+
                                             // Price
                                             Text(
                                               '\$ ${photographer['startingPrice']}',

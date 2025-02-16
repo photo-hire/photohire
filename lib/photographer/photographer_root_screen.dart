@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/photographer/explore_screen.dart';
+import 'package:photohire/photographer/photographer_chat_screen.dart';
 import 'package:photohire/photographer/photographer_services_screen.dart';
 import 'package:photohire/photographer/photographer_manage_profile_screen.dart';
 import 'package:photohire/photographer/photographer_profile_screen.dart';
@@ -21,7 +23,7 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
   List<Widget> pages =[
     ExploreScreen(),
     PhotographerManageProfileScreen(),
-    PhotoGrapherServiceScreen(),
+   StudioUserListScreen(studioId: FirebaseAuth.instance.currentUser!.uid,),
     PhotoggrapherProfileScreen(),
   ];
   @override
@@ -42,7 +44,7 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
           items:[
             BottomNavigationBarItem(icon: Icon(Icons.lightbulb_outlined),label: "idea",),
             BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline),label: "add",),
-            BottomNavigationBarItem(icon: Icon(Icons.miscellaneous_services_outlined),label: 'service'),
+            BottomNavigationBarItem(icon: Icon(Icons.chat),label: 'service'),
             BottomNavigationBarItem(icon: Icon(Icons.account_circle_outlined),label: "profile",),
           ] ,
           type: BottomNavigationBarType.fixed,

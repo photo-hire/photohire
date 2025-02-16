@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:photohire/admin/admin_home_screen.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
@@ -120,13 +121,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       .get();
 
                   if (photographerDoc.exists) {
-                    // Navigate to PhotographerDetailsScreen
-                    Navigator.pushReplacement(
+                    if(photographerDoc.data()?['isApproved'] == true){
+                      Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => PhotographerRootScreen(),
                       ),
+                      (route) => false,
                     );
+                      
+                    }else{
+                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('Admin not approved'),
+                  ));
+
+                    }
+                    // Navigate to PhotographerDetailsScreen
+                    
                     return; // Exit after successful navigation
                   }
                   final userDoc = await FirebaseFirestore.instance
@@ -136,11 +147,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   if (userDoc.exists) {
                     // Navigate to UserRegisterScreen (replace with the correct screen for users)
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => RootScreen(),
-                      ),
+                      ),(route) => false,
                     );
                     return; // Exit after successful navigation
                   }
@@ -153,14 +164,37 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   if (storeDoc.exists) {
                     // Navigate to UserRegisterScreen (replace with the correct screen for users)
-                    Navigator.pushReplacement(
+                    Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
                         builder: (context) => StoreRootScreen(),
                       ),
+                      (route) => false,
                     );
                     return; // Exit after successful navigation
                   }
+
+                  final adminDoc = await FirebaseFirestore.instance
+                      .collection('admin')
+                      .doc(userId)
+                      .get();
+
+
+                      if(adminDoc.exists){
+
+                          // Navigate to UserRegisterScreen (replace with the correct screen for users)
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdminHomeScreen(),
+                      ),
+                      (route) => false,
+                    );
+                    return; // E
+
+                        
+                      }
+
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: Text('User Not found'),
                   ));

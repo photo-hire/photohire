@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/features/auth/screens/rental_store_register_screen.dart';
 import 'package:photohire/features/auth/screens/photographerRegister.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
@@ -78,7 +79,7 @@ class _ChoosingState extends State<Choosing> {
                         fontWeight: FontWeight.bold),
                   )),
               SizedBox(
-                height: 20.h,
+                height: 10.h,
               ),
               Container(
                 decoration: BoxDecoration(
@@ -107,7 +108,7 @@ class _ChoosingState extends State<Choosing> {
                     )),
               ),
               SizedBox(
-                height: 20.h,
+                height: 10.h,
               ),
 
               ElevatedButton(
@@ -131,7 +132,11 @@ class _ChoosingState extends State<Choosing> {
                       fixedSize: Size(175, 60),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.r))),
-                  onPressed: () {},
+                  onPressed: () {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LoginScreen()));
+
+
+                  },
                   child: Text(
                     "Admin",
                     style: TextStyle(
@@ -141,14 +146,20 @@ class _ChoosingState extends State<Choosing> {
                   )),
             ],
           ),
-          Positioned(
-              bottom: 0.h,
-              left: 50.w,
-              child: Image.asset(
-                "asset/image/choose.png",
-                height: 300.h,
-                width: 300.w,
-              )),
+          // Positioned(
+          //     bottom: 0.h,
+          //     left: 50.w,
+          
+          
+          
+          //     child: Image.asset(
+          //       "asset/image/choose.png",
+          //       height: 300.h,
+          //       width: 300.w,
+          //     )),
+       
+       
+       
         ],
       ),
     );

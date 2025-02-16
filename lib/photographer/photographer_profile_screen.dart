@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photohire/admin/admin_home_screen.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/photographer/photographer_orders_screen.dart';
+import 'package:photohire/photographer/photographers_bookings_list_screen.dart';
 
 class PhotoggrapherProfileScreen extends StatefulWidget {
   const PhotoggrapherProfileScreen({super.key});
@@ -535,6 +536,30 @@ class _PhotoggrapherProfileScreenState
               ),
               GestureDetector(
                 onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context)=>PhotographerBookingsListScreen()));
+                },
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.layers,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(
+                      width: 10.w,
+                    ),
+                    Text(
+                      'My Bookings',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.sp),
+                    )
+                  ],
+                ),
+              ),
+              
+              GestureDetector(
+                onTap: () {
                   FirebaseAuth.instance.signOut();
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SplashScreen()));
                 },
@@ -562,7 +587,7 @@ class _PhotoggrapherProfileScreenState
                   children: [
                     Positioned(
                         left: 30,
-                        bottom: 10,
+                        bottom: -50,
                         child: Image.asset('asset/image/Saly-2.png'))
                   ],
                 ),

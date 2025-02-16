@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photohire/admin/admin_store_management_screen.dart';
 import 'package:photohire/admin/studio_management_screen.dart';
 
 class AdminHomeScreen extends StatefulWidget {
@@ -52,6 +53,25 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               SizedBox(
                 height: 20,
               ),
+               Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ElevatedButton(
+                
+                    style: ElevatedButton.styleFrom(
+                       
+                        fixedSize: Size(MediaQuery.of(context).size.width, 60),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15))),
+                    onPressed: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => StoreManagementScreen(),));
+                    },
+                    child: Text(
+                      "Store mangement",
+                      style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                    )),
+              ),
+              
+              
              
             
             
