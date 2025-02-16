@@ -57,124 +57,88 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
             fit: BoxFit.cover,
           ),
           // Content
-          Column(
-            children: [
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    _buildStudioList(false),
-                    _buildStudioList(true),
-                  ],
+          SafeArea(
+            child: Column(
+              children: [
+                AppBar(
+                  title: Text("Studio Management",style: TextStyle(color: Colors.white),),
+                  backgroundColor: Colors.black54,
+                  elevation: 0,
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStudioList(bool isApproved) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('photgrapher').where('isApproved', isEqualTo: isApproved).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No studios found'));
-        }
-
-        final studios = snapshot.data!.docs;
-
-        return ListView.builder(
-          itemCount: studios.length,
-          itemBuilder: (context, index) {
-            final studio = studios[index].data() as Map<String, dynamic>;
-            final docId = studios[index].id;
-
-            return Card(
-              margin: EdgeInsets.all(10),
-              elevation: 3,
-              child: Padding(
-                padding: EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        // Studio Photo
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: studio['companyLogo'] != null
-                              ? Image.network(
-                                  studio['companyLogo'],
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                )
-                              : Icon(Icons.business, size: 80),
-                        ),
-                        SizedBox(width: 10),
-                        // Studio Name
-                        Expanded(
-                          child: Text(
-                            studio['name'] ?? 'No Name',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
-                    // Description
-                    Text(studio['Description'] ?? 'No Description'),
-                    SizedBox(height: 10),
-                    // Document Link
-                    TextButton.icon(
-                      onPressed: () {
-                        print("View document: ${studio['document']}");
-                      },
-                      icon: Icon(Icons.description),
-                      label: Text("View Document"),
-                    ),
-                    SizedBox(height: 10),
-                    // Buttons for Pending and Accepted Studios
-                    if (!isApproved)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              _updateApprovalStatus(docId, true);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                            ),
-                            child: Text("Accept"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              _updateApprovalStatus(docId, false);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            child: Text("Reject"),
-                          ),
-                          // Delete Button for Pending Studios
-                          ElevatedButton(
-                            onPressed: () {
-                              _deleteStudio(docId);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                            ),
-                            child: Text("Delete"),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: studios.length,
+                    itemBuilder: (context, index) {
+                      final studio = studios[index];
+                      return Card(
+                        margin: EdgeInsets.all(10),
+                        elevation: 3,
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  // Studio Photo
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.0),
+                                    child: Image.network(
+                                      studio["photo"]!,
+                                      width: 80,
+                                      height: 80,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  SizedBox(width: 10),
+                                  // Studio Name
+                                  Expanded(
+                                    child: Text(
+                                      studio["name"]!,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 10),
+                              // Document Link
+                              TextButton.icon(
+                                onPressed: () {
+                                  print("View document: ${studio['document']}");
+                                },
+                                icon: Icon(Icons.description),
+                                label: Text("View Document"),
+                              ),
+                              SizedBox(height: 10),
+                              // Accept and Reject Buttons
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      print("${studio['name']} accepted");
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.green,
+                                    ),
+                                    child: Text("Accept"),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      print("${studio['name']} rejected");
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.red,
+                                    ),
+                                    child: Text("Reject"),
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -200,3 +164,5 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
     );
   }
 }
+
+

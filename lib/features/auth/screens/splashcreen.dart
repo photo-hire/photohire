@@ -1,21 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:photohire/features/auth/screens/loginscreen.dart';
+import 'package:photohire/features/auth/screens/choosing.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 17) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background gradient
+          // Background image
           Image.asset(
-            'asset/image/frontscreen.jpg', // Replace with your image path
+            'asset/image/frontscreen.jpg',
             height: MediaQuery.of(context).size.height,
             fit: BoxFit.cover,
           ),
@@ -25,7 +35,7 @@ class SplashScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Good Morning",
+                  getGreeting(),
                   style: GoogleFonts.satisfy(
                     textStyle: TextStyle(
                         fontSize: 46.sp,
@@ -33,9 +43,7 @@ class SplashScreen extends StatelessWidget {
                         fontWeight: FontWeight.w500),
                   ),
                 ),
-                SizedBox(
-                  height: 10.h,
-                ),
+                SizedBox(height: 10.h),
                 Text(
                   "Welcome to",
                   style: GoogleFonts.poppins(
@@ -43,7 +51,6 @@ class SplashScreen extends StatelessWidget {
                         fontSize: 25.sp, color: Colors.white, height: 1),
                   ),
                 ),
-                // SizedBox(height: 0.h),
                 Text(
                   "PhotoHire",
                   style: GoogleFonts.poppins(
@@ -61,39 +68,38 @@ class SplashScreen extends StatelessWidget {
                           fontSize: 15.sp,
                           fontWeight: FontWeight.w300)),
                 ),
+                SizedBox(height: 20.h),
                 Center(
-                    child: Image.asset("asset/image/firsticon.png",
-                        height: 300.h, width: 300.w)),
-                SizedBox(
-                  height: 30.h,
+                  child: Image.asset("asset/image/firsticon.png",
+                      height: 300.h, width: 300.w),
                 ),
+                SizedBox(height: 30.h),
                 Center(
+                  child: SizedBox(
+                    width: 250.w,
+                    height: 50.h,
                     child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => LoginScreen(),
-                        ));
-                  },
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Get Started",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20.sp),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Choosing()),
+                        );
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Get Started",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 20.sp),
+                          ),
+                          SizedBox(width: 10.w),
+                          Icon(Icons.arrow_right_alt_sharp)
+                        ],
                       ),
-                      SizedBox(
-                        width: 10.w,
-                      ),
-                      Icon(Icons.arrow_right_alt_sharp)
-                    ],
+                    ),
                   ),
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(250, 50),
-                  ),
-                )),
+                ),
               ],
             ),
           )

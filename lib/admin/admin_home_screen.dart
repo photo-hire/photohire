@@ -23,33 +23,34 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             height: MediaQuery.of(context).size.height,
             fit: BoxFit.cover,
           ),
-          
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              
               SizedBox(
                 height: 20,
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ElevatedButton(
-                
                     style: ElevatedButton.styleFrom(
-                       
                         fixedSize: Size(MediaQuery.of(context).size.width, 60),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15))),
                     onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => StudioManagementScreen(),));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StudioManagementScreen(),
+                          ));
                     },
                     child: Text(
                       "Studio mangement",
-                      style: TextStyle(color: Color(0xff03399E), fontSize: 25,fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Color(0xff03399E),
+                          fontSize: 25,
+                          fontWeight: FontWeight.bold),
                     )),
               ),
-              
-              
               SizedBox(
                 height: 20,
               ),
@@ -87,10 +88,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
               )),
         ],
       ),
-   
-   
-   
     );
-  
   }
 }
