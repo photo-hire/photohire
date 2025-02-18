@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Add this import
+import 'package:geocoding/geocoding.dart';
 import 'package:photohire/user/booking_photographers_screen.dart';
 import 'package:photohire/user/portfolio_screen.dart';
 import 'package:photohire/user/user_chat_screen.dart';
@@ -66,6 +67,8 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
     }
   }
 
+  double rating = 0.0;
+
   // Fetch reviews from Firestore
   Future<void> _fetchReviews() async {
     try {
@@ -75,12 +78,21 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
           .get()
           .then((querySnapshot) {
         List<Map<String, dynamic>> fetchedReviews = [];
-        querySnapshot.docs.forEach((doc) {
+        if(querySnapshot.docs.isNotEmpty){
+          querySnapshot.docs.forEach((doc) {
+          
           fetchedReviews.add(doc.data());
+          rating += doc['rating'];
+          
+
         });
+        }
 
         setState(() {
           reviews = fetchedReviews;
+          print('---------------------');
+          print(reviews);
+          print(rating);
         });
       });
     } catch (e) {
@@ -134,10 +146,10 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                     itemBuilder: (context, index) {
                       String imageUrl = images.isNotEmpty
                           ? images[index]
-                          : 'asset/image/weddingphoto.jpg';
+                          : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdASyvwmzMDS7ddjV87hv1QW1K3OWL05JHuw&s';
 
                       return Container(
-                        height: double.infinity,
+                        height: MediaQuery.of(context).size.height/2,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           image: DecorationImage(
@@ -245,7 +257,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                     children: [
                                       const Icon(Icons.star, color: Colors.yellow, size: 16),
                                       Text(
-                                        '4.5',
+                                        rating.toString(),
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           color: Colors.grey,
@@ -260,18 +272,35 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           SizedBox(height: 16.h),
                           // Address Section
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.location_on, color: Colors.blue),
-                              SizedBox(width: 8.w),
-                              Expanded(
-                                child: Text(
-                                  '${widget.studioDetails['latitude']}\n${widget.studioDetails['logitude']}',
-                                  style: TextStyle(fontSize: 14.sp),
-                                ),
-                              ),
-                            ],
-                          ),
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    const Icon(Icons.location_on, color: Colors.blue),
+    SizedBox(width: 8.w),
+    FutureBuilder<String>(
+      future: _getAddressFromCoordinates(
+        widget.studioDetails['latitude'],
+        widget.studioDetails['longitude'],
+      ),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          return Expanded(
+            child: Text(
+              snapshot.data!,
+              style: TextStyle(fontSize: 14.sp),
+            ),
+          );
+        } else {
+          return Text('No address available');
+        }
+      },
+    ),
+  ],
+),
+
                           SizedBox(height: 8.h),
                           // Contact Section
                           Row(
@@ -335,11 +364,10 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => UserChatScreen(
+                                          builder: (context) => ChatScreen(
                                                 studioId: widget.pid!,
-                                                studioLogo: widget.studioDetails['companyLogo'] ?? '',
                                                 studioName: widget.studioDetails['name'],
-                                                userId: FirebaseAuth.instance.currentUser!.uid,
+                                                userId: FirebaseAuth.instance.currentUser!.uid, userName: 'hello',
                                               )));
                                 },
                                 icon: const Icon(Icons.chat, color: Colors.white),
@@ -498,5 +526,17 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
         );
       },
     );
+  }
+}
+
+
+Future<String> _getAddressFromCoordinates(double latitude, double longitude) async {
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
+    Placemark place = placemarks[0];
+    return '${place.street}, ${place.locality}, ${place.postalCode}, ${place.country}';
+  } catch (e) {
+    print("Error getting address: $e");
+    return "Unknown Address";
   }
 }

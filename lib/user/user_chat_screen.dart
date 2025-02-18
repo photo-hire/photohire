@@ -1,79 +1,66 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
 
-class UserChatScreen extends StatefulWidget {
-  final String studioName;
-  final String studioLogo;
+class ChatScreen extends StatefulWidget {
+  final String userId;
   final String studioId;
-  final String userId; // Add userId for the current user
+  final String userName;
+  final String studioName;
 
-  const UserChatScreen({
+  const ChatScreen({
     super.key,
-    required this.studioName,
-    required this.studioLogo,
-    required this.studioId,
     required this.userId,
+    required this.studioId,
+    required this.userName,
+    required this.studioName,
   });
 
   @override
-  State<UserChatScreen> createState() => _UserChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _UserChatScreenState extends State<UserChatScreen> {
-  final _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-
-  // Firestore instance
+class _ChatScreenState extends State<ChatScreen> {
+  final TextEditingController _messageController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Send message to Firestore
+  String get chatId => '${widget.userId}_${widget.studioId}';
+
   void _sendMessage() async {
-  if (_messageController.text.trim().isNotEmpty) {
-    // Add message to Firestore
-    await _firestore
-        .collection('chats')
-        .doc(widget.studioId)
-        .collection('messages')
-        .add({
-      'message': _messageController.text.trim(),
-      'sender': widget.userId,
+    String message = _messageController.text.trim();
+    if (message.isEmpty) return;
+
+    await _firestore.collection('chats').doc(chatId).collection('messages').add({
+      'message': message,
+      'senderId': widget.userId,
+      'receiverId': widget.studioId,
       'timestamp': Timestamp.now(),
     });
 
-    // Update chat metadata
-    await _firestore
-        .collection('chatMetadata')
-        .doc('${widget.userId}_${widget.studioId}')
-        .set({
-      'userId': widget.userId,
-      'studioId': widget.studioId,
-      'studioName': widget.studioName,
-      'studioLogo': widget.studioLogo,
-      'lastMessage': _messageController.text.trim(),
-      'timestamp': Timestamp.now(),
+    // Update User Chat List
+    await _firestore.collection('userChats').doc(widget.userId).set({
+      'studios': FieldValue.arrayUnion([widget.studioId])
+    }, SetOptions(merge: true));
+
+    // Update Studio Chat List
+    await _firestore.collection('studioChats').doc(widget.studioId).set({
+      'users': FieldValue.arrayUnion([widget.userId])
     }, SetOptions(merge: true));
 
     _messageController.clear();
-
-    // Scroll to the bottom after sending a message
-    _scrollController.animateTo(
-      0,
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeOut,
-    );
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
+      appBar: AppBar(
+        title: Text(widget.studioName, style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       extendBodyBehindAppBar: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            transform: GradientRotation(11),
             begin: Alignment.topLeft,
             end: Alignment.bottomCenter,
             colors: [
@@ -85,100 +72,47 @@ class _UserChatScreenState extends State<UserChatScreen> {
         ),
         child: Column(
           children: [
-            SizedBox(height: 20.h),
-            // Studio Logo and Info
-            Padding(
-              padding: EdgeInsets.all(16.r),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 30.r,
-                    backgroundImage: widget.studioLogo.isNotEmpty
-                        ? NetworkImage(widget.studioLogo)
-                        : null,
-                    child: widget.studioLogo.isEmpty
-                        ? Icon(Icons.camera_alt, size: 30.r)
-                        : null,
-                  ),
-                  SizedBox(width: 16.w),
-                  Text(
-                    widget.studioName,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            // Chat Messages
+            SizedBox(height: 100),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore
                     .collection('chats')
-                    .doc(widget.studioId)
+                    .doc(chatId)
                     .collection('messages')
-                    .orderBy('timestamp', descending: true)
+                    .orderBy('timestamp', descending: false)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.blue[900],
-                      ),
-                    );
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text(
-                        "No messages yet",
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    );
-                  }
+                  if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
 
                   var messages = snapshot.data!.docs;
                   return ListView.builder(
-                    reverse: true,
-                    controller: _scrollController,
-                    padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 8.h),
+                    padding: EdgeInsets.all(8),
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      final message = messages[index].data() as Map<String, dynamic>;
-                      final isUser = message['sender'] == widget.userId;
+                      var msg = messages[index].data() as Map<String, dynamic>;
+                      bool isSender = msg['senderId'] == widget.userId;
                       return Align(
-                        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Card(
-                          color: isUser ? Colors.blue[50] : Colors.white,
-                          elevation: 3,
-                          margin: EdgeInsets.symmetric(vertical: 8.h),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+                        alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+                        child: Container(
+                          margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: isSender ? Colors.blueAccent : Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                spreadRadius: 1,
+                                offset: Offset(2, 3),
+                              )
+                            ],
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.all(12.r),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  message['message'],
-                                  style: TextStyle(fontSize: 16.sp),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  DateFormat('hh:mm a').format(
-                                    (message['timestamp'] as Timestamp).toDate(),
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
+                          child: Text(
+                            msg['message'],
+                            style: TextStyle(
+                              color: isSender ? Colors.white : Colors.black87,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -188,33 +122,32 @@ class _UserChatScreenState extends State<UserChatScreen> {
                 },
               ),
             ),
-            // Input Field and Send Button
             Padding(
-              padding: EdgeInsets.all(16.r),
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
                       controller: _messageController,
                       decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
+                        hintText: "Type a message...",
                         filled: true,
-                        fillColor: Colors.white.withOpacity(0.9),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 14.h),
+                        fillColor: Colors.white,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: BorderSide.none,
+                        ),
                       ),
-                      onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
-                  SizedBox(width: 16.w),
-                  IconButton(
-                    onPressed: _sendMessage,
-                    icon: Icon(
-                      Icons.send,
-                      size: 28.r,
-                      color: Colors.blue[900],
+                  SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: _sendMessage,
+                    child: CircleAvatar(
+                      backgroundColor: Colors.blueAccent,
+                      radius: 24,
+                      child: Icon(Icons.send, color: Colors.white, size: 24),
                     ),
                   ),
                 ],

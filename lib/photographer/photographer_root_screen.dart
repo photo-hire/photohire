@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/photographer/explore_screen.dart';
-import 'package:photohire/photographer/photographer_chat_screen.dart';
+import 'package:photohire/photographer/photographer_chatList_screen.dart';
 import 'package:photohire/photographer/photographer_services_screen.dart';
 import 'package:photohire/photographer/photographer_manage_profile_screen.dart';
 import 'package:photohire/photographer/photographer_profile_screen.dart';
@@ -23,7 +23,7 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
   List<Widget> pages =[
     ExploreScreen(),
     PhotographerManageProfileScreen(),
-   StudioUserListScreen(studioId: FirebaseAuth.instance.currentUser!.uid,),
+   StudioChatListScreen(studioId: FirebaseAuth.instance.currentUser!.uid,),
     PhotoggrapherProfileScreen(),
   ];
   @override

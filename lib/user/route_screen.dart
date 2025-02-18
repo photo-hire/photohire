@@ -20,7 +20,7 @@ class _RootScreenState extends State<RootScreen> {
     UserBookingListScreen(),
     RentalStoreScreen(), // Add the Rental Store screen
     RentelProductBookingListScreen(),
-    ChatListingScreen(userId: FirebaseAuth.instance.currentUser!.uid),
+    UserChatListScreen(userId: FirebaseAuth.instance.currentUser!.uid),
     UserProfileScreen(),
   ];
   bool _isDialogShowing = false;
