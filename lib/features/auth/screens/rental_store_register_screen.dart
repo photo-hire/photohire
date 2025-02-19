@@ -5,11 +5,13 @@ import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+
 import 'package:image_picker/image_picker.dart';
-import 'package:location/location.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
-import 'package:photohire/rentalStore/rental_store_home_screen.dart';
+import 'package:photohire/photographer/Location_picker_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
 
 class RentalStoreRegisterScreen extends StatefulWidget {
@@ -43,42 +45,83 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
   double? latitude;
   double? longitude;
 
-  // Function to get the current location
   Future<void> _getCurrentLocation() async {
     try {
-      Location location = Location();
-
       // Check if location services are enabled
-      bool serviceEnabled = await location.serviceEnabled();
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        serviceEnabled = await location.requestService();
-        if (!serviceEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Location services are disabled.')),
+        );
+        return;
+      }
+
+      // Check location permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Location permissions are denied.')),
+          );
           return;
         }
       }
 
-      // Check if location permissions are granted
-      PermissionStatus permissionGranted = await location.hasPermission();
-      if (permissionGranted == PermissionStatus.denied) {
-        permissionGranted = await location.requestPermission();
-        if (permissionGranted != PermissionStatus.granted) {
-          return;
-        }
+      if (permission == LocationPermission.deniedForever) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Location permissions are permanently denied.')),
+        );
+        return;
       }
 
-      // Fetch the current location
-      LocationData currentLocation = await location.getLocation();
-      setState(() {
-        latitude = currentLocation.latitude;
-        longitude = currentLocation.longitude;
-        _latitudeController.text = latitude?.toStringAsFixed(6) ?? '';
-        _longitudeController.text = longitude?.toStringAsFixed(6) ?? '';
-      });
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          latitude = position.latitude;
+          longitude = position.longitude;
+          _selectedAddress =
+              "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        });
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Location fetched successfully!')),
+      );
     } catch (e) {
-      print('Error getting location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to fetch location: $e')),
       );
+    }
+  }
+
+  String? _selectedAddress;
+
+  void _onLocationSelected(double lat, double lng) async {
+    setState(() {
+      latitude = lat;
+      longitude = lng;
+    });
+
+    // Convert coordinates to address
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks.first;
+      setState(() {
+        _selectedAddress =
+            "${place.street}, ${place.locality}, ${place.country}";
+      });
     }
   }
 
@@ -192,7 +235,7 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                     TextField(
                       controller: storeNameController,
                       decoration: InputDecoration(
-                        labelText: 'Store Name',
+                        hintText: 'Store Name',
                         filled: true,
                         fillColor: Colors.white,
                         border: InputBorder.none,
@@ -208,14 +251,13 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(
                       height: 16.4.h,
                     ),
                     TextField(
                       controller: phoneController,
                       decoration: InputDecoration(
-                        labelText: 'Phone Number',
+                        hintText: 'Phone Number',
                         filled: true,
                         fillColor: Colors.white,
                         border: InputBorder.none,
@@ -235,7 +277,7 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                     TextField(
                       controller: emailController,
                       decoration: InputDecoration(
-                        labelText: 'Email',
+                        hintText: 'Email',
                         filled: true,
                         fillColor: Colors.white,
                         border: InputBorder.none,
@@ -256,7 +298,7 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                       controller: passwordController,
                       obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        hintText: 'Password',
                         filled: true,
                         fillColor: Colors.white,
                         border: InputBorder.none,
@@ -287,14 +329,12 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                         ),
                       ),
                     ),
-
                     SizedBox(height: 16.0.r),
-
                     TextField(
                       maxLines: 4,
                       controller: descController,
                       decoration: InputDecoration(
-                        labelText: 'Description',
+                        hintText: 'Description',
                         filled: true,
                         fillColor: Colors.white,
                         border: InputBorder.none,
@@ -313,56 +353,48 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                     SizedBox(
                       height: 16.h,
                     ),
-                    TextField(
-                      controller: _latitudeController,
-                      decoration: InputDecoration(
-                        labelText: 'Latitude',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                            vertical: 15.0, horizontal: 20.0),
-                        enabledBorder: OutlineInputBorder(
+                    ElevatedButton(
+                      onPressed: () {
+                        if (latitude != null && longitude != null) {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => LocationPickerScreen(
+                                    onLocationSelected: _onLocationSelected,
+                                    latitude: latitude!,
+                                    longitude: longitude!,
+                                  )));
+                        } else {
+                          _getCurrentLocation();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.yellow,
+                        foregroundColor: Colors.blue[900],
+                        shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10.0.r),
-                          borderSide: BorderSide.none,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.location_on),
-                          onPressed: _getCurrentLocation,
-                        ),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 15.0),
                       ),
-                      readOnly: true,
-                    ),
-                    SizedBox(height: 16.h),
-                    // Longitude TextField
-                    TextField(
-                      controller: _longitudeController,
-                      decoration: InputDecoration(
-                        labelText: 'Longitude',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                            vertical: 15.0, horizontal: 20.0),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10.0.r),
-                          borderSide: BorderSide.none,
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(Icons.location_on),
-                          onPressed: _getCurrentLocation,
-                        ),
+                      child: Text(
+                        latitude != null && longitude != null
+                            ? 'Selected Location'
+                            : 'Get Current Location',
+                        style: TextStyle(
+                            fontSize: 15.sp, fontWeight: FontWeight.bold),
                       ),
-                      readOnly: true,
                     ),
+                    SizedBox(
+                      height: 10.h,
+                    ),
+                    if (latitude != null && longitude != null)
+                      if (_selectedAddress != null)
+                        Center(
+                          child: Text(
+                            'Address: $_selectedAddress',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16.sp),
+                          ),
+                        ),
                     SizedBox(height: 24.0.h),
                     ElevatedButton(
                       onPressed: () async {
@@ -395,7 +427,7 @@ class _RentalStoreRegisterScreenState extends State<RentalStoreRegisterScreen> {
                           Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => StoreRootScreen()));
+                                  builder: (context) => LoginScreen()));
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'email-already-in-use') {
                             // Display a user-friendly message

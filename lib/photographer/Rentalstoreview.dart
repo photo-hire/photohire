@@ -116,10 +116,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           return GridView.builder(
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                            ),
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    childAspectRatio: .9),
                             itemCount: approvedProducts.length,
                             itemBuilder: (context, index) {
                               var product = approvedProducts[index].data()
@@ -150,7 +150,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                                       'description'],
                                                   rating: 0.0,
                                                   price: firstProductDetail[
-                                                      'price'],
+                                                          'price']
+                                                      .toString(),
                                                 )));
                                   },
                                   child: ExploreScreenWidget(
@@ -158,7 +159,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                         'asset/image/weddingphoto.jpg',
                                     title: firstProductDetail['name'] ??
                                         'No Title',
-                                    price: firstProductDetail['price'] ?? '0.0',
+                                    price: firstProductDetail['price']
+                                            .toString() ??
+                                        '0.0',
                                     rating: firstProductDetail['rating'] ?? 0.0,
                                   ),
                                 );

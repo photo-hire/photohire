@@ -377,11 +377,14 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                                 topLeft: Radius.circular(10.r),
                                                 topRight:
                                                     Radius.circular(10.r)),
-                                            child: Image.network(
-                                              product['image'],
-                                              fit: BoxFit.cover,
-                                              height: 150.h,
-                                              width: double.infinity,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(4),
+                                              child: Image.network(
+                                                product['image'],
+                                                fit: BoxFit.cover,
+                                                height: 150.h,
+                                                // width: double.infinity,
+                                              ),
                                             ),
                                           ),
                                           Container(

@@ -12,9 +12,9 @@ class StoreRootScreen extends StatefulWidget {
 }
 
 class _StoreRootScreenState extends State<StoreRootScreen> {
-int selectedIndex = 0;
+  int selectedIndex = 0;
 
-  List<Widget> pages =[
+  List<Widget> pages = [
     RentalStoreHomeScreen(),
     StoreAddProductScreen(),
     OrdersScreen(),
@@ -25,35 +25,42 @@ int selectedIndex = 0;
     return Scaffold(
       bottomNavigationBar: ClipRRect(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10)
-        ),
+            topLeft: Radius.circular(10), topRight: Radius.circular(10)),
         child: BottomNavigationBar(
-          
           onTap: (index) {
             setState(() {
               selectedIndex = index;
             });
           },
-          items:[
-            BottomNavigationBarItem(icon: Icon(Icons.lightbulb_outlined),label: "idea",),
-            BottomNavigationBarItem(icon: Icon(Icons.add_circle_outline),label: "add",),
-            BottomNavigationBarItem(icon: Icon(Icons.layers),label: "orders",),
-            BottomNavigationBarItem(icon: Icon(Icons.account_circle_outlined),label: "profile",),
-          ] ,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: "idea",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_outline),
+              label: "add",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.layers),
+              label: "orders",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle_outlined),
+              label: "profile",
+            ),
+          ],
           type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           selectedItemColor: Colors.white,
-          selectedIconTheme: IconThemeData(
-            size: 40
-          ),
-          unselectedItemColor:Colors.white,
+          selectedIconTheme: IconThemeData(size: 40),
+          unselectedItemColor: Colors.white,
           backgroundColor: Colors.blue[900],
           currentIndex: selectedIndex,
-          ),
+        ),
       ),
-        body: pages[selectedIndex],
+      body: pages[selectedIndex],
     );
   }
 }

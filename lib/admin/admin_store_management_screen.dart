@@ -7,7 +7,8 @@ class StoreManagementScreen extends StatefulWidget {
   _StoreManagementScreenState createState() => _StoreManagementScreenState();
 }
 
-class _StoreManagementScreenState extends State<StoreManagementScreen> with SingleTickerProviderStateMixin {
+class _StoreManagementScreenState extends State<StoreManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -24,7 +25,7 @@ class _StoreManagementScreenState extends State<StoreManagementScreen> with Sing
   }
 
   Future<void> _updateApprovalStatus(String docId, bool isApproved) async {
-    await _firestore.collection('stores').doc(docId).update({
+    await _firestore.collection('rentalStore').doc(docId).update({
       'isApproved': isApproved,
     });
   }
@@ -87,7 +88,10 @@ class _StoreManagementScreenState extends State<StoreManagementScreen> with Sing
 
   Widget _buildStoreList(bool isApproved) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('rentalStore').where('isApproved', isEqualTo: isApproved).snapshots(),
+      stream: _firestore
+          .collection('rentalStore')
+          .where('isApproved', isEqualTo: isApproved)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -151,7 +155,8 @@ class _StoreManagementScreenState extends State<StoreManagementScreen> with Sing
                     Text("Phone: ${store['phone'] ?? 'No Phone'}"),
                     SizedBox(height: 10),
                     // Location (Latitude and Longitude)
-                    Text("Location: (${store['latitude']}, ${store['longitude']})"),
+                    Text(
+                        "Location: (${store['latitude']}, ${store['longitude']})"),
                     SizedBox(height: 10),
                     // Button to View Location on Google Maps
                     ElevatedButton.icon(

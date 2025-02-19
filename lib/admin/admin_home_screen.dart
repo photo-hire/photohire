@@ -5,6 +5,7 @@ import 'package:photohire/admin/admin_store_management_screen.dart';
 import 'package:photohire/admin/bookingview';
 import 'package:photohire/admin/reviewscreen.dart';
 import 'package:photohire/admin/studio_management_screen.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 // import 'package:photohire/admin/reviews_screen.dart'; // Import the Reviews Screen
 
 class AdminHomeScreen extends StatefulWidget {
@@ -127,8 +128,24 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                             fontWeight: FontWeight.bold),
                       ))),
               SizedBox(
-                height: 100.h,
+                height: 5.h,
               ),
+              TextButton(
+                  onPressed: () {
+                    print('hhhhhhh');
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginScreen(),
+                        ));
+                  },
+                  child: Text(
+                    "Logout",
+                    style: TextStyle(color: Colors.white, fontSize: 20.h),
+                  )),
+              SizedBox(
+                height: 150.h,
+              )
             ],
           ),
           Positioned(

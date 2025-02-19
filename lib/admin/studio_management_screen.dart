@@ -25,13 +25,13 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
   }
 
   Future<void> _updateApprovalStatus(String docId, bool isApproved) async {
-    await _firestore.collection('stores').doc(docId).update({
+    await _firestore.collection('photgrapher').doc(docId).update({
       'isApproved': isApproved,
     });
   }
 
   Future<void> _deleteStore(String docId) async {
-    await _firestore.collection('photographers').doc(docId).delete();
+    await _firestore.collection('photgrapher').doc(docId).delete();
   }
 
   Future<void> _openMap(double latitude, double longitude) async {
@@ -47,7 +47,7 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Store Management", style: TextStyle(color: Colors.white)),
+        title: Text("Studio Management", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
         bottom: TabBar(
@@ -90,7 +90,7 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
   Widget _buildStoreList(bool isApproved) {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
-          .collection('rentalStore')
+          .collection('photgrapher')
           .where('isApproved', isEqualTo: isApproved)
           .snapshots(),
       builder: (context, snapshot) {
@@ -99,7 +99,7 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No stores found'));
+          return Center(child: Text('No photographers found'));
         }
 
         final stores = snapshot.data!.docs;

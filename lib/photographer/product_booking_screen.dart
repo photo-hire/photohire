@@ -128,12 +128,12 @@ class _ProductBookingScreenState extends State<ProductBookingScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            width: double.infinity,
-                            height: MediaQuery.of(context).size.height / 3,
+                            width: 100,
+                            height: 100,
                             decoration: BoxDecoration(
                               image: DecorationImage(
                                 image: NetworkImage(widget.image),
-                                fit: BoxFit.cover,
+                                fit: BoxFit.contain,
                               ),
                               borderRadius: BorderRadius.circular(10.r),
                             ),
