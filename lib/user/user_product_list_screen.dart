@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:photohire/user/user_product_details_screen.dart';
 
-
 class ParentWidget extends StatelessWidget {
   final Map<String, dynamic> store;
 
@@ -19,7 +18,8 @@ class ParentWidget extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         } else if (snapshot.hasError) {
-          return Scaffold(body: Center(child: Text('Error: ${snapshot.error}')));
+          return Scaffold(
+              body: Center(child: Text('Error: ${snapshot.error}')));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Scaffold(body: Center(child: Text('No products found.')));
         } else {
@@ -35,8 +35,6 @@ class ParentWidget extends StatelessWidget {
   }
 }
 
-
-
 Future<List<Map<String, dynamic>>> fetchProductDetails(String storeId) async {
   print('hi');
   List<Map<String, dynamic>> productDetails = [];
@@ -51,10 +49,6 @@ Future<List<Map<String, dynamic>>> fetchProductDetails(String storeId) async {
 
   return productDetails;
 }
-
-
-
-
 
 class UserRentalServiceScreen extends StatelessWidget {
   final Map<String, dynamic> store;
@@ -93,11 +87,12 @@ class UserRentalServiceScreen extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
                       child: CachedNetworkImage(
-                        imageUrl: store['companyLogo']??'',
+                        imageUrl: store['companyLogo'] ?? '',
                         width: 150,
                         height: 150,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                        placeholder: (context, url) =>
+                            Center(child: CircularProgressIndicator()),
                         errorWidget: (context, url, error) => Icon(Icons.error),
                       ),
                     ),
@@ -117,7 +112,7 @@ class UserRentalServiceScreen extends StatelessWidget {
                 children: [
                   // Store Name
                   Text(
-                    store['storeName']??'',
+                    store['storeName'] ?? '',
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -127,7 +122,7 @@ class UserRentalServiceScreen extends StatelessWidget {
                   SizedBox(height: 10),
                   // Store Description
                   Text(
-                    store['description']??'',
+                    store['description'] ?? '',
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[700],
@@ -146,9 +141,10 @@ class UserRentalServiceScreen extends StatelessWidget {
                         children: [
                           // Email
                           ListTile(
-                            leading: Icon(Icons.email, color: Colors.blueAccent),
+                            leading:
+                                Icon(Icons.email, color: Colors.blueAccent),
                             title: Text(
-                              store['email']??'',
+                              store['email'] ?? '',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.blueAccent,
@@ -160,7 +156,7 @@ class UserRentalServiceScreen extends StatelessWidget {
                           ListTile(
                             leading: Icon(Icons.phone, color: Colors.green),
                             title: Text(
-                              store['phone']??'',
+                              store['phone'] ?? '',
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.green,
@@ -202,7 +198,7 @@ class UserRentalServiceScreen extends StatelessWidget {
   }
 }
 
- class ProductItem extends StatelessWidget {
+class ProductItem extends StatelessWidget {
   final Map<String, dynamic> product;
 
   const ProductItem({Key? key, required this.product}) : super(key: key);
@@ -212,8 +208,12 @@ class UserRentalServiceScreen extends StatelessWidget {
     print('------------------');
     print(product);
     return GestureDetector(
-      onTap:  () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => UserProductDetailsScreen(product: product['productDetails'][0])));
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => UserProductDetailsScreen(
+                    product: product['productDetails'][0])));
       },
       child: Card(
         margin: EdgeInsets.only(bottom: 10),
@@ -233,7 +233,8 @@ class UserRentalServiceScreen extends StatelessWidget {
                   width: 80,
                   height: 80,
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
@@ -260,7 +261,7 @@ class UserRentalServiceScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 5),
                     Text(
-                      'Price: \$${product['productDetails'][0]['price']}',
+                      'Price: \₹${product['productDetails'][0]['price']}',
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.green,

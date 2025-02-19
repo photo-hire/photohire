@@ -125,7 +125,8 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                     child: Container(
                                       height: 190.h,
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         border: Border.all(
                                             color: Colors.black,
                                             width: 2.w,
@@ -200,9 +201,10 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                               descController.text.trim();
                                           String price =
                                               priceController.text.trim();
-                              
+
                                           // Post details
-                                          Map<String, dynamic> productDetails = {
+                                          Map<String, dynamic> productDetails =
+                                              {
                                             'name': title,
                                             'description': description,
                                             'price': price,
@@ -216,7 +218,7 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                             'userId': userId,
                                             'productDetails': [productDetails],
                                           });
-                              
+
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
                                             SnackBar(
@@ -246,7 +248,8 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                       padding: EdgeInsets.all(10),
                                       width: double.infinity,
                                       decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10.r),
+                                          borderRadius:
+                                              BorderRadius.circular(10.r),
                                           color: Colors.blue[900]),
                                       child: Center(
                                         child: isLoading
@@ -344,7 +347,8 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                         }).toList();
 
                         return productDetails.isEmpty
-                            ? const Center(child: Text('No products to display'))
+                            ? const Center(
+                                child: Text('No products to display'))
                             : Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: GridView.builder(
@@ -360,55 +364,53 @@ class _StoreAddProductScreenState extends State<StoreAddProductScreen> {
                                   itemBuilder: (context, index) {
                                     final product = productDetails[index];
                                     return Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(10.r)),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10.r)),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.only(
+                                                topLeft: Radius.circular(10.r),
+                                                topRight:
+                                                    Radius.circular(10.r)),
+                                            child: Image.network(
+                                              product['image'],
+                                              fit: BoxFit.cover,
+                                              height: 150.h,
+                                              width: double.infinity,
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: EdgeInsets.only(
+                                                left: 10, top: 10),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                ClipRRect(
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                        topLeft: Radius.circular(10.r),
-                                                        topRight: Radius.circular(10.r)
-                                                      ),
-                                                  child: Image.network(
-                                                    product['image'],
-                                                    fit: BoxFit.cover,
-                                                    height: 150.h,
-                                                    width: double.infinity,
-                                                  ),
+                                                Text(
+                                                  product['name'],
+                                                  style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
                                                 ),
-                                                Container(
-                                                  padding:
-                                                      EdgeInsets.only(left: 10,top: 10),
-                                                  child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                                    children: [
-                                                      Text(
-                                                        product['name'],
-                                                        style: TextStyle(
-                                                            fontSize: 15.sp,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      Text(
-                                                        '\$${product['price']}',
-                                                        style: TextStyle(
-                                                            fontSize: 15.sp,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                )
+                                                Text(
+                                                  '\₹${product['price']}',
+                                                  style: TextStyle(
+                                                      fontSize: 15.sp,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
                                               ],
                                             ),
-                                          );
+                                          )
+                                        ],
+                                      ),
+                                    );
                                   },
                                 ),
                               );

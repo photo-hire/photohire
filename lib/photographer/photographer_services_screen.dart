@@ -220,13 +220,12 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                     FirebaseFirestore.instance
                                                         .collection('services')
                                                         .doc();
-                                                  await serviceDocRef.set({
-                                                    'userId': userId,
-                                                    'serviceDetails': [
-                                                      serviceDetails
-                                                    ],
-                                                  });
-                                                
+                                                await serviceDocRef.set({
+                                                  'userId': userId,
+                                                  'serviceDetails': [
+                                                    serviceDetails
+                                                  ],
+                                                });
 
                                                 ScaffoldMessenger.of(context)
                                                     .showSnackBar(
@@ -386,7 +385,8 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                             decoration: BoxDecoration(
                                                 color: Colors.white,
                                                 borderRadius:
-                                                    BorderRadius.circular(10.r)),
+                                                    BorderRadius.circular(
+                                                        10.r)),
                                             child: Column(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
@@ -394,9 +394,12 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                 ClipRRect(
                                                   borderRadius:
                                                       BorderRadius.only(
-                                                        topLeft: Radius.circular(10.r),
-                                                        topRight: Radius.circular(10.r)
-                                                      ),
+                                                          topLeft:
+                                                              Radius.circular(
+                                                                  10.r),
+                                                          topRight:
+                                                              Radius.circular(
+                                                                  10.r)),
                                                   child: Image.network(
                                                     service['image'],
                                                     fit: BoxFit.cover,
@@ -405,10 +408,12 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                   ),
                                                 ),
                                                 Container(
-                                                  padding:
-                                                      EdgeInsets.only(left: 10,top: 10),
+                                                  padding: EdgeInsets.only(
+                                                      left: 10, top: 10),
                                                   child: Column(
-                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
                                                     children: [
                                                       Text(
                                                         service['title'],
@@ -419,7 +424,7 @@ class _PhotoGrapherServiceScreenState extends State<PhotoGrapherServiceScreen> {
                                                                     .bold),
                                                       ),
                                                       Text(
-                                                        '\$${service['price']}',
+                                                        '\₹${service['price']}',
                                                         style: TextStyle(
                                                             fontSize: 15.sp,
                                                             fontWeight:

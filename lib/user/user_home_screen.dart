@@ -91,7 +91,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  List<LatLng> ? latLngList;
+  List<LatLng>? latLngList;
 
   Future<List<Map<String, dynamic>>> getData() async {
     try {
@@ -108,20 +108,19 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           .map((doc) => {'data': doc.data(), 'id': doc.id})
           .toList();
 
-
-       latLngList = studioData
-        .map((studio) {
-          var data = studio['data']; // Extract document data
-          if (data.containsKey('latitude') && data.containsKey('longitude')) {
-            double lat = (data['latitude'] as num).toDouble();
-            double lng = (data['longitude'] as num).toDouble();
-            return LatLng(lat, lng);
-          }
-          return null;
-        })
-        .where((latLng) => latLng != null) // Remove any null values
-        .cast<LatLng>()
-        .toList();
+      latLngList = studioData
+          .map((studio) {
+            var data = studio['data']; // Extract document data
+            if (data.containsKey('latitude') && data.containsKey('longitude')) {
+              double lat = (data['latitude'] as num).toDouble();
+              double lng = (data['longitude'] as num).toDouble();
+              return LatLng(lat, lng);
+            }
+            return null;
+          })
+          .where((latLng) => latLng != null) // Remove any null values
+          .cast<LatLng>()
+          .toList();
 
       isLoading = false;
       setState(() {});
@@ -174,7 +173,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                             ),
                             Text(
                               _currentLocation, // Display current location
-                              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                              style: TextStyle(
+                                  color: Colors.grey, fontSize: 14.sp),
                             ),
                           ],
                         ),
@@ -228,18 +228,22 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     // Toggle Button
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => UserGoogleMapScreen(latlnglist: latLngList, latlong: LatLng(lat, lng),)));
-                        
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => UserGoogleMapScreen(
+                                      latlnglist: latLngList,
+                                      latlong: LatLng(lat, lng),
+                                    )));
                       },
                       child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 15, vertical: 10),
-                        child: Icon(Icons.map)
-                      ),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(10.r),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 15, vertical: 10),
+                          child: Icon(Icons.map)),
                     ),
                   ],
                 ),
@@ -252,7 +256,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                   : studioData.length > 0
                       ? Expanded(
                           child: GridView.builder(
-                            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 10.0),
                             gridDelegate:
                                 const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
@@ -280,7 +285,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                   ),
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Logo Section
                                       Container(
@@ -292,7 +298,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(5)),
                                         child: Center(
-                                            child: photographer['companyLogo'] ==
+                                            child: photographer[
+                                                        'companyLogo'] ==
                                                     null
                                                 ? Text(
                                                     "LOGO HERE",
@@ -346,7 +353,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
 
                                             // Price
                                             Text(
-                                              '\$ ${photographer['startingPrice']}',
+                                              '\₹ ${photographer['startingPrice']}',
                                               style: TextStyle(
                                                 fontWeight: FontWeight.bold,
                                                 color: Colors.black,
@@ -368,7 +375,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
             ],
           ),
         ),
-        backgroundColor: Colors.purple[50], // Matches the gradient in the image.
+        backgroundColor:
+            Colors.purple[50], // Matches the gradient in the image.
       ),
     );
   }

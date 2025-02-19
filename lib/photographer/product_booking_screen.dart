@@ -41,33 +41,28 @@ class _ProductBookingScreenState extends State<ProductBookingScreen> {
     _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
     productController.text = widget.productName;
     _loadCurrentUserName();
-    getBookedStatus(widget.productId,userId);
+    getBookedStatus(widget.productId, userId);
   }
 
   Future<void> getBookedStatus(String productId, String userId) async {
-  try {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('bookedProducts')
-        .where('productId', isEqualTo: productId)
-        .where('userId', isEqualTo: userId)
-        .get();
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('bookedProducts')
+          .where('productId', isEqualTo: productId)
+          .where('userId', isEqualTo: userId)
+          .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      isBooked = true;
-      setState(() {
-        
-      });
-    } else {
-      isBooked = false;
-      setState(() {
-        
-      });
+      if (querySnapshot.docs.isNotEmpty) {
+        isBooked = true;
+        setState(() {});
+      } else {
+        isBooked = false;
+        setState(() {});
+      }
+    } catch (e) {
+      print("Error: $e");
     }
-  } catch (e) {
-    print("Error: $e");
   }
-}
-
 
   Future<void> _loadCurrentUserName() async {
     try {
@@ -184,7 +179,7 @@ class _ProductBookingScreenState extends State<ProductBookingScreen> {
                             height: 10.h,
                           ),
                           Text(
-                            '\$${widget.price}',
+                            '\₹${widget.price}',
                             style: TextStyle(
                                 fontSize: 16.sp, fontWeight: FontWeight.bold),
                           ),
@@ -196,176 +191,195 @@ class _ProductBookingScreenState extends State<ProductBookingScreen> {
                                 color: Colors.blue[900]),
                             child: TextButton(
                               onPressed: () {
-                                isBooked?ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Already Booked'))):
-                                showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return StatefulBuilder(
-                                      builder: (context, setDialogState) {
-                                        return AlertDialog(
-                                          title: Text('Book the product'),
-                                          content: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              TextField(
-                                                controller: productController,
-                                                decoration: InputDecoration(
-                                                    labelText: 'Product',
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    10.r))),
-                                              ),
-                                              SizedBox(
-                                                height: 16.h,
-                                              ),
-                                              TextField(
-                                                controller: userController,
-                                                decoration: InputDecoration(
-                                                    labelText: 'Your name',
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    10.r))),
-                                              ),
-                                              SizedBox(
-                                                height: 16.h,
-                                              ),
-                                              TextField(
-                                                controller:
-                                                    bookingDaysController,
-                                                decoration: InputDecoration(
-                                                    labelText:
-                                                        'No of days you want to book',
-                                                    border: OutlineInputBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    10.r))),
-                                              ),
-                                              SizedBox(
-                                                height: 16.h,
-                                              ),
-                                              TextField(
-                                                controller: _dateController,
-                                                readOnly:
-                                                    true, // Make the TextField non-editable
-                                                onTap: () => _selectDate(
-                                                    context), // Show date picker on tap
-                                                decoration: InputDecoration(
-                                                  labelText: 'Select Date',
-                                                  hintText: 'yyyy-MM-dd',
-                                                  border: OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.r)),
+                                isBooked
+                                    ? ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                            content: Text('Already Booked')))
+                                    : showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return StatefulBuilder(
+                                            builder: (context, setDialogState) {
+                                              return AlertDialog(
+                                                title: Text('Book the product'),
+                                                content: Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    TextField(
+                                                      controller:
+                                                          productController,
+                                                      decoration: InputDecoration(
+                                                          labelText: 'Product',
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.r))),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 16.h,
+                                                    ),
+                                                    TextField(
+                                                      controller:
+                                                          userController,
+                                                      decoration: InputDecoration(
+                                                          labelText:
+                                                              'Your name',
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.r))),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 16.h,
+                                                    ),
+                                                    TextField(
+                                                      controller:
+                                                          bookingDaysController,
+                                                      decoration: InputDecoration(
+                                                          labelText:
+                                                              'No of days you want to book',
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          10.r))),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 16.h,
+                                                    ),
+                                                    TextField(
+                                                      controller:
+                                                          _dateController,
+                                                      readOnly:
+                                                          true, // Make the TextField non-editable
+                                                      onTap: () => _selectDate(
+                                                          context), // Show date picker on tap
+                                                      decoration:
+                                                          InputDecoration(
+                                                        labelText:
+                                                            'Select Date',
+                                                        hintText: 'yyyy-MM-dd',
+                                                        border: OutlineInputBorder(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.r)),
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      height: 24.h,
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: () async {
+                                                        try {
+                                                          isLoading = true;
+                                                          setDialogState(() {});
+
+                                                          String product =
+                                                              productController
+                                                                  .text
+                                                                  .trim();
+                                                          String user =
+                                                              userController
+                                                                  .text
+                                                                  .trim();
+                                                          String bookingDays =
+                                                              bookingDaysController
+                                                                  .text
+                                                                  .trim();
+                                                          String bookedToDate =
+                                                              _dateController
+                                                                  .text
+                                                                  .trim();
+
+                                                          final bookProductDocRef =
+                                                              FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      'bookedProducts');
+
+                                                          // Create a new document with post details
+                                                          await bookProductDocRef
+                                                              .add({
+                                                            'userId': userId,
+                                                            'productId': widget
+                                                                .productId,
+                                                            'userName': user,
+                                                            'product': product,
+                                                            'bookingDays':
+                                                                bookingDays,
+                                                            'bookedDate': DateTime
+                                                                    .now()
+                                                                .toLocal()
+                                                                .toIso8601String()
+                                                                .split('T')[0],
+                                                            'bookedToDate':
+                                                                bookedToDate,
+                                                          });
+
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                                content: Text(
+                                                                    'Booked successfully')),
+                                                          );
+
+                                                          Navigator.pop(
+                                                              context);
+                                                        } catch (e) {
+                                                          print(e);
+                                                          ScaffoldMessenger.of(
+                                                                  context)
+                                                              .showSnackBar(
+                                                            SnackBar(
+                                                                content: Text(e
+                                                                    .toString())),
+                                                          );
+                                                        } finally {
+                                                          isLoading = false;
+                                                          setDialogState(() {});
+                                                        }
+                                                      },
+                                                      child: Container(
+                                                        padding:
+                                                            EdgeInsets.all(10),
+                                                        width: double.infinity,
+                                                        decoration: BoxDecoration(
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        10.r),
+                                                            color: Colors
+                                                                .blue[900]),
+                                                        child: Center(
+                                                          child: isLoading
+                                                              ? CircularProgressIndicator(
+                                                                  color: Colors
+                                                                      .white,
+                                                                )
+                                                              : Text(
+                                                                  'Book now',
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .white),
+                                                                ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
                                                 ),
-                                              ),
-                                              SizedBox(
-                                                height: 24.h,
-                                              ),
-                                              GestureDetector(
-                                                onTap: () async {
-                                                  try {
-                                                    isLoading = true;
-                                                    setDialogState(() {});
-
-                                                    String product =
-                                                        productController.text
-                                                            .trim();
-                                                    String user = userController
-                                                        .text
-                                                        .trim();
-                                                    String bookingDays =
-                                                        bookingDaysController
-                                                            .text
-                                                            .trim();
-                                                    String bookedToDate =
-                                                        _dateController.text
-                                                            .trim();
-
-                                                    final bookProductDocRef =
-                                                        FirebaseFirestore
-                                                            .instance
-                                                            .collection(
-                                                                'bookedProducts');
-
-                                                    // Create a new document with post details
-                                                    await bookProductDocRef
-                                                        .add({
-                                                      'userId': userId,
-                                                      'productId':
-                                                          widget.productId,
-                                                      'userName': user,
-                                                      'product': product,
-                                                      'bookingDays':
-                                                          bookingDays,
-                                                      'bookedDate':
-                                                          DateTime.now()
-                                                              .toLocal()
-                                                              .toIso8601String()
-                                                              .split('T')[0],
-                                                      'bookedToDate':
-                                                          bookedToDate,
-                                                    });
-
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                          content: Text(
-                                                              'Booked successfully')),
-                                                    );
-
-                                                    Navigator.pop(context);
-                                                  } catch (e) {
-                                                    print(e);
-                                                    ScaffoldMessenger.of(
-                                                            context)
-                                                        .showSnackBar(
-                                                      SnackBar(
-                                                          content: Text(
-                                                              e.toString())),
-                                                    );
-                                                  } finally {
-                                                    isLoading = false;
-                                                    setDialogState(() {});
-                                                  }
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(10),
-                                                  width: double.infinity,
-                                                  decoration: BoxDecoration(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              10.r),
-                                                      color: Colors.blue[900]),
-                                                  child: Center(
-                                                    child: isLoading
-                                                        ? CircularProgressIndicator(
-                                                            color: Colors.white,
-                                                          )
-                                                        : Text(
-                                                            'Book now',
-                                                            style: TextStyle(
-                                                                color: Colors
-                                                                    .white),
-                                                          ),
-                                                  ),
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
+                                              );
+                                            },
+                                          );
+                                        },
+                                      );
                               },
-                              child: Text(isBooked?'Already Booked':
-                                'Book Now',
+                              child: Text(
+                                isBooked ? 'Already Booked' : 'Book Now',
                                 style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold),

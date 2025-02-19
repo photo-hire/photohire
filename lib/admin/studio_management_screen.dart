@@ -6,7 +6,8 @@ class StudioManagementScreen extends StatefulWidget {
   _StudioManagementScreenState createState() => _StudioManagementScreenState();
 }
 
-class _StudioManagementScreenState extends State<StudioManagementScreen> with SingleTickerProviderStateMixin {
+class _StudioManagementScreenState extends State<StudioManagementScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -23,13 +24,13 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
   }
 
   Future<void> _updateApprovalStatus(String docId, bool isApproved) async {
-    await _firestore.collection('photgrapher').doc(docId).update({
+    await _firestore.collection('photographer').doc(docId).update({
       'isApproved': isApproved,
     });
   }
 
   Future<void> _deleteStudio(String docId) async {
-    await _firestore.collection('photgrapher').doc(docId).delete();
+    await _firestore.collection('photographer').doc(docId).delete();
   }
 
   @override
@@ -56,92 +57,118 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
             width: MediaQuery.of(context).size.width,
             fit: BoxFit.cover,
           ),
+
           // Content
           SafeArea(
-            child: Column(
+            child: TabBarView(
+              controller: _tabController,
               children: [
-                AppBar(
-                  title: Text("Studio Management",style: TextStyle(color: Colors.white),),
-                  backgroundColor: Colors.black54,
-                  elevation: 0,
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: studios.length,
-                    itemBuilder: (context, index) {
-                      final studio = studios[index];
-                      return Card(
-                        margin: EdgeInsets.all(10),
-                        elevation: 3,
-                        child: Padding(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  // Studio Photo
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                      studio["photo"]!,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  SizedBox(width: 10),
-                                  // Studio Name
-                                  Expanded(
-                                    child: Text(
-                                      studio["name"]!,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10),
-                              // Document Link
-                              TextButton.icon(
-                                onPressed: () {
-                                  print("View document: ${studio['document']}");
-                                },
-                                icon: Icon(Icons.description),
-                                label: Text("View Document"),
-                              ),
-                              SizedBox(height: 10),
-                              // Accept and Reject Buttons
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      print("${studio['name']} accepted");
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green,
-                                    ),
-                                    child: Text("Accept"),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      print("${studio['name']} rejected");
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                    ),
-                                    child: Text("Reject"),
-                                  ),
-                                ],
-                              ),
-                            ],
+                _buildStudioList(false), // Pending Studios
+                _buildStudioList(true), // Accepted Studios
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStudioList(bool isApproved) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore
+          .collection('photographer')
+          .where('isApproved', isEqualTo: isApproved)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        var studios = snapshot.data!.docs;
+
+        if (studios.isEmpty) {
+          return Center(child: Text("No Studios Found"));
+        }
+
+        return ListView.builder(
+          itemCount: studios.length,
+          itemBuilder: (context, index) {
+            var studio = studios[index];
+            String docId = studio.id;
+            Map<String, dynamic> data = studio.data() as Map<String, dynamic>;
+
+            return Card(
+              margin: EdgeInsets.all(10),
+              elevation: 3,
+              child: Padding(
+                padding: EdgeInsets.all(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        // Studio Photo
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            data["photo"] ?? "",
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        SizedBox(width: 10),
+                        // Studio Name
+                        Expanded(
+                          child: Text(
+                            data["name"] ?? "Unnamed Studio",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+
+                    // Document Link
+                    TextButton.icon(
+                      onPressed: () {
+                        print("View document: ${data['document']}");
+                      },
+                      icon: Icon(Icons.description),
+                      label: Text("View Document"),
+                    ),
+                    SizedBox(height: 10),
+
+                    // Accept and Reject Buttons (Only for Pending Studios)
+                    if (!isApproved)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              _updateApprovalStatus(docId, true);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
+                            child: Text("Accept"),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _updateApprovalStatus(docId, false);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: Text("Reject"),
                           ),
                         ],
                       ),
+
+                    // Delete Button (Only for Accepted Studios)
                     if (isApproved)
                       Center(
                         child: ElevatedButton(
@@ -164,5 +191,3 @@ class _StudioManagementScreenState extends State<StudioManagementScreen> with Si
     );
   }
 }
-
-

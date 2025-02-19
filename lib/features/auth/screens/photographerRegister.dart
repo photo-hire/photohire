@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/photographer/Location_picker_screen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
@@ -111,7 +112,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
 
       if (permission == LocationPermission.deniedForever) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Location permissions are permanently denied.')),
+          SnackBar(
+              content: Text('Location permissions are permanently denied.')),
         );
         return;
       }
@@ -122,25 +124,19 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
       );
 
       List<Placemark> placemarks = await placemarkFromCoordinates(
-      position.latitude,
-      position.longitude,
-    );
+        position.latitude,
+        position.longitude,
+      );
 
-
-    if (placemarks.isNotEmpty) {
-      Placemark place = placemarks.first;
-      setState(() {
-        latitude = position.latitude;
-        longitude = position.longitude;
-        _selectedAddress =
-            "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-      });
-    }
-
-
-
-
-      
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks.first;
+        setState(() {
+          latitude = position.latitude;
+          longitude = position.longitude;
+          _selectedAddress =
+              "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
+        });
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Location fetched successfully!')),
@@ -152,11 +148,9 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
     }
   }
 
+  String? _selectedAddress;
 
-  String? _selectedAddress; 
-
-
-   void _onLocationSelected(double lat, double lng) async {
+  void _onLocationSelected(double lat, double lng) async {
     setState(() {
       latitude = lat;
       longitude = lng;
@@ -177,6 +171,20 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Choosing()),
+              );
+            },
+          ),
+        ),
         body: Stack(fit: StackFit.expand, children: [
           // Background gradient
           Image.asset(
@@ -208,9 +216,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       child: CircleAvatar(
                         radius: 60.r,
                         backgroundColor: Colors.white,
-                        backgroundImage: image == null
-                            ? null
-                            : FileImage(File(image!.path)),
+                        backgroundImage:
+                            image == null ? null : FileImage(File(image!.path)),
                         child: image == null
                             ? Center(
                                 child: Text(
@@ -230,8 +237,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -252,8 +259,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -276,7 +283,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                             onChanged: (value) {
                               setState(() {
                                 isProfessional = value!;
-                                isFreelancer = false; // Only one can be selected
+                                isFreelancer =
+                                    false; // Only one can be selected
                               });
                             },
                             activeColor: Colors.white,
@@ -295,7 +303,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                             onChanged: (value) {
                               setState(() {
                                 isFreelancer = value!;
-                                isProfessional = false; // Only one can be selected
+                                isProfessional =
+                                    false; // Only one can be selected
                               });
                             },
                             activeColor: Colors.white,
@@ -319,8 +328,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -339,8 +348,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -360,8 +369,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -392,8 +401,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -408,17 +417,16 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   // Button to fetch current location
                   ElevatedButton(
                     onPressed: () {
-
-                      if(latitude != null && longitude != null){
-                                                Navigator.of(context).push(MaterialPageRoute(builder: (context) => LocationPickerScreen(onLocationSelected: _onLocationSelected,latitude: latitude!,longitude: longitude!,)));
-
-
-                      }else{
-                                                 _getCurrentLocation();
-
+                      if (latitude != null && longitude != null) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LocationPickerScreen(
+                                  onLocationSelected: _onLocationSelected,
+                                  latitude: latitude!,
+                                  longitude: longitude!,
+                                )));
+                      } else {
+                        _getCurrentLocation();
                       }
-                      
-                      
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.yellow,
@@ -426,11 +434,13 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                       ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 15.0),
                     ),
                     child: Text(
-                     latitude != null && longitude != null ? 'Selected Location' : 'Get Current Location',
+                      latitude != null && longitude != null
+                          ? 'Selected Location'
+                          : 'Get Current Location',
                       style: TextStyle(
                           fontSize: 15.sp, fontWeight: FontWeight.bold),
                     ),
@@ -439,10 +449,10 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   // Display latitude and longitude
                   if (latitude != null && longitude != null)
                     if (_selectedAddress != null)
-        Text(
-          'Address: $_selectedAddress',
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-        ),
+                      Text(
+                        'Address: $_selectedAddress',
+                        style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                      ),
                   SizedBox(height: 16.0.h),
                   TextField(
                     maxLines: 4,
@@ -452,8 +462,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                      contentPadding: EdgeInsets.symmetric(
+                          vertical: 15.0, horizontal: 20.0),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                         borderSide: BorderSide.none,
@@ -499,7 +509,13 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                         });
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Registered Successfully')));
-                       Navigator.pop(context);
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                          (route) => false,
+                        );
                       } on FirebaseAuthException catch (e) {
                         if (e.code == 'email-already-in-use') {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -510,7 +526,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text('An error occurred: ${e.message}')),
+                                content:
+                                    Text('An error occurred: ${e.message}')),
                           );
                         }
                       } catch (e) {
@@ -529,8 +546,8 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.0.r),
                       ),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 15.0),
                     ),
                     child: isLoading
                         ? CircularProgressIndicator(

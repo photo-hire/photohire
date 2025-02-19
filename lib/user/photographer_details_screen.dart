@@ -33,7 +33,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
     super.initState();
     _pageController = PageController();
     _fetchPostDetails(); // Fetch the post details when the screen is initialized
-    _fetchReviews(); // Fetch reviews when the screen is initialized
+    // _fetchReviews(); // Fetch reviews when the screen is initialized
   }
 
   @override
@@ -123,31 +123,31 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
               child: Stack(
                 children: [
                   // Background Image
-                  PageView.builder(
-                    controller: _pageController,
-                    itemCount: images.isNotEmpty ? images.length : 1,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      String imageUrl = images.isNotEmpty
-                          ? images[index]
-                          : 'asset/image/weddingphoto.jpg';
+                  // PageView.builder(
+                  //   controller: _pageController,
+                  //   itemCount: images.isNotEmpty ? images.length : 1,
+                  //   onPageChanged: (index) {
+                  //     setState(() {
+                  //       _currentIndex = index;
+                  //     });
+                  //   },
+                  //   itemBuilder: (context, index) {
+                  //     String imageUrl = images.isNotEmpty
+                  //         ? images[index]
+                  //         : 'asset/image/weddingphoto.jpg';
 
-                      return Container(
-                        height: double.infinity,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                  //     return Container(
+                  //       height: double.infinity,
+                  //       width: double.infinity,
+                  //       decoration: BoxDecoration(
+                  //         image: DecorationImage(
+                  //           image: NetworkImage(imageUrl),
+                  //           fit: BoxFit.cover,
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                   // Dots Indicator
                   Positioned(
                     top: 280,
@@ -162,7 +162,9 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           width: _currentIndex == index ? 12.w : 8.w,
                           height: 8.h,
                           decoration: BoxDecoration(
-                            color: _currentIndex == index ? Colors.white : Colors.grey,
+                            color: _currentIndex == index
+                                ? Colors.white
+                                : Colors.grey,
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                         ),
@@ -199,15 +201,18 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                             children: [
                               CircleAvatar(
                                 radius: 25.r,
-                                backgroundImage: widget.studioDetails['companyLogo'] != null
-                                    ? NetworkImage(widget.studioDetails['companyLogo'])
-                                    : null,
-                                child: widget.studioDetails['companyLogo'] == null
-                                    ? Text(
-                                        'Logo here',
-                                        style: TextStyle(fontSize: 8.sp),
-                                      )
-                                    : null,
+                                backgroundImage:
+                                    widget.studioDetails['companyLogo'] != null
+                                        ? NetworkImage(
+                                            widget.studioDetails['companyLogo'])
+                                        : null,
+                                child:
+                                    widget.studioDetails['companyLogo'] == null
+                                        ? Text(
+                                            'Logo here',
+                                            style: TextStyle(fontSize: 8.sp),
+                                          )
+                                        : null,
                               ),
                               SizedBox(width: 10.w),
                               Column(
@@ -234,7 +239,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '\$${widget.studioDetails['startingPrice']}',
+                                    '\₹${widget.studioDetails['startingPrice']}',
                                     style: TextStyle(
                                       fontSize: 18.sp,
                                       fontWeight: FontWeight.bold,
@@ -243,7 +248,8 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   ),
                                   Row(
                                     children: [
-                                      const Icon(Icons.star, color: Colors.yellow, size: 16),
+                                      const Icon(Icons.star,
+                                          color: Colors.yellow, size: 16),
                                       Text(
                                         '4.5',
                                         style: TextStyle(
@@ -288,12 +294,15 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => ImagePortfolioScreen(
+                                          builder: (context) =>
+                                              ImagePortfolioScreen(
                                                 imageUrls: images,
                                               )));
                                 },
-                                icon: const Icon(Icons.map, color: Colors.white),
-                                label: const Text('Portfolio', style: TextStyle(color: Colors.white)),
+                                icon:
+                                    const Icon(Icons.map, color: Colors.white),
+                                label: const Text('Portfolio',
+                                    style: TextStyle(color: Colors.white)),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.blue[900],
                                   shape: RoundedRectangleBorder(
@@ -320,7 +329,8 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                 SizedBox(height: 8.h),
                                 Text(
                                   widget.studioDetails['Description'],
-                                  style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                                  style: TextStyle(
+                                      fontSize: 14.sp, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -337,13 +347,20 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                       MaterialPageRoute(
                                           builder: (context) => UserChatScreen(
                                                 studioId: widget.pid!,
-                                                studioLogo: widget.studioDetails['companyLogo'] ?? '',
-                                                studioName: widget.studioDetails['name'],
-                                                userId: FirebaseAuth.instance.currentUser!.uid,
+                                                studioLogo:
+                                                    widget.studioDetails[
+                                                            'companyLogo'] ??
+                                                        '',
+                                                studioName: widget
+                                                    .studioDetails['name'],
+                                                userId: FirebaseAuth
+                                                    .instance.currentUser!.uid,
                                               )));
                                 },
-                                icon: const Icon(Icons.chat, color: Colors.white),
-                                label: const Text('Get in Touch', style: TextStyle(color: Colors.white)),
+                                icon:
+                                    const Icon(Icons.chat, color: Colors.white),
+                                label: const Text('Get in Touch',
+                                    style: TextStyle(color: Colors.white)),
                                 style: ElevatedButton.styleFrom(
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
@@ -356,12 +373,15 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => UserBookingScreen(
-                                                studioDetails: widget.studioDetails,
+                                          builder: (context) =>
+                                              UserBookingScreen(
+                                                studioDetails:
+                                                    widget.studioDetails,
                                                 studioId: widget.pid!,
                                               )));
                                 },
-                                icon: const Icon(Icons.book_online, color: Colors.white),
+                                icon: const Icon(Icons.book_online,
+                                    color: Colors.white),
                                 label: const Text(
                                   'Book Now',
                                   style: TextStyle(color: Colors.white),
@@ -393,16 +413,20 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                 reviews.isEmpty
                                     ? Text(
                                         'No reviews yet.',
-                                        style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                                        style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: Colors.grey),
                                       )
                                     : Column(
                                         children: reviews.map((review) {
                                           return ListTile(
                                             leading: CircleAvatar(
-                                              backgroundImage: NetworkImage(review['userName']),
+                                              backgroundImage: NetworkImage(
+                                                  review['userName']),
                                             ),
                                             title: Text(review['userName']),
-                                            subtitle: Text(review['reviewText']),
+                                            subtitle:
+                                                Text(review['reviewText']),
                                             trailing: RatingBar.builder(
                                               initialRating: review['rating'],
                                               minRating: 1,
@@ -410,11 +434,13 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                               allowHalfRating: true,
                                               itemCount: 5,
                                               itemSize: 16,
-                                              itemBuilder: (context, _) => const Icon(
+                                              itemBuilder: (context, _) =>
+                                                  const Icon(
                                                 Icons.star,
                                                 color: Colors.amber,
                                               ),
-                                              ignoreGestures: true, // Disable user interaction
+                                              ignoreGestures:
+                                                  true, // Disable user interaction
                                               onRatingUpdate: (rating) {},
                                             ),
                                           );

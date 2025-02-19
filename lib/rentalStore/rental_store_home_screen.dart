@@ -105,7 +105,8 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                         }).toList();
 
                         return productDetails.isEmpty
-                            ? const Center(child: Text('No products to display'))
+                            ? const Center(
+                                child: Text('No products to display'))
                             : Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: GridView.builder(
@@ -152,7 +153,8 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                                                     color: Colors.red,
                                                   ),
                                                   onPressed: () {
-                                                    deleteProduct(product['id']);
+                                                    deleteProduct(
+                                                        product['id']);
                                                   },
                                                 ),
                                               )
@@ -173,7 +175,7 @@ class _RentalStoreHomeScreenState extends State<RentalStoreHomeScreen> {
                                                           FontWeight.bold),
                                                 ),
                                                 Text(
-                                                  '\$${product['price']}',
+                                                  '\₹${product['price']}',
                                                   style: TextStyle(
                                                       fontSize: 15.sp,
                                                       fontWeight:
