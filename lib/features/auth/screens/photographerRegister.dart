@@ -233,7 +233,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   TextField(
                     controller: nameController,
                     decoration: InputDecoration(
-                      labelText: 'Name',
+                      hintText: 'Name',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -255,7 +255,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   TextField(
                     controller: companyController,
                     decoration: InputDecoration(
-                      labelText: 'Company Name',
+                      hintText: 'Company Name',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -324,7 +324,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   TextField(
                     controller: phoneController,
                     decoration: InputDecoration(
-                      labelText: 'Phone Number',
+                      hintText: 'Phone Number',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -344,7 +344,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      hintText: 'Email',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -365,7 +365,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     controller: passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      hintText: 'Password',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -397,7 +397,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   TextField(
                     controller: priceController,
                     decoration: InputDecoration(
-                      labelText: 'Starting Price',
+                      hintText: 'Starting Price',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -458,7 +458,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     maxLines: 4,
                     controller: descController,
                     decoration: InputDecoration(
-                      labelText: 'Description',
+                      hintText: 'Description',
                       filled: true,
                       fillColor: Colors.white,
                       border: InputBorder.none,
@@ -478,6 +478,51 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                   ElevatedButton(
                     onPressed: () async {
                       try {
+                        if (nameController.text.isEmpty) {
+                          showError('Name cannot be empty', context);
+                          return;
+                        }
+
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                            .hasMatch(emailController.text)) {
+                          showError(
+                              'Please enter a valid email address', context);
+                          return;
+                        }
+
+                        if (passwordController.text.length < 6) {
+                          showError(
+                              'Password must be at least 6 characters long',
+                              context);
+                          return;
+                        }
+
+                        if (!RegExp(r'^\d{10}$')
+                            .hasMatch(phoneController.text)) {
+                          showError(
+                              'Please enter a valid 10-digit phone number',
+                              context);
+                          return;
+                        }
+
+                        if (companyController.text.isEmpty) {
+                          showError('Company name cannot be empty', context);
+                          return;
+                        }
+
+                        if (priceController.text.isEmpty ||
+                            double.tryParse(priceController.text) == null) {
+                          showError('Please enter a valid price', context);
+                          return;
+                        }
+
+                        if (descController.text.isEmpty) {
+                          showError('Description cannot be empty', context);
+                          return;
+                        }
+
+                        // Proceed with form submission if all validations pass
+
                         String userType =
                             isProfessional ? 'Professional' : 'Freelancer';
 
@@ -589,4 +634,13 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
       ),
     );
   }
+}
+
+void showError(String message, BuildContext context) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      backgroundColor: Colors.red,
+    ),
+  );
 }

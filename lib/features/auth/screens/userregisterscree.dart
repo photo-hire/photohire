@@ -24,6 +24,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -64,7 +65,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 TextField(
                   controller: nameController,
                   decoration: InputDecoration(
-                    labelText: 'Name',
+                    hintText: 'Name',
                     filled: true,
                     fillColor: Colors.white,
                     border: InputBorder.none,
@@ -86,7 +87,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 TextField(
                   controller: phoneController,
                   decoration: InputDecoration(
-                    labelText: 'Phone Number',
+                    hintText: 'Phone Number',
                     filled: true,
                     fillColor: Colors.white,
                     border: InputBorder.none,
@@ -106,7 +107,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 TextField(
                   controller: emailController,
                   decoration: InputDecoration(
-                    labelText: 'Email',
+                    hintText: 'Email',
                     filled: true,
                     fillColor: Colors.white,
                     border: InputBorder.none,
@@ -127,7 +128,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                   controller: passwordController,
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
-                    labelText: 'Password',
+                    hintText: 'Password',
                     filled: true,
                     fillColor: Colors.white,
                     border: InputBorder.none,
@@ -160,6 +161,27 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 SizedBox(height: 24.0.h),
                 ElevatedButton(
                   onPressed: () async {
+                    if (phoneController.text.length < 10) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Enter valid phone number'),
+                          backgroundColor: Colors
+                              .red, // Optional: Change the background color to red for error
+                        ),
+                      );
+                      return; // Exit the function if the password is too short
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                        .hasMatch(emailController.text)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Please enter a valid email address'),
+                          backgroundColor: Colors.red, // Error color
+                        ),
+                      );
+                      return; // Exit the function if the email format is invalid
+                    }
+
                     // Check if the password is at least 6 characters long
                     if (passwordController.text.length < 6) {
                       ScaffoldMessenger.of(context).showSnackBar(

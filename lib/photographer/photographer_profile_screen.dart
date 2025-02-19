@@ -186,7 +186,8 @@ class _PhotoggrapherProfileScreenState
                                                 )
                                               : ClipRRect(
                                                   borderRadius:
-                                                      BorderRadius.circular(8.r),
+                                                      BorderRadius.circular(
+                                                          8.r),
                                                   child: Image.file(
                                                     imageFile!,
                                                     fit: BoxFit.cover,
@@ -216,7 +217,8 @@ class _PhotoggrapherProfileScreenState
                                             decoration: BoxDecoration(
                                                 color: Colors.blue[900],
                                                 borderRadius:
-                                                    BorderRadius.circular(10.r)),
+                                                    BorderRadius.circular(
+                                                        10.r)),
                                             child: Icon(
                                               Icons.edit,
                                               color: Colors.white,
@@ -510,7 +512,10 @@ class _PhotoggrapherProfileScreenState
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>PhotographerOrdersScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PhotographerOrdersScreen()));
                 },
                 child: Row(
                   children: [
@@ -536,7 +541,11 @@ class _PhotoggrapherProfileScreenState
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>PhotographerBookingsListScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              PhotographerBookingsListScreen()));
                 },
                 child: Row(
                   children: [
@@ -557,11 +566,14 @@ class _PhotoggrapherProfileScreenState
                   ],
                 ),
               ),
-              
+              SizedBox(
+                height: 10.w,
+              ),
               GestureDetector(
                 onTap: () {
                   FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>SplashScreen()));
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => SplashScreen()));
                 },
                 child: Row(
                   children: [

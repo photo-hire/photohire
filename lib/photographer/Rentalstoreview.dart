@@ -37,7 +37,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Explore',
+                  'Rental Store',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 25.sp,
@@ -59,7 +59,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                    hintText: 'search...',
+                    hintText: 'Search...',
                     hintStyle: TextStyle(color: Colors.grey),
                     prefixIcon: Icon(Icons.search, color: Colors.grey),
                     suffixIcon: Icon(Icons.tune, color: Colors.grey),
@@ -107,14 +107,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           }
 
                           // Get approved store products
-                          var approvedProducts = storeProducts
-                              .where((product) {
-                                var userId = product['userId'];
-                                return rentalStoreSnapshot.data!
-                                    .any((rentalStore) =>
-                                        rentalStore.id == userId);
-                              })
-                              .toList();
+                          var approvedProducts = storeProducts.where((product) {
+                            var userId = product['userId'];
+                            return rentalStoreSnapshot.data!
+                                .any((rentalStore) => rentalStore.id == userId);
+                          }).toList();
 
                           return GridView.builder(
                             gridDelegate:
@@ -125,8 +122,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             ),
                             itemCount: approvedProducts.length,
                             itemBuilder: (context, index) {
-                              var product = approvedProducts[index]
-                                  .data() as Map<String, dynamic>;
+                              var product = approvedProducts[index].data()
+                                  as Map<String, dynamic>;
                               var productDetails =
                                   product['productDetails'] as List<dynamic>;
 
@@ -141,9 +138,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                         MaterialPageRoute(
                                             builder: (context) =>
                                                 ProductBookingScreen(
-                                                  productId:approvedProducts[index].id,
-                                                  productName: firstProductDetail[
-                                                      'name'],
+                                                  productId:
+                                                      approvedProducts[index]
+                                                          .id,
+                                                  productName:
+                                                      firstProductDetail[
+                                                          'name'],
                                                   image: firstProductDetail[
                                                       'image'],
                                                   desc: firstProductDetail[
@@ -164,7 +164,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                 );
                               } else {
                                 return Center(
-                                    child: Text("No product details available"));
+                                    child:
+                                        Text("No product details available"));
                               }
                             },
                           );

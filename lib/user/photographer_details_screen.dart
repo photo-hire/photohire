@@ -78,11 +78,14 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
           .get()
           .then((querySnapshot) {
         List<Map<String, dynamic>> fetchedReviews = [];
+        double totalRating = 0.0;
         if (querySnapshot.docs.isNotEmpty) {
           querySnapshot.docs.forEach((doc) {
             fetchedReviews.add(doc.data());
-            rating += doc['rating'];
+            // rating += doc['rating'];
+            totalRating += doc['rating'];
           });
+          rating = totalRating / fetchedReviews.length;
         }
 
         setState(() {
