@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class StudioManagementScreen extends StatefulWidget {
   @override
@@ -24,20 +25,29 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
   }
 
   Future<void> _updateApprovalStatus(String docId, bool isApproved) async {
-    await _firestore.collection('photographer').doc(docId).update({
+    await _firestore.collection('stores').doc(docId).update({
       'isApproved': isApproved,
     });
   }
 
-  Future<void> _deleteStudio(String docId) async {
-    await _firestore.collection('photographer').doc(docId).delete();
+  Future<void> _deleteStore(String docId) async {
+    await _firestore.collection('photographers').doc(docId).delete();
+  }
+
+  Future<void> _openMap(double latitude, double longitude) async {
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+    );
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch $url');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Studio Management", style: TextStyle(color: Colors.white)),
+        title: Text("Store Management", style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
         elevation: 0,
         bottom: TabBar(
@@ -59,43 +69,46 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
           ),
 
           // Content
-          SafeArea(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildStudioList(false), // Pending Studios
-                _buildStudioList(true), // Accepted Studios
-              ],
-            ),
+          Column(
+            children: [
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildStoreList(false),
+                    _buildStoreList(true),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStudioList(bool isApproved) {
+  Widget _buildStoreList(bool isApproved) {
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
-          .collection('photographer')
+          .collection('rentalStore')
           .where('isApproved', isEqualTo: isApproved)
           .snapshots(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
         }
 
-        var studios = snapshot.data!.docs;
-
-        if (studios.isEmpty) {
-          return Center(child: Text("No Studios Found"));
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No stores found'));
         }
 
+        final stores = snapshot.data!.docs;
+
         return ListView.builder(
-          itemCount: studios.length,
+          itemCount: stores.length,
           itemBuilder: (context, index) {
-            var studio = studios[index];
-            String docId = studio.id;
-            Map<String, dynamic> data = studio.data() as Map<String, dynamic>;
+            final store = stores[index].data() as Map<String, dynamic>;
+            final docId = stores[index].id;
 
             return Card(
               margin: EdgeInsets.all(10),
@@ -107,21 +120,23 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
                   children: [
                     Row(
                       children: [
-                        // Studio Photo
+                        // Store Logo
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            data["photo"] ?? "",
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          ),
+                          child: store['companyLogo'] != null
+                              ? Image.network(
+                                  store['companyLogo'],
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                )
+                              : Icon(Icons.store, size: 80),
                         ),
                         SizedBox(width: 10),
-                        // Studio Name
+                        // Store Name
                         Expanded(
                           child: Text(
-                            data["name"] ?? "Unnamed Studio",
+                            store['storeName'] ?? 'No Name',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -131,18 +146,31 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
                       ],
                     ),
                     SizedBox(height: 10),
-
-                    // Document Link
-                    TextButton.icon(
+                    // Description
+                    Text(store['description'] ?? 'No Description'),
+                    SizedBox(height: 10),
+                    // Email
+                    Text("Email: ${store['email'] ?? 'No Email'}"),
+                    SizedBox(height: 10),
+                    // Phone
+                    Text("Phone: ${store['phone'] ?? 'No Phone'}"),
+                    SizedBox(height: 10),
+                    // Location (Latitude and Longitude)
+                    Text(
+                        "Location: (${store['latitude']}, ${store['longitude']})"),
+                    SizedBox(height: 10),
+                    // Button to View Location on Google Maps
+                    ElevatedButton.icon(
                       onPressed: () {
-                        print("View document: ${data['document']}");
+                        final double latitude = store['latitude'];
+                        final double longitude = store['longitude'];
+                        _openMap(latitude, longitude);
                       },
-                      icon: Icon(Icons.description),
-                      label: Text("View Document"),
+                      icon: Icon(Icons.map),
+                      label: Text("View on Map"),
                     ),
                     SizedBox(height: 10),
-
-                    // Accept and Reject Buttons (Only for Pending Studios)
+                    // Buttons for Pending and Accepted Stores
                     if (!isApproved)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,7 +201,7 @@ class _StudioManagementScreenState extends State<StudioManagementScreen>
                       Center(
                         child: ElevatedButton(
                           onPressed: () {
-                            _deleteStudio(docId);
+                            _deleteStore(docId);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,

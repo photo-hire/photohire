@@ -1,104 +1,114 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:intl/intl.dart';
-import 'user_chat_screen.dart'; // Import the UserChatScreen
+import 'package:photohire/user/user_chat_screen.dart';
 
-class ChatListingScreen extends StatefulWidget {
+class UserChatListScreen extends StatelessWidget {
   final String userId;
 
-  const ChatListingScreen({super.key, required this.userId});
+  const UserChatListScreen({super.key, required this.userId});
 
-  @override
-  State<ChatListingScreen> createState() => _ChatListingScreenState();
-}
-
-class _ChatListingScreenState extends State<ChatListingScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  Future<Map<String, dynamic>?> _fetchStudioDetails(String studioId) async {
+    DocumentSnapshot studioDoc = await FirebaseFirestore.instance.collection('photgrapher').doc(studioId).get();
+    if (studioDoc.exists) {
+      return studioDoc.data() as Map<String, dynamic>;
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chats', style: TextStyle(fontSize: 20.sp)),
-        backgroundColor: Colors.blue[900],
+        title: Text("Studios You've Messaged"),
+        backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _firestore
-            .collection('chatMetadata')
-            .where('userId', isEqualTo: widget.userId)
-            .orderBy('timestamp', descending: true)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: Colors.blue[900],
-              ),
-            );
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(
-              child: Text(
-                "No chats yet",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: Colors.grey,
+      extendBodyBehindAppBar: true,
+     
+      body: Container(
+        padding: EdgeInsets.only(top: 100),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
+              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
+              Colors.white, // White (Bottom)
+            ],
+          ),
+        ),
+        child: StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance.collection('userChats').doc(userId).snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Center(
+                child: Text(
+                  "No messages yet",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
                 ),
-              ),
-            );
-          }
-
-          var chats = snapshot.data!.docs;
-          print(chats);
-          return ListView.builder(
-            padding: EdgeInsets.symmetric(vertical: 8.h),
-            itemCount: chats.length,
-            itemBuilder: (context, index) {
-              final chat = chats[index].data() as Map<String, dynamic>;
-              print(chat);
-              return ListTile(
-                leading: CircleAvatar(
-                  radius: 25.r,
-                  backgroundImage: chat['studioLogo'] != null && chat['studioLogo'].isNotEmpty
-                      ? NetworkImage(chat['studioLogo'])
-                      : null,
-                  child: chat['studioLogo'] == null || chat['studioLogo'].isEmpty
-                      ? Icon(Icons.camera_alt, size: 25.r)
-                      : null,
-                ),
-                title: Text(
-                  chat['studioName'],
-                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
-                ),
-                subtitle: Text(
-                  chat['lastMessage'],
-                  style: TextStyle(fontSize: 14.sp, color: Colors.grey),
-                ),
-                trailing: Text(
-                  DateFormat('hh:mm a').format(
-                    (chat['timestamp'] as Timestamp).toDate(),
-                  ),
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => UserChatScreen(
-                        studioId: chat['studioId'],
-                        studioName: chat['studioName'],
-                        studioLogo: chat['studioLogo'],
-                        userId: widget.userId,
-                      ),
-                    ),
-                  );
-                },
               );
-            },
-          );
-        },
+            }
+
+            var data = snapshot.data!.data() as Map<String, dynamic>;
+            List<dynamic> studios = data['studios'] ?? [];
+
+            return ListView.builder(
+              itemCount: studios.length,
+              padding: EdgeInsets.all(12),
+              itemBuilder: (context, index) {
+                String studioId = studios[index];
+
+                return FutureBuilder<Map<String, dynamic>?>(
+                  future: _fetchStudioDetails(studioId),
+                  builder: (context, studioSnapshot) {
+                    if (!studioSnapshot.hasData) {
+                      return ListTile(
+                        title: Text("Loading...", style: TextStyle(color: Colors.white)),
+                        leading: CircleAvatar(child: Icon(Icons.business, color: Colors.white)),
+                      );
+                    }
+
+                    var studio = studioSnapshot.data!;
+                    String studioName = studio['name'] ?? "Unknown";
+                    String companyName = studio['company'] ?? "No Company";
+                    String startingPrice = studio['startingPrice'] ?? "N/A";
+                    String? logoUrl = studio['companyLogo'];
+
+                    return Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.white,
+                          backgroundImage: logoUrl != null ? NetworkImage(logoUrl) : null,
+                          child: logoUrl == null ? Icon(Icons.business, color: Colors.blueAccent) : null,
+                        ),
+                        title: Text(studioName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        subtitle: Text("$companyName • Starting from ₹$startingPrice", style: TextStyle(fontSize: 14)),
+                        trailing: Icon(Icons.chat, color: Colors.blueAccent),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                userId: userId,
+                                studioId: studioId,
+                                userName: "User", // Fetch actual user name if needed
+                                studioName: studioName,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
