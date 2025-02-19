@@ -136,6 +136,37 @@ class _ChoosingState extends State<Choosing> {
               ),
 
               SizedBox(height: 30.h),
+
+              /// Admin Button with White Border
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  fixedSize: Size(250.w, 50.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.r),
+                    side: BorderSide(
+                        color: Colors.white, width: 1.5), // Thin white border
+                  ),
+                  backgroundColor: Colors.transparent, // No fill color
+                  elevation: 0, // Remove shadow
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminLogin()),
+                  );
+                },
+                child: Text(
+                  "ADMIN",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 100.h,
+              )
             ],
           ),
 

@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
+class PhotographerBookingsScreen extends StatelessWidget {
+  final CollectionReference bookingsCollection =
+      FirebaseFirestore.instance.collection('photographerbookings');
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Photographer Bookings')),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: bookingsCollection.orderBy('bookingDate', descending: true).snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('No Bookings Found'));
+          }
+
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              var bookingData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+
+              String photographerName = bookingData['photographerName'] ?? 'Unknown Photographer';
+              String userName = bookingData['userName'] ?? 'Unknown User';
+              String userEmail = bookingData['userEmail'] ?? 'No Email';
+              String status = bookingData['status'] ?? 'Pending';
+              DateTime? bookingDate = (bookingData['bookingDate'] as Timestamp?)?.toDate();
+              String formattedDate =
+                  bookingDate != null ? DateFormat.yMMMd().format(bookingDate) : 'Unknown Date';
+
+              return Card(
+                margin: EdgeInsets.all(10),
+                elevation: 4,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: ListTile(
+                  title: Text(
+                    'Photographer: $photographerName',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Customer: $userName'),
+                      Text('Email: $userEmail'),
+                      Text('Booking Date: $formattedDate'),
+                      Text('Status: $status',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: status == 'Confirmed'
+                                  ? Colors.green
+                                  : status == 'Cancelled'
+                                      ? Colors.red
+                                      : Colors.orange)),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

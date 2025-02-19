@@ -64,8 +64,8 @@ class _AdminLoginState extends State<AdminLogin> {
                       controller: emailController,
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: "Email",
-                        labelStyle: TextStyle(color: Colors.white),
+                        hintText: "Email",
+                        hintStyle: TextStyle(color: Colors.white),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.2),
                         border: OutlineInputBorder(
@@ -88,8 +88,8 @@ class _AdminLoginState extends State<AdminLogin> {
                       obscureText: true,
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: "Password",
-                        labelStyle: TextStyle(color: Colors.white),
+                        hintText: "Password",
+                        hintStyle: TextStyle(color: Colors.white),
                         filled: true,
                         fillColor: Colors.white.withOpacity(0.2),
                         border: OutlineInputBorder(
