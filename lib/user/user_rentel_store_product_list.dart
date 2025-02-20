@@ -5,15 +5,18 @@ import 'package:photohire/user/user_product_list_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RentalStoreScreen extends StatelessWidget {
-  // Fetch data from Firestore
+  // Fetch data from Firestore with null safety
   Future<List<Map<String, dynamic>>> fetchRentalStores() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
           .collection('rentalStore')
-          .where('isApproved', isEqualTo: true) // Only fetch approved stores
+          .where('isApproved', isEqualTo: true) // Fetch only approved stores
           .get();
 
-      return querySnapshot.docs.map((doc) => {'data':doc.data(), 'id': doc.id }as Map<String, dynamic>).toList();
+      return querySnapshot.docs
+          .map((doc) =>
+              {'data': doc.data(), 'id': doc.id} as Map<String, dynamic>)
+          .toList();
     } catch (e) {
       print("Error fetching rental stores: $e");
       return [];
@@ -58,7 +61,8 @@ class RentalStoreScreen extends StatelessWidget {
                       ),
                     );
                   },
-                  child: RentalStoreCard(store: store['data']));
+                  child: RentalStoreCard(store: store['data']),
+                );
               },
             );
           }
@@ -68,14 +72,12 @@ class RentalStoreScreen extends StatelessWidget {
   }
 }
 
-
-
 class RentalStoreCard extends StatelessWidget {
   final Map<String, dynamic> store;
 
   const RentalStoreCard({Key? key, required this.store}) : super(key: key);
 
-  // Function to open Google Maps
+  // Function to open Google Maps with null safety
   void _openGoogleMaps(double latitude, double longitude) async {
     final Uri googleMapsUrl = Uri.parse(
       'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
@@ -90,6 +92,17 @@ class RentalStoreCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Null-safe variable assignments
+    String storeName = store['storeName'] ?? 'No Name Available';
+    String companyLogo =
+        store['companyLogo'] ?? 'https://example.com/default_image.png';
+    String email = store['email'] ?? 'No Email Available';
+    String phone = store['phone'] ?? 'No Phone Available';
+
+    // Handle latitude and longitude safely
+    double latitude = (store['latitude'] as num?)?.toDouble() ?? 0.0;
+    double longitude = (store['longitude'] as num?)?.toDouble() ?? 0.0;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -102,11 +115,12 @@ class RentalStoreCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             child: CachedNetworkImage(
-              imageUrl: store['companyLogo'],
+              imageUrl: companyLogo,
               height: 120,
               width: double.infinity,
               fit: BoxFit.cover,
-              placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+              placeholder: (context, url) =>
+                  Center(child: CircularProgressIndicator()),
               errorWidget: (context, url, error) => Icon(Icons.error),
             ),
           ),
@@ -117,23 +131,21 @@ class RentalStoreCard extends StatelessWidget {
               children: [
                 // Store Name
                 Text(
-                  store['storeName'],
+                  storeName,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 SizedBox(height: 8),
-                // Store Description
-                
-               
+                // Store Email
                 Row(
                   children: [
                     Icon(Icons.email, size: 16, color: Colors.blueAccent),
                     SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        store['email'],
+                        email,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 14,
@@ -150,7 +162,7 @@ class RentalStoreCard extends StatelessWidget {
                     Icon(Icons.phone, size: 16, color: Colors.green),
                     SizedBox(width: 8),
                     Text(
-                      store['phone'],
+                      phone,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.green,
@@ -165,10 +177,13 @@ class RentalStoreCard extends StatelessWidget {
                   child: IconButton(
                     icon: Icon(Icons.map, color: Colors.red),
                     onPressed: () {
-                      _openGoogleMaps(
-                        store['latitude'],
-                        store['longitude'],
-                      );
+                      if (latitude != 0.0 && longitude != 0.0) {
+                        _openGoogleMaps(latitude, longitude);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Location not available')),
+                        );
+                      }
                     },
                   ),
                 ),
@@ -180,7 +195,3 @@ class RentalStoreCard extends StatelessWidget {
     );
   }
 }
-
-
-
-
