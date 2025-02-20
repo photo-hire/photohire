@@ -30,15 +30,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (user != null) {
       DocumentSnapshot userDoc =
           await _firestore.collection('users').doc(user.uid).get();
-          print(user.uid);
+      print(user.uid);
       print(userDoc);
       if (userDoc.exists) {
         setState(() {
           _email = userDoc['email'] ?? 'No email';
           _name = userDoc['name'] ?? 'No name';
           _phone = userDoc['phone'] ?? 'No phone';
-         
-          
         });
       }
     }
@@ -116,7 +114,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                 fit: BoxFit.cover,
                                 width: 120,
                                 height: 120,
-                                placeholder: (context, url) => CircularProgressIndicator(),
+                                placeholder: (context, url) =>
+                                    CircularProgressIndicator(),
                                 errorWidget: (context, url, error) => Icon(
                                   Icons.person,
                                   size: 60,
@@ -203,10 +202,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       ),
                     ),
                   ],
-                
-                
-                
-                
                 ),
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/admin/admin_home_screen.dart';
 import 'package:photohire/admin/adminlogin.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
+import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
 import 'package:photohire/user/route_screen.dart';
@@ -26,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        resizeToAvoidBottomInset: false,
         extendBodyBehindAppBar: true,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
@@ -35,7 +37,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const Choosing()),
+                MaterialPageRoute(builder: (context) => const SplashScreen()),
               );
             },
           ),

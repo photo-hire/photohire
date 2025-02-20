@@ -8,10 +8,12 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package
 class UserProductDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> product;
 
-  const UserProductDetailsScreen({Key? key, required this.product}) : super(key: key);
+  const UserProductDetailsScreen({Key? key, required this.product})
+      : super(key: key);
 
   @override
-  _UserProductDetailsScreenState createState() => _UserProductDetailsScreenState();
+  _UserProductDetailsScreenState createState() =>
+      _UserProductDetailsScreenState();
 }
 
 class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
@@ -100,7 +102,8 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
 
     // Calculate the end date
     DateTime bookedToDate = now.add(Duration(days: _bookingDays));
-    String bookedToDateFormatted = DateFormat('yyyy-MM-dd').format(bookedToDate);
+    String bookedToDateFormatted =
+        DateFormat('yyyy-MM-dd').format(bookedToDate);
 
     // Prepare order data
     Map<String, dynamic> orderData = {
@@ -108,8 +111,10 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
       "bookedToDate": bookedToDateFormatted,
       "bookingDays": _bookingDays.toString(),
       "product": widget.product['name'] ?? 'Unnamed Product',
-      "productId": widget.product['id'] ?? '', // Assuming product has an 'id' field
-      "userId": FirebaseAuth.instance.currentUser!.uid, // Replace with actual user ID
+      "productId":
+          widget.product['id'] ?? '', // Assuming product has an 'id' field
+      "userId":
+          FirebaseAuth.instance.currentUser!.uid, // Replace with actual user ID
       // Replace with actual user name
       "paymentId": paymentId,
       "amount": widget.product['price'] * _bookingDays, // Total amount
@@ -155,8 +160,10 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
                     height: 200,
                     width: double.infinity,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => Icon(Icons.error, size: 50, color: Colors.grey),
+                    placeholder: (context, url) =>
+                        Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        Icon(Icons.error, size: 50, color: Colors.grey),
                   ),
                 ),
                 SizedBox(height: 16),
@@ -194,7 +201,8 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
                     color: Colors.green,
                   ),
                 ),
-                SizedBox(height: 100), // Extra space for the button at the bottom
+                SizedBox(
+                    height: 100), // Extra space for the button at the bottom
               ],
             ),
           ),
@@ -214,10 +222,14 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white) // Show loading indicator
+                      ? CircularProgressIndicator(
+                          color: Colors.white) // Show loading indicator
                       : Text(
                           'Book the Product',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -267,7 +279,8 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
             onPressed: () {
               if (daysController.text.isNotEmpty) {
                 _bookingDays = int.parse(daysController.text);
-                int amount = int.parse(widget.product['price'])* _bookingDays; // Calculate total amount
+                int amount = int.parse(widget.product['price']) *
+                    _bookingDays; // Calculate total amount
                 _openRazorpayGateway(amount); // Open Razorpay payment gateway
                 Navigator.pop(context); // Close the dialog
               } else {
@@ -276,7 +289,8 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
                 );
               }
             },
-            child: Text('Proceed to Pay', style: TextStyle(color: Colors.blueAccent)),
+            child: Text('Proceed to Pay',
+                style: TextStyle(color: Colors.blueAccent)),
           ),
         ],
       ),

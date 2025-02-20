@@ -183,7 +183,6 @@ class _PhotographerManageProfileScreenState
                                       setDialogState(() {});
                                       await _uploadImage();
                                       if (downloadURL != null) {
-                                       
                                         String title =
                                             titleController.text.trim();
                                         String description =
@@ -245,7 +244,8 @@ class _PhotographerManageProfileScreenState
                                     padding: EdgeInsets.all(10),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         color: Colors.blue[900]),
                                     child: Center(
                                       child: isLoading
@@ -310,56 +310,61 @@ class _PhotographerManageProfileScreenState
                 height: 20.h,
               ),
               Expanded(
-                child: StreamBuilder<DocumentSnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('posts')
-            .doc(userId)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+                  child: StreamBuilder<DocumentSnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('posts')
+                          .doc(userId)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        }
 
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
 
-          if (!snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('No posts found'));
-          }
+                        if (!snapshot.hasData || !snapshot.data!.exists) {
+                          return const Center(child: Text('No posts found'));
+                        }
 
-          // Extract the postDetails list
-          List<Map<String, dynamic>> postDetails = List<Map<String, dynamic>>.from(snapshot.data!['postDetails'] ?? []);
+                        // Extract the postDetails list
+                        List<Map<String, dynamic>> postDetails =
+                            List<Map<String, dynamic>>.from(
+                                snapshot.data!['postDetails'] ?? []);
 
-          return postDetails.isEmpty
-              ? const Center(child: Text('No posts to display'))
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // Number of columns
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 0.75, // Adjust this to fit your design
-                    ),
-                    itemCount: postDetails.length,
-                    itemBuilder: (context, index) {
-                      final post = postDetails[index];
-                      return ClipRRect(
-                      borderRadius: BorderRadius.circular(10.r),
-                      child: Image.network(
-                        post['image'],
-                        fit: BoxFit.cover,
-                        height: 150.h,
-                        width: double.infinity,
-                      ),
-                    );
-                    },
-                  ),
-                );
-        }
-                )
-              )
+                        return postDetails.isEmpty
+                            ? const Center(child: Text('No posts to display'))
+                            : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2, // Number of columns
+                                    crossAxisSpacing: 10,
+                                    mainAxisSpacing: 10,
+                                    childAspectRatio:
+                                        0.75, // Adjust this to fit your design
+                                  ),
+                                  itemCount: postDetails.length,
+                                  itemBuilder: (context, index) {
+                                    final post = postDetails[index];
+                                    return ClipRRect(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      child: Image.network(
+                                        post['image'],
+                                        fit: BoxFit.cover,
+                                        height: 150.h,
+                                        width: double.infinity,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                      }))
             ],
           ),
         ),

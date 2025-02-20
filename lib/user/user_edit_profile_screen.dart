@@ -57,7 +57,6 @@ class _UserEditScreenState extends State<UserEditScreen> {
     }
   }
 
-
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
