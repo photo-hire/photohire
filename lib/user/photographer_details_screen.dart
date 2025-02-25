@@ -34,7 +34,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
     super.initState();
     _pageController = PageController();
     _fetchPostDetails(); // Fetch the post details when the screen is initialized
-    // _fetchReviews(); // Fetch reviews when the screen is initialized
+     _fetchReviews(); // Fetch reviews when the screen is initialized
   }
 
   @override
@@ -473,11 +473,18 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                           );
                                         }).toList(),
                                       ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    _showReviewDialog();
-                                  },
-                                  child: Text('Add Review'),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(255, 11, 86, 147),
+                                      
+                                    ),
+                                    onPressed: () {
+                                      _showReviewDialog();
+                                    },
+                                    child: Text('Add Review',style: TextStyle(color: Colors.white),),
+                                  ),
                                 ),
                               ],
                             ),
