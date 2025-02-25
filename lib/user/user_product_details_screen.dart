@@ -7,8 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package
 
 class UserProductDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> product;
+  final String pid;
 
-  const UserProductDetailsScreen({Key? key, required this.product})
+  const UserProductDetailsScreen({Key? key, required this.product, required this.pid})
       : super(key: key);
 
   @override
@@ -18,7 +19,8 @@ class UserProductDetailsScreen extends StatefulWidget {
 
 class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
   late Razorpay _razorpay;
-  int _bookingDays = 0;
+  DateTime? _startDate;
+  DateTime? _endDate;
   bool _isLoading = false; // Track loading state
 
   @override
@@ -95,29 +97,23 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
     }
   }
 
-  void _saveOrderDetails(String paymentId) async {
-    // Get the current date
-    DateTime now = DateTime.now();
-    String bookedDate = DateFormat('yyyy-MM-dd').format(now);
-
-    // Calculate the end date
-    DateTime bookedToDate = now.add(Duration(days: _bookingDays));
-    String bookedToDateFormatted =
-        DateFormat('yyyy-MM-dd').format(bookedToDate);
+  Future<void> _saveOrderDetails(String paymentId) async {
+    if (_startDate == null || _endDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select valid dates.')),
+      );
+      return;
+    }
 
     // Prepare order data
     Map<String, dynamic> orderData = {
-      "bookedDate": bookedDate,
-      "bookedToDate": bookedToDateFormatted,
-      "bookingDays": _bookingDays.toString(),
+      "bookedDate": DateFormat('yyyy-MM-dd').format(_startDate!),
+      "bookedToDate": DateFormat('yyyy-MM-dd').format(_endDate!),
       "product": widget.product['name'] ?? 'Unnamed Product',
-      "productId":
-          widget.product['id'] ?? '', // Assuming product has an 'id' field
-      "userId":
-          FirebaseAuth.instance.currentUser!.uid, // Replace with actual user ID
-      // Replace with actual user name
+      "productId": widget.pid, // Assuming product has an 'id' field
+      "userId": FirebaseAuth.instance.currentUser!.uid, // Replace with actual user ID
       "paymentId": paymentId,
-      "amount": widget.product['price'] * _bookingDays, // Total amount
+      "amount": widget.product['price'] * _calculateDays(), // Total amount
       "status": "Booked", // Order status
     };
 
@@ -141,6 +137,59 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
       );
     }
   }
+
+  int _calculateDays() {
+    if (_startDate == null || _endDate == null) return 0;
+    return _endDate!.difference(_startDate!).inDays;
+  }
+
+
+Future<bool> _checkIfDatesAreBooked() async {
+  if (_startDate == null || _endDate == null) return false;
+
+  // Convert _startDate and _endDate to just date (no time)
+  DateTime startDate = DateTime(_startDate!.year, _startDate!.month, _startDate!.day);
+  DateTime endDate = DateTime(_endDate!.year, _endDate!.month, _endDate!.day);
+
+  QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('orders')
+      .where('productId', isEqualTo: widget.pid)
+      .get();
+
+  for (var doc in snapshot.docs) {
+    print(doc.data());
+
+    DateTime bookedDate;
+    DateTime bookedToDate;
+
+    if (doc['bookedDate'] is Timestamp) {
+      bookedDate = (doc['bookedDate'] as Timestamp).toDate();
+      bookedToDate = (doc['bookedToDate'] as Timestamp).toDate();
+    } else {
+      bookedDate = DateFormat('yyyy-MM-dd').parse(doc['bookedDate']);
+      bookedToDate = DateFormat('yyyy-MM-dd').parse(doc['bookedToDate']);
+    }
+
+    // Convert Firestore dates to date-only (ignore time)
+    bookedDate = DateTime(bookedDate.year, bookedDate.month, bookedDate.day);
+    bookedToDate = DateTime(bookedToDate.year, bookedToDate.month, bookedToDate.day);
+
+    print(startDate.isAtSameMomentAs(bookedDate));
+
+    print('====================++++');
+
+    // Check if selected dates overlap with booked dates
+    if ((startDate.isAfter(bookedDate) && startDate.isBefore(bookedToDate)) ||
+        (endDate.isAfter(bookedDate) && endDate.isBefore(bookedToDate)) ||
+        (startDate.isBefore(bookedDate) && endDate.isAfter(bookedToDate)) ||
+        (startDate.isAtSameMomentAs(bookedDate) || endDate.isAtSameMomentAs(bookedToDate))) {
+      print('Dates are already booked!');
+      return true;
+    }
+  }
+
+  return false;
+}
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +250,7 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
                     color: Colors.green,
                   ),
                 ),
-                SizedBox(
-                    height: 100), // Extra space for the button at the bottom
+                SizedBox(height: 100), // Extra space for the button at the bottom
               ],
             ),
           ),
@@ -248,52 +296,137 @@ class _UserProductDetailsScreenState extends State<UserProductDetailsScreen> {
     );
   }
 
-  void _showBookingDialog(BuildContext context) {
-    TextEditingController daysController = TextEditingController();
 
+
+
+
+  void _showBookingDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Book Product'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Enter the number of days to book:'),
-            SizedBox(height: 16),
-            TextField(
-              controller: daysController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                hintText: 'e.g., 5',
-                border: OutlineInputBorder(),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Book Photographer'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Start Date Picker
+                  ListTile(
+                    title: Text('Start Date'),
+                    subtitle: Text(
+                      _startDate == null
+                          ? 'Select Start Date'
+                          : DateFormat('yyyy-MM-dd').format(_startDate!),
+                    ),
+                    onTap: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2100),
+                      );
+
+                      if (pickedDate != null) {
+                        setState(() {
+                          _startDate = pickedDate;
+                          _endDate = null; // Reset end date
+                        });
+                      }
+                    },
+                  ),
+                  // End Date Picker
+                  ListTile(
+                    title: Text('End Date'),
+                    subtitle: Text(
+                      _endDate == null
+                          ? 'Select End Date'
+                          : DateFormat('yyyy-MM-dd').format(_endDate!),
+                    ),
+                    onTap: () async {
+                      if (_startDate == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Please select a start date first.')),
+                        );
+                        return;
+                      }
+
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: _startDate!,
+                        firstDate: _startDate!,
+                        lastDate: DateTime(2100),
+                      );
+
+                      if (pickedDate != null) {
+                        setState(() {
+                          _endDate = pickedDate;
+                        });
+                      }
+                    },
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-        actions: [
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+                ),
+
+
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey)),
-          ),
-          TextButton(
-            onPressed: () {
-              if (daysController.text.isNotEmpty) {
-                _bookingDays = int.parse(daysController.text);
-                int amount = int.parse(widget.product['price']) *
-                    _bookingDays; // Calculate total amount
-                _openRazorpayGateway(amount); // Open Razorpay payment gateway
-                Navigator.pop(context); // Close the dialog
-              } else {
+            onPressed: () async {
+              if (_startDate == null || _endDate == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Please enter the number of days.')),
+                  SnackBar(content: Text('Please select both start and end dates.')),
                 );
+                return;
               }
+
+              if (_endDate!.isBefore(_startDate!)) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('End date must be after start date.')),
+                );
+                return;
+              }
+
+              bool isBooked = await _checkIfDatesAreBooked();
+
+              print('------------------booked----------------');
+
+              print(isBooked);
+              if (isBooked) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Selected dates are already booked.')),
+                );
+                return;
+              }
+
+              int amount = int.parse(widget.product['price']) * _calculateDays();
+              _openRazorpayGateway(amount); // Open Razorpay payment gateway
+              Navigator.pop(context); // Close the dialog
             },
             child: Text('Proceed to Pay',
                 style: TextStyle(color: Colors.blueAccent)),
           ),
-        ],
-      ),
+       
+       
+              
+             
+              ],
+            );
+          },
+        );
+      },
     );
   }
+
+
+
+
 }
+
+
+
+
+

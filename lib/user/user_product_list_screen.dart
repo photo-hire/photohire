@@ -44,8 +44,12 @@ Future<List<Map<String, dynamic>>> fetchProductDetails(String storeId) async {
       .get();
 
   for (var doc in querySnapshot.docs) {
-    productDetails.add(doc.data() as Map<String, dynamic>);
+    productDetails.add({
+    'productId': doc.id, // Explicitly add the document ID
+    ...doc.data() as Map<String, dynamic>, // Spread document data
+  });
   }
+  print(productDetails);
 
   return productDetails;
 }
@@ -213,6 +217,7 @@ class ProductItem extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => UserProductDetailsScreen(
+                    pid : product['productId'],
                     product: product['productDetails'][0])));
       },
       child: Card(
