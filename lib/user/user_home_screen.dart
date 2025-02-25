@@ -91,7 +91,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  List<LatLng>? latLngList;
+  List<LatLng> latLngList = [];
 
   Future<List<Map<String, dynamic>>> getData() async {
     try {
@@ -108,19 +108,25 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           .map((doc) => {'data': doc.data(), 'id': doc.id})
           .toList();
 
-      latLngList = studioData
-          .map((studio) {
-            var data = studio['data']; // Extract document data
-            if (data.containsKey('latitude') && data.containsKey('longitude')) {
-              double lat = (data['latitude'] as num).toDouble();
-              double lng = (data['longitude'] as num).toDouble();
-              return LatLng(lat, lng);
-            }
-            return null;
-          })
-          .where((latLng) => latLng != null) // Remove any null values
-          .cast<LatLng>()
-          .toList();
+          print('[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]');
+          print(studioData);
+
+          
+
+      
+
+for (var studio in studioData) {
+  var data = studio['data']; // Extract document data
+  if (data.containsKey('latitude') && data.containsKey('longitude')) {
+    double lat = (data['latitude'] as num).toDouble();
+    double lng = (data['longitude'] as num).toDouble();
+    latLngList.add(LatLng(lat, lng));
+  }
+}
+
+
+
+     
 
       isLoading = false;
       setState(() {});
@@ -228,6 +234,9 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     // Toggle Button
                     GestureDetector(
                       onTap: () {
+
+                        print(latLngList!.length);
+                        
                         Navigator.push(
                             context,
                             MaterialPageRoute(
