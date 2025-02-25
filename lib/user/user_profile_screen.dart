@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/user/user_edit_profile_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -30,8 +31,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     if (user != null) {
       DocumentSnapshot userDoc =
           await _firestore.collection('users').doc(user.uid).get();
-      print(user.uid);
-      print(userDoc);
       if (userDoc.exists) {
         setState(() {
           _email = userDoc['email'] ?? 'No email';
@@ -40,6 +39,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         });
       }
     }
+  }
+
+  Future<void> _logout() async {
+    await _auth.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginScreen()), // Navigate to login
+    );
   }
 
   @override
@@ -60,32 +67,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ),
         child: Stack(
           children: [
-            // Background Blurred Circles
-            Positioned(
-              top: -50,
-              left: -50,
-              child: Container(
-                width: 200,
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.purple.withOpacity(0.2),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -100,
-              right: -50,
-              child: Container(
-                width: 250,
-                height: 250,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.blue.withOpacity(0.2),
-                ),
-              ),
-            ),
-            // Profile Content
             Center(
               child: SingleChildScrollView(
                 child: Column(
@@ -159,45 +140,50 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                     SizedBox(height: 30),
                     // Edit Profile Button
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.blueAccent.withOpacity(0.3),
-                            blurRadius: 10,
-                            spreadRadius: 2,
-                            offset: Offset(0, 4),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserEditScreen(),
                           ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserEditScreen(),
-                            ),
-                          ).then((_) {
-                            // Refresh profile data after returning from edit screen
-                            _fetchUserData();
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
+                        ).then((_) => _fetchUserData()); // Refresh profile data
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
                         ),
-                        child: Text(
-                          'Edit Profile',
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                      ),
+                      child: Text(
+                        'Edit Profile',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // Logout Button
+                    ElevatedButton(
+                      onPressed: _logout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: Text(
+                        'Logout',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
                       ),
                     ),

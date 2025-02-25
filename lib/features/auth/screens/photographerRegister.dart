@@ -54,6 +54,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
     if (image != null) {
       // Get the image file
       imageFile = File(image!.path);
+       await _uploadImage();
       setState(() {});
     }
   }
@@ -439,7 +440,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                     ),
                     child: Text(
                       latitude != null && longitude != null
-                          ? 'Selected Location'
+                          ? 'Select on Map'
                           : 'Get Current Location',
                       style: TextStyle(
                           fontSize: 15.sp, fontWeight: FontWeight.bold),
@@ -521,6 +522,11 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                           return;
                         }
 
+                        if(downloadURL == null){
+                          showError('Please upload a logo', context);
+                          return;
+                        }
+
                         // Proceed with form submission if all validations pass
 
                         String userType =
@@ -534,7 +540,7 @@ class _PhotographerRegisterState extends State<PhotographerRegister> {
                                 password: passwordController.text);
                         String uid = FirebaseAuth.instance.currentUser!.uid;
 
-                        await _uploadImage();
+                       
 
                         await FirebaseFirestore.instance
                             .collection('photgrapher')
