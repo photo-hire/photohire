@@ -5,14 +5,14 @@ class ChatScreen extends StatefulWidget {
   final String userId;
   final String studioId;
   final String userName;
-  final String studioName;
+
 
   const ChatScreen({
     super.key,
     required this.userId,
     required this.studioId,
     required this.userName,
-    required this.studioName,
+
   });
 
   @override
@@ -36,16 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
       'timestamp': Timestamp.now(),
     });
 
-    // Update User Chat List
-    await _firestore.collection('userChats').doc(widget.userId).set({
-      'studios': FieldValue.arrayUnion([widget.studioId])
-    }, SetOptions(merge: true));
-
-    // Update Studio Chat List
-    await _firestore.collection('studioChats').doc(widget.studioId).set({
-      'users': FieldValue.arrayUnion([widget.userId])
-    }, SetOptions(merge: true));
-
+    
     _messageController.clear();
   }
 
@@ -53,7 +44,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.studioName, style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),

@@ -8,7 +8,7 @@ class PhotographerScreen extends StatefulWidget {
 
 class _PhotographerScreenState extends State<PhotographerScreen> {
   final CollectionReference photographers =
-      FirebaseFirestore.instance.collection('photographer');
+      FirebaseFirestore.instance.collection('photgrapher');
 
   String searchQuery = "";
   TextEditingController searchController = TextEditingController();

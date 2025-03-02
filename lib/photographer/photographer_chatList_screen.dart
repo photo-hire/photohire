@@ -26,21 +26,37 @@ class StudioChatListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               String userId = users[index];
 
-              return ListTile(
-                title: Text("User ID: $userId"), // Fetch actual user details if needed
-                leading: CircleAvatar(child: Icon(Icons.person)),
-                trailing: Icon(Icons.chat),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChatScreen(
-                        userId: userId,
-                        studioId: studioId,
-                        userName: "User Name",
-                        studioName: "Studio",
-                      ),
-                    ),
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance.collection('users').doc(userId).get(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                    return ListTile(
+                      title: Text("User ID: $userId"),
+                      leading: CircleAvatar(child: Icon(Icons.person)),
+                      trailing: Icon(Icons.chat),
+                    );
+                  }
+
+                  var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                  String userName = userData['name'] ?? "Unknown User";
+
+                  return ListTile(
+                    title: Text(userName),
+                    leading: CircleAvatar(child: Icon(Icons.person)),
+                    trailing: Icon(Icons.chat),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            userId: userId,
+                            studioId: studioId,
+                            userName: userName,
+                         
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               );

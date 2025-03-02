@@ -96,7 +96,7 @@ class UserChatListScreen extends StatelessWidget {
                                 userId: userId,
                                 studioId: studioId,
                                 userName: "User", // Fetch actual user name if needed
-                                studioName: studioName,
+                            
                               ),
                             ),
                           );

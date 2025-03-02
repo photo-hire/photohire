@@ -377,8 +377,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                       MaterialPageRoute(
                                           builder: (context) => ChatScreen(
                                                 studioId: widget.pid!,
-                                                studioName: widget
-                                                    .studioDetails['name'],
+                                             
                                                 userId: FirebaseAuth
                                                     .instance.currentUser!.uid,
                                                 userName: 'hello',

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -115,7 +116,7 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index].data() as Map<String, dynamic>;
-                    final isStudio = message['sender'] == widget.studioId;
+                    final isStudio = message['sender'] == FirebaseAuth.instance.currentUser!.uid;
 
                     return Align(
                       alignment: isStudio ? Alignment.centerRight : Alignment.centerLeft,
