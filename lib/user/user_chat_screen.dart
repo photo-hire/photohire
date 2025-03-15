@@ -6,13 +6,11 @@ class ChatScreen extends StatefulWidget {
   final String studioId;
   final String userName;
 
-
   const ChatScreen({
     super.key,
     required this.userId,
     required this.studioId,
     required this.userName,
-
   });
 
   @override
@@ -29,14 +27,17 @@ class _ChatScreenState extends State<ChatScreen> {
     String message = _messageController.text.trim();
     if (message.isEmpty) return;
 
-    await _firestore.collection('chats').doc(chatId).collection('messages').add({
+    await _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .add({
       'message': message,
       'senderId': widget.userId,
       'receiverId': widget.studioId,
       'timestamp': Timestamp.now(),
     });
 
-    
     _messageController.clear();
   }
 
@@ -72,7 +73,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     .orderBy('timestamp', descending: false)
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+                  if (!snapshot.hasData)
+                    return Center(child: CircularProgressIndicator());
 
                   var messages = snapshot.data!.docs;
                   return ListView.builder(
@@ -82,10 +84,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       var msg = messages[index].data() as Map<String, dynamic>;
                       bool isSender = msg['senderId'] == widget.userId;
                       return Align(
-                        alignment: isSender ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment: isSender
+                            ? Alignment.centerRight
+                            : Alignment.centerLeft,
                         child: Container(
-                          margin: EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                          margin:
+                              EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 14),
                           decoration: BoxDecoration(
                             color: isSender ? Colors.blueAccent : Colors.white,
                             borderRadius: BorderRadius.circular(18),
@@ -123,7 +129,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         hintText: "Type a message...",
                         filled: true,
                         fillColor: Colors.white,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        contentPadding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
                           borderSide: BorderSide.none,

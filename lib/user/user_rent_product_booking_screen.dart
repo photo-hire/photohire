@@ -6,10 +6,12 @@ class RentelProductBookingListScreen extends StatefulWidget {
   const RentelProductBookingListScreen({Key? key}) : super(key: key);
 
   @override
-  _RentelProductBookingListScreenState createState() => _RentelProductBookingListScreenState();
+  _RentelProductBookingListScreenState createState() =>
+      _RentelProductBookingListScreenState();
 }
 
-class _RentelProductBookingListScreenState extends State<RentelProductBookingListScreen> {
+class _RentelProductBookingListScreenState
+    extends State<RentelProductBookingListScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
 
@@ -29,50 +31,89 @@ class _RentelProductBookingListScreenState extends State<RentelProductBookingLis
     final String? userId = user?.uid;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('My Bookings'),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
-        elevation: 4,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 200, 148, 249), // Purple
+              Color.fromARGB(255, 162, 213, 255), // Blue
+              Colors.white, // White
+            ],
+          ),
+        ),
+        child: Column(
+          children: [
+            SizedBox(height: 50), // Space for status bar
+
+            // Title
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                'Rental Bookings',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+
+            Expanded(
+              child: userId == null
+                  ? Center(
+                      child: Text(
+                        'Please log in to view bookings.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    )
+                  : StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('orders')
+                          .where('userId', isEqualTo: userId)
+                          .snapshots(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError) {
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
+                        }
+
+                        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                          return Center(
+                            child: Text(
+                              'No bookings found.',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          );
+                        }
+
+                        final bookings = snapshot.data!.docs;
+
+                        return RefreshIndicator(
+                          onRefresh: _refreshBookings,
+                          child: ListView.builder(
+                            padding: EdgeInsets.all(16),
+                            itemCount: bookings.length,
+                            itemBuilder: (context, index) {
+                              final booking = bookings[index].data()
+                                  as Map<String, dynamic>;
+                              return BookingCard(booking: booking);
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
         ),
       ),
-      body: userId == null
-          ? Center(child: Text('Please log in to view bookings.'))
-          : StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('orders')
-                  .where('userId', isEqualTo: userId)
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No bookings found.'));
-                }
-
-                final bookings = snapshot.data!.docs;
-
-                return RefreshIndicator(
-                  onRefresh: _refreshBookings,
-                  child: ListView.builder(
-                    itemCount: bookings.length,
-                    itemBuilder: (context, index) {
-                      final booking = bookings[index].data() as Map<String, dynamic>;
-                      return BookingCard(booking: booking);
-                    },
-                  ),
-                );
-              },
-            ),
     );
   }
 }
@@ -84,47 +125,76 @@ class BookingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 4,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              booking['product'] ?? 'Unnamed Product',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.shopping_bag, color: Colors.blueAccent, size: 20),
+              SizedBox(width: 5),
+              Text(
+                booking['product'] ?? 'Unnamed Product',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Booked From: ${booking['bookedDate']}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            children: [
+              Icon(Icons.calendar_today, color: Colors.grey, size: 16),
+              SizedBox(width: 5),
+              Text(
+                'From: ${booking['bookedDate']}',
+                style: TextStyle(fontSize: 14, color: Colors.black87),
               ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Booked To: ${booking['bookedToDate']}',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(Icons.event, color: Colors.grey, size: 16),
+              SizedBox(width: 5),
+              Text(
+                'To: ${booking['bookedToDate']}',
+                style: TextStyle(fontSize: 14, color: Colors.black87),
               ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              'Status: ${booking['status']}',
-              style: TextStyle(
-                fontSize: 14,
-                color: booking['status'] == 'Booked' ? Colors.green : Colors.red,
+            ],
+          ),
+          SizedBox(height: 4),
+          Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color:
+                    booking['status'] == 'Booked' ? Colors.green : Colors.red,
+                size: 16,
               ),
-            ),
-          ],
-        ),
+              SizedBox(width: 5),
+              Text(
+                'Status: ${booking['status']}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color:
+                      booking['status'] == 'Booked' ? Colors.green : Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
 import 'package:photohire/features/auth/screens/loginscreen.dart';
-import 'package:photohire/user/user_home_screen.dart';
+import 'package:photohire/user/route_screen.dart';
 
 class UserRegisterScreen extends StatefulWidget {
   const UserRegisterScreen({super.key});
@@ -36,12 +36,11 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
     }
   }
 
-  // Upload Image to Firebase Storage
-  Future<String?> _uploadImage(File image) async {
+  // Upload Image to Firebase Storage and return URL
+  Future<String?> _uploadImage(File image, String userId) async {
     try {
-      String fileName = '${DateTime.now().millisecondsSinceEpoch}.jpg';
       Reference ref =
-          FirebaseStorage.instance.ref().child('profile_pictures/$fileName');
+          FirebaseStorage.instance.ref().child('profile_pictures/$userId.jpg');
       UploadTask uploadTask = ref.putFile(image);
       TaskSnapshot snapshot = await uploadTask;
       return await snapshot.ref.getDownloadURL();
@@ -61,19 +60,6 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const Choosing()),
-            );
-          },
-        ),
-      ),
       body: Stack(
         fit: StackFit.expand,
         children: [
@@ -96,7 +82,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 ),
                 SizedBox(height: 24.0.h),
 
-                // Profile Picture Upload
+                // Profile Picture Upload (Mandatory)
                 GestureDetector(
                   onTap: _pickImage,
                   child: CircleAvatar(
@@ -104,7 +90,19 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                     backgroundColor: Colors.grey[300],
                     backgroundImage: _image != null ? FileImage(_image!) : null,
                     child: _image == null
-                        ? Icon(Icons.camera_alt, size: 30, color: Colors.black)
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.camera_alt,
+                                  size: 30, color: Colors.red),
+                              Text(
+                                'Upload\nPhoto',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 12.sp, color: Colors.red),
+                              ),
+                            ],
+                          )
                         : null,
                   ),
                 ),
@@ -121,6 +119,11 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                 // Register Button
                 ElevatedButton(
                   onPressed: () async {
+                    if (_image == null) {
+                      _showSnackBar(
+                          'Please upload a profile picture', Colors.red);
+                      return;
+                    }
                     if (!_isValidPhoneNumber(phoneController.text)) {
                       _showSnackBar(
                           'Phone number must be exactly 10 digits', Colors.red);
@@ -150,12 +153,9 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       );
 
                       String uid = userCredential.user!.uid;
-                      String? imageUrl;
 
-                      // Upload Profile Image if available
-                      if (_image != null) {
-                        imageUrl = await _uploadImage(_image!);
-                      }
+                      // Upload Profile Image (Mandatory)
+                      String imageUrl = await _uploadImage(_image!, uid) ?? '';
 
                       // Save user details in Firestore
                       await FirebaseFirestore.instance
@@ -165,7 +165,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                         'name': nameController.text,
                         'email': emailController.text,
                         'phone': phoneController.text,
-                        'profileImage': imageUrl ?? '',
+                        'profileImage': imageUrl,
                       });
 
                       _showSnackBar(
@@ -174,8 +174,7 @@ class _UserRegisterScreenState extends State<UserRegisterScreen> {
                       // Navigate to Home Screen
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => UserHomeScreen()),
+                        MaterialPageRoute(builder: (context) => RootScreen()),
                       );
                     } catch (e) {
                       _showSnackBar('Error: ${e.toString()}', Colors.red);

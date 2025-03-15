@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:photohire/admin/admin_home_screen.dart';
 import 'package:photohire/admin/adminlogin.dart';
 import 'package:photohire/features/auth/screens/choosing.dart';
+import 'package:photohire/features/auth/screens/forgot_password_screen.dart';
 import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/photographer/photographer_root_screen.dart';
 import 'package:photohire/rentalStore/store_root_screen.dart';
@@ -240,14 +241,22 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 15.sp, fontWeight: FontWeight.bold),
                         ),
                 ),
-                SizedBox(height: 16.0.h),
-                Text(
-                  'Create an Account',
-                  style: TextStyle(
-                      color: Colors.yellow[700],
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold),
+                SizedBox(
+                  height: 20.h,
                 ),
+                TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ForgotPasswordScreen(),
+                          ));
+                    },
+                    child: Text(
+                      "Forgot Password",
+                      style: TextStyle(color: Colors.white, fontSize: 18.sp),
+                    )),
+                // SizedBox(height: 5.0.h),
                 TextButton(
                     onPressed: () {
                       Navigator.push(context,
@@ -256,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       'Sign Up',
                       style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.yellow,
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold),
                     )),

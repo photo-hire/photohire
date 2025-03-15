@@ -27,9 +27,14 @@ class RentalStoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Rental Stores'),
-        centerTitle: true,
-        backgroundColor: Colors.blueAccent,
+        title: Text("Rental Store",
+            style: TextStyle(
+                color: Colors.black,
+                fontSize: 22,
+                fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: false,
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: fetchRentalStores(),

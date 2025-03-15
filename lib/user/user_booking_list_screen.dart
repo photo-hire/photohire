@@ -1,11 +1,8 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class UserBookingListScreen extends StatelessWidget {
-  
-
   UserBookingListScreen();
 
   @override
@@ -14,76 +11,154 @@ class UserBookingListScreen extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            transform: GradientRotation(11),
             begin: Alignment.topLeft,
             end: Alignment.bottomCenter,
             colors: [
-              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-              Colors.white, // White (Bottom)
+              Color.fromARGB(255, 200, 148, 249), // Purple
+              Color.fromARGB(255, 162, 213, 255), // Blue
+              Colors.white, // White
             ],
           ),
         ),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection('photographerbookings')
-              .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid) // Filter by specific userId
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            }
+        child: Column(
+          children: [
+            SizedBox(height: 50), // Space for status bar
 
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
+            // Title
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                'Booked Photographers',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('No bookings found.'));
-            }
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('photographerbookings')
+                    .where('userId',
+                        isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
 
-            final bookings = snapshot.data!.docs;
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
 
-            return ListView.builder(
-              padding: EdgeInsets.all(16),
-              itemCount: bookings.length,
-              itemBuilder: (context, index) {
-                final booking = bookings[index].data() as Map<String, dynamic>;
-                return Card(
-                  elevation: 4,
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No bookings found.',
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                      ),
+                    );
+                  }
+
+                  final bookings = snapshot.data!.docs;
+
+                  return ListView.builder(
                     padding: EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Name: ${booking['name']}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    itemCount: bookings.length,
+                    itemBuilder: (context, index) {
+                      final booking =
+                          bookings[index].data() as Map<String, dynamic>;
+
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 12),
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(15),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black12,
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                        SizedBox(height: 8),
-                        Text('Date: ${booking['date']}'),
-                        SizedBox(height: 8),
-                        Text('Time: ${booking['time']}'),
-                        SizedBox(height: 8),
-                        Text('Phone: ${booking['phone']}'),
-                        SizedBox(height: 8),
-                        Text('Studio: ${booking['studio']}'),
-                        SizedBox(height: 8),
-                        Text('Notes: ${booking['notes']}'),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              booking['studio'],
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent,
+                              ),
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today,
+                                    color: Colors.grey, size: 16),
+                                SizedBox(width: 5),
+                                Text(
+                                  booking['date'],
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Icon(Icons.access_time,
+                                    color: Colors.grey, size: 16),
+                                SizedBox(width: 5),
+                                Text(
+                                  booking['time'],
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Icon(Icons.phone, color: Colors.grey, size: 16),
+                                SizedBox(width: 5),
+                                Text(
+                                  booking['phone'],
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Icon(Icons.note, color: Colors.grey, size: 16),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(
+                                    booking['notes'] ?? 'No notes',
+                                    style: TextStyle(
+                                        fontSize: 14, color: Colors.grey),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );
