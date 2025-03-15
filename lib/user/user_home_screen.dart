@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:photohire/features/auth/screens/loginscreen.dart';
 import 'package:photohire/user/photographer_details_screen.dart';
 import 'package:photohire/user/user_google_map_explore_screen.dart';
 
@@ -21,6 +22,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   String _currentLocation = "Fetching location...";
   double lat = 0.0;
   double lng = 0.0;
+  List<LatLng> latLngList = [];
 
   @override
   void initState() {
@@ -32,7 +34,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   // Fetch current location
   Future<void> _getCurrentLocation() async {
     try {
-      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         setState(() {
@@ -41,7 +42,6 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         return;
       }
 
-      // Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -60,12 +60,10 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         return;
       }
 
-      // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
 
-      // Convert coordinates to address
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -91,49 +89,38 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
-  List<LatLng> latLngList = [];
-
   Future<List<Map<String, dynamic>>> getData() async {
     try {
-      isLoading = true;
-      setState(() {});
+      setState(() {
+        isLoading = true;
+      });
 
-      // Fetch the documents in the 'photographer' collection
       QuerySnapshot<Map<String, dynamic>> snapshot =
           await FirebaseFirestore.instance.collection('photgrapher').get();
 
-      // Extract data from each document and return as a list of maps
       studioData = snapshot.docs
           .where((doc) => doc.data()['isApproved'] == true)
           .map((doc) => {'data': doc.data(), 'id': doc.id})
           .toList();
 
-          print('[[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]]');
-          print(studioData);
+      for (var studio in studioData) {
+        var data = studio['data'];
+        if (data.containsKey('latitude') && data.containsKey('longitude')) {
+          double lat = (data['latitude'] as num).toDouble();
+          double lng = (data['longitude'] as num).toDouble();
+          latLngList.add(LatLng(lat, lng));
+        }
+      }
 
-          
+      setState(() {
+        isLoading = false;
+      });
 
-      
-
-for (var studio in studioData) {
-  var data = studio['data']; // Extract document data
-  if (data.containsKey('latitude') && data.containsKey('longitude')) {
-    double lat = (data['latitude'] as num).toDouble();
-    double lng = (data['longitude'] as num).toDouble();
-    latLngList.add(LatLng(lat, lng));
-  }
-}
-
-
-
-     
-
-      isLoading = false;
-      setState(() {});
       return studioData;
     } catch (e) {
-      isLoading = false;
-      setState(() {});
+      setState(() {
+        isLoading = false;
+      });
       throw Exception('Failed to fetch data');
     }
   }
@@ -149,9 +136,9 @@ for (var studio in studioData) {
               begin: Alignment.topLeft,
               end: Alignment.bottomCenter,
               colors: [
-                Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-                Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-                Colors.white, // White (Bottom)
+                Color.fromARGB(255, 200, 148, 249),
+                Color.fromARGB(255, 162, 213, 255),
+                Colors.white,
               ],
             ),
           ),
@@ -178,7 +165,7 @@ for (var studio in studioData) {
                               ),
                             ),
                             Text(
-                              _currentLocation, // Display current location
+                              _currentLocation,
                               style: TextStyle(
                                   color: Colors.grey, fontSize: 14.sp),
                             ),
@@ -188,13 +175,19 @@ for (var studio in studioData) {
                     ),
                     PopupMenuButton<String>(
                       icon: CircleAvatar(
-                        backgroundImage: AssetImage(
-                            "asset/image/image1.jpg"), // Replace with your profile image asset
+                        backgroundImage: AssetImage("asset/image/image1.jpg"),
                         radius: 20.r,
                       ),
-                      onSelected: (value) {
+                      onSelected: (value) async {
                         if (value == 'Sign out') {
-                          FirebaseAuth.instance.signOut();
+                          await FirebaseAuth.instance.signOut();
+                          if (mounted) {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()),
+                            );
+                          }
                         }
                       },
                       itemBuilder: (BuildContext context) => [
@@ -214,7 +207,6 @@ for (var studio in studioData) {
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Row(
                   children: [
-                    // Search Bar
                     Expanded(
                       child: TextField(
                         decoration: InputDecoration(
@@ -231,28 +223,27 @@ for (var studio in studioData) {
                       ),
                     ),
                     SizedBox(width: 10.w),
-                    // Toggle Button
                     GestureDetector(
                       onTap: () {
-
-                        print(latLngList!.length);
-                        
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => UserGoogleMapScreen(
-                                      latlnglist: latLngList,
-                                      latlong: LatLng(lat, lng),
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserGoogleMapScreen(
+                              latlnglist: latLngList,
+                              latlong: LatLng(lat, lng),
+                            ),
+                          ),
+                        );
                       },
                       child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 15, vertical: 10),
-                          child: Icon(Icons.map)),
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 15, vertical: 10),
+                        child: Icon(Icons.map),
+                      ),
                     ),
                   ],
                 ),
@@ -262,7 +253,7 @@ for (var studio in studioData) {
               // Grid View of Items
               isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : studioData.length > 0
+                  : studioData.isNotEmpty
                       ? Expanded(
                           child: GridView.builder(
                             padding:
@@ -280,112 +271,27 @@ for (var studio in studioData) {
                               return GestureDetector(
                                 onTap: () {
                                   Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              PhotographerDetailsScreen(
-                                                studioDetails: photographer,
-                                                pid: studioData[index]['id'],
-                                              )));
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          PhotographerDetailsScreen(
+                                        studioDetails: photographer,
+                                        pid: studioData[index]['id'],
+                                      ),
+                                    ),
+                                  );
                                 },
                                 child: Card(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Logo Section
-                                      Container(
-                                        height: 100.h,
-                                        width: double.infinity,
-                                        margin: EdgeInsets.all(5),
-                                        decoration: BoxDecoration(
-                                            color: Colors.grey[200],
-                                            borderRadius:
-                                                BorderRadius.circular(5)),
-                                        child: Center(
-                                            child: photographer[
-                                                        'companyLogo'] ==
-                                                    null
-                                                ? Text(
-                                                    "LOGO HERE",
-                                                    style: TextStyle(
-                                                        color: Colors.grey),
-                                                  )
-                                                : Image.network(
-                                                    photographer['companyLogo'],
-                                                    fit: BoxFit.fill,
-                                                  )),
-                                      ),
-
-                                      Padding(
-                                        padding: EdgeInsets.all(10),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            // Title and Description
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  photographer['company'],
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16.sp,
-                                                  ),
-                                                ),
-                                                Spacer(),
-                                                Text(
-                                                  "4.5",
-                                                  style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                Icon(Icons.star,
-                                                    color: Colors.yellow,
-                                                    size: 16),
-                                              ],
-                                            ),
-                                            SizedBox(
-                                              height: 5.h,
-                                            ),
-                                            Text(
-                                              "${photographer['role']} Photographers",
-                                              style: TextStyle(
-                                                  color: Colors.grey,
-                                                  fontSize: 12),
-                                            ),
-                                            SizedBox(height: 5.h),
-
-                                            // Price
-                                            Text(
-                                              '\₹ ${photographer['startingPrice']}',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
+                                  child: Text(photographer['company']),
                                 ),
                               );
                             },
                           ),
                         )
-                      : Center(
-                          child: Text('No data available'),
-                        )
+                      : Center(child: Text('No data available'))
             ],
           ),
         ),
-        backgroundColor:
-            Colors.purple[50], // Matches the gradient in the image.
       ),
     );
   }
