@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'photographer_profile_screen.dart';
 
 class PhotographerScreen extends StatefulWidget {
   @override
@@ -9,48 +13,110 @@ class PhotographerScreen extends StatefulWidget {
 class _PhotographerScreenState extends State<PhotographerScreen> {
   final CollectionReference photographers =
       FirebaseFirestore.instance.collection('photgrapher');
+  final CollectionReference posts =
+      FirebaseFirestore.instance.collection('posts');
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
   String searchQuery = "";
   TextEditingController searchController = TextEditingController();
+  String currentUserId = "";
+
+  @override
+  void initState() {
+    super.initState();
+    User? user = auth.currentUser;
+    if (user != null) {
+      setState(() {
+        currentUserId = user.uid;
+      });
+    }
+  }
+
+  Stream<DocumentSnapshot<Object?>>? getStudioStream() {
+    if (currentUserId.isNotEmpty) {
+      return photographers.doc(currentUserId).snapshots();
+    } else {
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false, // Prevent bottom overflow
       appBar: AppBar(
-        title: Text('Photographers'),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            transform: GradientRotation(11),
-            begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-              Colors.white, // White (Bottom)
-            ],
-          ),
+        title: StreamBuilder<DocumentSnapshot>(
+          stream: getStudioStream(),
+          builder: (context, snapshot) {
+            String studioName = "Studio";
+            if (snapshot.hasData && snapshot.data!.exists) {
+              var data = snapshot.data!.data() as Map<String, dynamic>;
+              studioName = data['company'] ?? "Studio";
+            }
+            return Text(
+              "Welcome, $studioName",
+              style: TextStyle(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple),
+            );
+          },
         ),
+        backgroundColor: Colors.white,
+        elevation: 1,
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: 16.w),
+            child: StreamBuilder<DocumentSnapshot>(
+              stream: getStudioStream(),
+              builder: (context, snapshot) {
+                String companyLogoUrl = "";
+                if (snapshot.hasData && snapshot.data!.exists) {
+                  var data = snapshot.data!.data() as Map<String, dynamic>;
+                  companyLogoUrl = data['companyLogo'] ?? "";
+                }
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => PhotographerProfileScreen()),
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 22,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: companyLogoUrl.isNotEmpty
+                        ? NetworkImage(companyLogoUrl)
+                        : null,
+                    child: companyLogoUrl.isEmpty
+                        ? Icon(Icons.person, color: Colors.white)
+                        : null,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: kToolbarHeight + 20), // Adjust for AppBar overlap
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
               child: TextField(
                 controller: searchController,
                 decoration: InputDecoration(
-                  hintText: 'Search by name...',
+                  hintText: 'Search for photographers...',
                   prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
                   filled: true,
-                  fillColor: Colors.white.withOpacity(0.8),
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(15),
                     borderSide: BorderSide.none,
                   ),
+                  contentPadding: EdgeInsets.symmetric(vertical: 15.h),
+                  hintStyle: TextStyle(color: Colors.grey),
                 ),
                 onChanged: (value) {
                   setState(() {
@@ -61,7 +127,7 @@ class _PhotographerScreenState extends State<PhotographerScreen> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: photographers.snapshots(),
+                stream: posts.snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -70,64 +136,130 @@ class _PhotographerScreenState extends State<PhotographerScreen> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No Photographers Found'));
+                    return Center(child: Text('No Posts Found'));
                   }
 
                   var filteredDocs = snapshot.data!.docs.where((doc) {
-                    var data = doc.data() as Map<String, dynamic>;
-                    var name = (data['name'] ?? '').toString().toLowerCase();
-                    return name.contains(searchQuery);
+                    var data = doc.data() as Map<String, dynamic>?;
+                    var studioId = data?['userId'] ?? "";
+                    return studioId != currentUserId;
                   }).toList();
 
-                  return filteredDocs.isEmpty
-                      ? Center(child: Text('No results found'))
-                      : ListView.builder(
-                          itemCount: filteredDocs.length,
-                          itemBuilder: (context, index) {
-                            var data = filteredDocs[index].data()
-                                as Map<String, dynamic>;
+                  return GridView.builder(
+                    padding: EdgeInsets.all(10.w),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8.w,
+                      mainAxisSpacing: 8.h,
+                      childAspectRatio: 1,
+                    ),
+                    itemCount: filteredDocs.length,
+                    shrinkWrap: true,
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      var post =
+                          filteredDocs[index].data() as Map<String, dynamic>?;
 
-                            return Card(
-                              margin: EdgeInsets.all(10),
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)),
-                              child: ListTile(
-                                title: Text(data['name'] ?? 'No Name',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Role: ${data['role'] ?? 'N/A'}'),
-                                    Text(
-                                        'Company: ${data['company'] ?? 'N/A'}'),
-                                    Text('Email: ${data['email'] ?? 'N/A'}'),
-                                    Text('Phone: ${data['phone'] ?? 'N/A'}'),
-                                    Text(
-                                        'Starting Price: ${data['startingPrice'] ?? 'N/A'}'),
-                                    Text(
-                                        'Approved: ${data['isApproved'] == true ? 'Yes' : 'No'}'),
-                                  ],
+                      if (post == null) return SizedBox.shrink();
+
+                      var imageUrl = post['imageUrl'] ?? '';
+                      var studioId = post['userId'] ?? '';
+
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: photographers.doc(studioId).get(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return SizedBox();
+                          }
+                          if (!snapshot.hasData ||
+                              !(snapshot.data?.exists ?? false)) {
+                            return SizedBox.shrink();
+                          }
+
+                          var studioData =
+                              snapshot.data!.data() as Map<String, dynamic>?;
+
+                          if (studioData == null) return SizedBox.shrink();
+
+                          var studioName = studioData['company'] ?? "Studio";
+
+                          if (searchQuery.isNotEmpty &&
+                              !studioName.toLowerCase().contains(searchQuery)) {
+                            return SizedBox.shrink();
+                          }
+
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PhotoDetailScreen(imageUrl: imageUrl),
                                 ),
-                                trailing: data['companyLogo'] != null
-                                    ? ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.network(
-                                            data['companyLogo'],
-                                            width: 50,
-                                            height: 50,
-                                            fit: BoxFit.cover))
-                                    : Icon(Icons.image_not_supported,
-                                        color: Colors.grey),
-                              ),
-                            );
-                          },
-                        );
+                              );
+                            },
+                            child: Column(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageUrl,
+                                    width: double.infinity,
+                                    height: 100.h,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Center(
+                                        child: CircularProgressIndicator()),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error, color: Colors.red),
+                                  ),
+                                ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  studioName,
+                                  style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.bold),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
                 },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class PhotoDetailScreen extends StatelessWidget {
+  final String imageUrl;
+
+  PhotoDetailScreen({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Photo Details"),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: Center(
+        child: CachedNetworkImage(
+          imageUrl: imageUrl,
+          width: double.infinity,
+          fit: BoxFit.contain,
+          placeholder: (context, url) =>
+              Center(child: CircularProgressIndicator()),
+          errorWidget: (context, url, error) =>
+              Icon(Icons.error, size: 50, color: Colors.red),
         ),
       ),
     );

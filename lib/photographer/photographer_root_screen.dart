@@ -1,11 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photohire/photographer/Rentalstoreview.dart';
 import 'package:photohire/photographer/photographer_chatList_screen.dart';
-import 'package:photohire/photographer/photographer_services_screen.dart';
 import 'package:photohire/photographer/photographer_manage_profile_screen.dart';
-import 'package:photohire/photographer/photographer_profile_screen.dart';
 import 'package:photohire/photographer/photographersview.dart';
 
 class PhotographerRootScreen extends StatefulWidget {
@@ -21,56 +18,75 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
   int selectedIndex = 0;
 
   List<Widget> pages = [
-    PhotographerScreen(),
-    ExploreScreen(),
+    PhotographerScreen(), // Photographer Idea Page
+    ExploreScreen(), // Explore Page
     PhotographerManageProfileScreen(),
     StudioChatListScreen(
       studioId: FirebaseAuth.instance.currentUser!.uid,
     ),
-    PhotoggrapherProfileScreen(),
   ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      selectedIndex = index;
+    });
+  }
+
+  Future<bool> _onWillPop() async {
+    bool exit = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Exit App'),
+        content: Text('Are you sure you want to exit?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+    return exit ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-        child: BottomNavigationBar(
-          onTap: (index) {
-            setState(() {
-              selectedIndex = index;
-            });
-          },
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        body: pages[selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: selectedIndex,
+          onTap: _onItemTapped,
+          selectedItemColor: Colors.blueAccent, // Highlight selected item
+          unselectedItemColor: Colors.grey, // Unselected items are grey
+          showSelectedLabels: false, // No labels displayed
+          showUnselectedLabels: false, // No labels displayed
+          type: BottomNavigationBarType.fixed,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.lightbulb_outlined),
-              label: "idea",
+              icon: Icon(Icons.lightbulb_outlined, size: 30),
+              label: '', // Empty label for minimalism
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.camera_alt_outlined),
-              label: "Rental Store",
+              icon: Icon(Icons.camera_alt_outlined, size: 30),
+              label: '', // Empty label for minimalism
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline),
-              label: "add",
+              icon: Icon(Icons.add_circle_outline_sharp, size: 30),
+              label: '', // Empty label for minimalism
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'service'),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_circle_outlined),
-              label: "profile",
+              icon: Icon(Icons.chat_bubble_outline, size: 30),
+              label: '', // Empty label for minimalism
             ),
           ],
-          type: BottomNavigationBarType.fixed,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          selectedItemColor: Colors.white,
-          selectedIconTheme: IconThemeData(size: 40),
-          unselectedItemColor: Colors.white,
-          backgroundColor: Colors.blue[900],
-          currentIndex: selectedIndex,
         ),
       ),
-      body: pages[selectedIndex],
     );
   }
 }

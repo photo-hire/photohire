@@ -7,7 +7,7 @@ class UserGoogleMapScreen extends StatefulWidget {
   UserGoogleMapScreen({super.key, required this.latlong, this.latlnglist});
 
   final LatLng latlong;
-  List<LatLng>? latlnglist;
+  final List<LatLng>? latlnglist;
 
   @override
   State<UserGoogleMapScreen> createState() => _UserGoogleMapScreenState();
@@ -17,20 +17,23 @@ class _UserGoogleMapScreenState extends State<UserGoogleMapScreen> {
   late GoogleMapController mapController;
   LatLng? _initialPosition;
   final Set<Marker> _markers = {};
-  Map<String, dynamic>? selectedPhotographer; // Store photographer details
+  Map<String, dynamic>? selectedPhotographer;
 
   @override
   void initState() {
     _initialPosition = widget.latlong;
     super.initState();
-    _addExampleMarkers();
+    _addPhotographerMarkers();
   }
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
   }
 
-  // Fetch photographer details from Firestore
+  void _recenterMap() {
+    mapController.animateCamera(CameraUpdate.newLatLng(_initialPosition!));
+  }
+
   Future<void> _fetchPhotographerDetails(LatLng position) async {
     QuerySnapshot query = await FirebaseFirestore.instance
         .collection('photgrapher')
@@ -40,53 +43,115 @@ class _UserGoogleMapScreenState extends State<UserGoogleMapScreen> {
 
     if (query.docs.isNotEmpty) {
       setState(() {
-        selectedPhotographer = {'data': query.docs.first.data(), 'id': query.docs.first.id} as Map<String, dynamic>;
+        selectedPhotographer = {
+          'data': query.docs.first.data(),
+          'id': query.docs.first.id
+        } as Map<String, dynamic>;
       });
 
       _showBottomSheet();
     }
   }
 
-  // Show Bottom Sheet with Photographer Details
   void _showBottomSheet() {
     if (selectedPhotographer == null) return;
 
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return Container(
           padding: const EdgeInsets.all(16.0),
-          height: 200,
+          height: 250,
           width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            color: Colors.white,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
+              Center(
+                child: Container(
+                  width: 50,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[300],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Text(
-                selectedPhotographer!['data']['company'] ?? 'Unknown',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                selectedPhotographer!['data']['company'] ?? 'Unknown Studio',
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Text(selectedPhotographer!['data']['email'] ?? 'No details available'),
+              Row(
+                children: [
+                  const Icon(Icons.email, size: 20, color: Colors.blueGrey),
+                  const SizedBox(width: 6),
+                  Text(
+                    selectedPhotographer!['data']['email'] ??
+                        'No email available',
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                ],
+              ),
               const SizedBox(height: 8),
-              Text("Contact: ${selectedPhotographer!['data']['phone'] ?? 'N/A'}"),
-              SizedBox(height: 8),
-              Text("Price: ${selectedPhotographer!['data']['startingPrice'] ?? 'N/A'}"),
-              SizedBox(height: 8),
-
-
+              Row(
+                children: [
+                  const Icon(Icons.phone, size: 20, color: Colors.green),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Contact: ${selectedPhotographer!['data']['phone'] ?? 'N/A'}",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.attach_money,
+                      size: 20, color: Colors.orange),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Starting Price: ${selectedPhotographer!['data']['startingPrice'] ?? 'N/A'}",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => PhotographerDetailsScreen(studioDetails: selectedPhotographer!['data'],pid: selectedPhotographer!['id'],),));// Close the bottom sheet
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PhotographerDetailsScreen(
+                          studioDetails: selectedPhotographer!['data'],
+                          pid: selectedPhotographer!['id'],
+                        ),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 6, 68, 118),
+                    backgroundColor: Colors.blueAccent,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  child: const Text("Book now",style: TextStyle(color: Colors.white),),
+                  child: const Text(
+                    "View Details",
+                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  ),
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -94,29 +159,44 @@ class _UserGoogleMapScreenState extends State<UserGoogleMapScreen> {
     );
   }
 
-  // Adding Markers
-  void _addExampleMarkers() {
-    List<LatLng> exampleLocations = [
-      widget.latlong,
-      ...widget.latlnglist!,
-    ];
+  void _addPhotographerMarkers() async {
+    QuerySnapshot querySnapshot =
+        await FirebaseFirestore.instance.collection('photgrapher').get();
 
-    for (int i = 0; i < exampleLocations.length; i++) {
-      _markers.add(
-        Marker(
-          markerId: MarkerId('Location_$i'),
-          position: exampleLocations[i],
-          infoWindow: InfoWindow(
-            title: "Location ${i + 1}",
-            snippet: "Tap for details",
+    for (var doc in querySnapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+      if (data.containsKey('latitude') && data.containsKey('longitude')) {
+        LatLng position = LatLng(data['latitude'], data['longitude']);
+
+        _markers.add(
+          Marker(
+            markerId: MarkerId(doc.id),
+            position: position,
+            infoWindow: InfoWindow(
+              title: data['company'] ?? "Photographer",
+              snippet: "Tap for details",
+            ),
+            icon:
+                BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+            onTap: () => _fetchPhotographerDetails(position),
           ),
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
-          onTap: () => _fetchPhotographerDetails(exampleLocations[i]), // Fetch details on tap
-        ),
-      );
+        );
+      }
     }
 
-    setState(() {}); // Refresh UI
+    _addUserLocationMarker();
+    setState(() {});
+  }
+
+  void _addUserLocationMarker() {
+    _markers.add(
+      Marker(
+        markerId: const MarkerId('User_Location'),
+        position: _initialPosition!,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: const InfoWindow(title: "Your Location"),
+      ),
+    );
   }
 
   @override
@@ -132,6 +212,15 @@ class _UserGoogleMapScreenState extends State<UserGoogleMapScreen> {
               zoom: 11.0,
             ),
             markers: _markers,
+          ),
+          Positioned(
+            bottom: 20,
+            left: 20,
+            child: FloatingActionButton(
+              onPressed: _recenterMap,
+              backgroundColor: Colors.blue,
+              child: const Icon(Icons.my_location, color: Colors.white),
+            ),
           ),
         ],
       ),

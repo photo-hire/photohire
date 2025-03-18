@@ -40,7 +40,7 @@ class _RootScreenState extends State<RootScreen> {
           type: BottomNavigationBarType.fixed,
           items: [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_filled),
+              icon: Icon(Icons.camera_alt_outlined),
               label: '',
             ),
             BottomNavigationBarItem(

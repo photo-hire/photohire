@@ -13,15 +13,19 @@ class UserChatListScreen extends StatefulWidget {
 
 class _UserChatListScreenState extends State<UserChatListScreen> {
   TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
 
+  // Fetch studio details
   Future<Map<String, dynamic>?> _fetchStudioDetails(String studioId) async {
-    DocumentSnapshot studioDoc = await FirebaseFirestore.instance
-        .collection('photographers')
-        .doc(studioId)
-        .get();
-    if (studioDoc.exists) {
-      return studioDoc.data() as Map<String, dynamic>;
+    try {
+      DocumentSnapshot studioDoc = await FirebaseFirestore.instance
+          .collection('photographers')
+          .doc(studioId)
+          .get();
+      if (studioDoc.exists) {
+        return studioDoc.data() as Map<String, dynamic>;
+      }
+    } catch (e) {
+      print("Error fetching studio details: $e");
     }
     return null;
   }
@@ -30,7 +34,8 @@ class _UserChatListScreenState extends State<UserChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Message",
+        automaticallyImplyLeading: false,
+        title: Text("Messages",
             style: TextStyle(
                 color: Colors.black,
                 fontSize: 22,
@@ -38,41 +43,36 @@ class _UserChatListScreenState extends State<UserChatListScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search, color: Colors.black54),
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate:
-                    ChatSearchDelegate(widget.userId, _fetchStudioDetails),
-              );
-            },
-          ),
-        ],
       ),
-      body: StreamBuilder<DocumentSnapshot>(
+      body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('userChats')
-            .doc(widget.userId)
+            .collection('chats')
+            .where('participants', arrayContains: widget.userId)
+            .orderBy('lastMessageTime', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData || !snapshot.data!.exists) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(
               child: Text("No Messages Yet!",
                   style: TextStyle(fontSize: 16, color: Colors.black54)),
             );
           }
 
-          var data = snapshot.data!.data() as Map<String, dynamic>;
-          List<dynamic> studios = data['studios'] ?? [];
+          var chatDocs = snapshot.data!.docs;
 
           return ListView.builder(
-            itemCount: studios.length,
+            itemCount: chatDocs.length,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             physics: BouncingScrollPhysics(),
             itemBuilder: (context, index) {
-              String studioId = studios[index];
+              var chatData = chatDocs[index].data() as Map<String, dynamic>;
+              String chatId = chatDocs[index].id;
+              String studioId = chatData['studioId'];
+              String lastMessage = chatData['lastMessage'] ?? "No messages yet";
+              Timestamp? lastMessageTime = chatData['lastMessageTime'];
+              String formattedTime = lastMessageTime != null
+                  ? "${lastMessageTime.toDate().hour}:${lastMessageTime.toDate().minute}"
+                  : "";
 
               return FutureBuilder<Map<String, dynamic>?>(
                 future: _fetchStudioDetails(studioId),
@@ -106,9 +106,11 @@ class _UserChatListScreenState extends State<UserChatListScreen> {
                     title: Text(studioName,
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w600)),
-                    subtitle: Text(companyName,
+                    subtitle: Text(lastMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 14, color: Colors.black54)),
-                    trailing: Text("12:19",
+                    trailing: Text(formattedTime,
                         style: TextStyle(fontSize: 12, color: Colors.black38)),
                     onTap: () {
                       Navigator.push(
@@ -129,129 +131,6 @@ class _UserChatListScreenState extends State<UserChatListScreen> {
           );
         },
       ),
-    );
-  }
-}
-
-// Search Delegate for Chat List
-class ChatSearchDelegate extends SearchDelegate {
-  final String userId;
-  final Future<Map<String, dynamic>?> Function(String) fetchStudioDetails;
-
-  ChatSearchDelegate(this.userId, this.fetchStudioDetails);
-
-  @override
-  List<Widget>? buildActions(BuildContext context) {
-    return [
-      IconButton(
-        icon: Icon(Icons.clear),
-        onPressed: () {
-          query = "";
-        },
-      ),
-    ];
-  }
-
-  @override
-  Widget? buildLeading(BuildContext context) {
-    return IconButton(
-      icon: Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, null);
-      },
-    );
-  }
-
-  @override
-  Widget buildResults(BuildContext context) {
-    return _buildChatList();
-  }
-
-  @override
-  Widget buildSuggestions(BuildContext context) {
-    return _buildChatList();
-  }
-
-  Widget _buildChatList() {
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('userChats')
-          .doc(userId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(
-            child: Text("No Messages Found!",
-                style: TextStyle(fontSize: 16, color: Colors.black54)),
-          );
-        }
-
-        var data = snapshot.data!.data() as Map<String, dynamic>;
-        List<dynamic> studios = data['studios'] ?? [];
-
-        return ListView.builder(
-          itemCount: studios.length,
-          itemBuilder: (context, index) {
-            String studioId = studios[index];
-
-            return FutureBuilder<Map<String, dynamic>?>(
-              future: fetchStudioDetails(studioId),
-              builder: (context, studioSnapshot) {
-                if (!studioSnapshot.hasData) {
-                  return SizedBox.shrink();
-                }
-
-                var studio = studioSnapshot.data!;
-                String studioName = studio['name'] ?? "Unknown";
-                String companyName = studio['company'] ?? "No Company";
-                String? logoUrl = studio['companyLogo'];
-
-                if (!studioName.toLowerCase().contains(query.toLowerCase())) {
-                  return SizedBox.shrink();
-                }
-
-                return ListTile(
-                  leading: CircleAvatar(
-                    radius: 24,
-                    backgroundColor:
-                        Colors.primaries[index % Colors.primaries.length],
-                    backgroundImage:
-                        logoUrl != null ? NetworkImage(logoUrl) : null,
-                    child: logoUrl == null
-                        ? Text(
-                            studioName[0].toUpperCase(),
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white),
-                          )
-                        : null,
-                  ),
-                  title: Text(studioName,
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                  subtitle: Text(companyName,
-                      style: TextStyle(fontSize: 14, color: Colors.black54)),
-                  trailing: Text("12:19",
-                      style: TextStyle(fontSize: 12, color: Colors.black38)),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ChatScreen(
-                          userId: userId,
-                          studioId: studioId,
-                          userName: "User",
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
-      },
     );
   }
 }

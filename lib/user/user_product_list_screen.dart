@@ -23,7 +23,7 @@ class ParentWidget extends StatelessWidget {
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return Scaffold(body: Center(child: Text('No products found.')));
         } else {
-          print('ppppppppp');
+          // print('ppppppppp');
           print(snapshot.data);
           return UserRentalServiceScreen(
             store: store['data'],
@@ -45,9 +45,9 @@ Future<List<Map<String, dynamic>>> fetchProductDetails(String storeId) async {
 
   for (var doc in querySnapshot.docs) {
     productDetails.add({
-    'productId': doc.id, // Explicitly add the document ID
-    ...doc.data() as Map<String, dynamic>, // Spread document data
-  });
+      'productId': doc.id, // Explicitly add the document ID
+      ...doc.data() as Map<String, dynamic>, // Spread document data
+    });
   }
   print(productDetails);
 
@@ -217,7 +217,7 @@ class ProductItem extends StatelessWidget {
             context,
             MaterialPageRoute(
                 builder: (context) => UserProductDetailsScreen(
-                    pid : product['productId'],
+                    pid: product['productId'],
                     product: product['productDetails'][0])));
       },
       child: Card(

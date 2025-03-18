@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloudinary/cloudinary.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -26,84 +25,54 @@ class _PhotographerManageProfileScreenState
   String userId = FirebaseAuth.instance.currentUser!.uid;
 
   final cloudinary = Cloudinary.signedConfig(
-    apiKey: '142832579599847', // Replace with your API key
-    apiSecret: '2_MaDsMn0MLW5jqxKvxep_tvVJk', // Replace with your API secret
-    cloudName: 'dm3mcgkch', // Replace with your Cloudinary cloud name
+    apiKey: '142832579599847',
+    apiSecret: '2_MaDsMn0MLW5jqxKvxep_tvVJk',
+    cloudName: 'dm3mcgkch',
   );
 
   Future<void> _pickImage() async {
-    // Pick an image from the gallery
     final ImagePicker picker = ImagePicker();
     image = await picker.pickImage(source: ImageSource.gallery);
-    setState(() {});
-
-    if (image != null) {
-      // Get the image file
-      imageFile = File(image!.path);
-      setState(() {});
-    }
+    setState(() => imageFile = image != null ? File(image!.path) : null);
   }
 
   Future<void> _uploadImage() async {
-    if (imageFile != null) {
-      final response = await cloudinary.upload(
-        file: imageFile!.path,
-        fileBytes: imageFile!.readAsBytesSync(),
-        resourceType: CloudinaryResourceType.image,
-      );
+    if (imageFile == null) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('No image selected')));
+      return;
+    }
 
-      if (response.isSuccessful) {
-        downloadURL = response.secureUrl;
-        setState(() {});
-        print('Upload Successful. URL: ${response.secureUrl}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Image uploaded successfully')),
-        );
-      } else {
-        print('Upload Failed: ${response.error}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upload image')),
-        );
-      }
+    final response = await cloudinary.upload(
+      file: imageFile!.path,
+      fileBytes: imageFile!.readAsBytesSync(),
+      resourceType: CloudinaryResourceType.image,
+    );
+
+    if (response.isSuccessful) {
+      downloadURL = response.secureUrl;
+      setState(() {});
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No image selected')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to upload image')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            transform: GradientRotation(11),
-            begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-              Colors.white, // White (Bottom)
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(15, 30, 15, 0),
+      child: Scaffold(
+        appBar: AppBar(
+            title: Text(
+          'Manage Your Profile',
+          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700),
+        )),
+        body: Padding(
+          padding: EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Manage Your Profile',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.bold),
-              ),
-              SizedBox(
-                height: 30.h,
-              ),
+              // 🔹 Add New Post Button
               GestureDetector(
                 onTap: () {
                   showDialog(
@@ -112,34 +81,25 @@ class _PhotographerManageProfileScreenState
                       return StatefulBuilder(
                         builder: (context, setDialogState) {
                           return AlertDialog(
-                            title: Text('Add a new post'),
+                            title: Text('Add a New Post'),
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
+                                // 🔹 Image Picker
                                 GestureDetector(
                                   onTap: () async {
                                     await _pickImage();
-                                    // Update the state of the dialog to reflect the selected image
                                     setDialogState(() {});
                                   },
                                   child: Container(
-                                    height: 190.h,
+                                    height: 150.h,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.r),
-                                      border: Border.all(
-                                          color: Colors.black,
-                                          width: 2.w,
-                                          style: BorderStyle.solid),
+                                      border: Border.all(color: Colors.black),
                                     ),
                                     child: imageFile == null
                                         ? Center(
-                                            child: Text(
-                                              'Upload Image',
-                                              style: TextStyle(
-                                                color: Colors.grey,
-                                                fontSize: 16.sp,
-                                              ),
-                                            ),
+                                            child: Icon(Icons.upload, size: 40),
                                           )
                                         : ClipRRect(
                                             borderRadius:
@@ -151,64 +111,58 @@ class _PhotographerManageProfileScreenState
                                           ),
                                   ),
                                 ),
-                                SizedBox(
-                                  height: 16.h,
-                                ),
+                                SizedBox(height: 16.h),
+
+                                // 🔹 Title Input
                                 TextField(
                                   controller: titleController,
                                   decoration: InputDecoration(
-                                      labelText: 'Title',
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.r))),
+                                    labelText: 'Title',
+                                    border: OutlineInputBorder(),
+                                  ),
                                 ),
-                                SizedBox(
-                                  height: 16.h,
-                                ),
+                                SizedBox(height: 16.h),
+
+                                // 🔹 Description Input
                                 TextField(
                                   controller: descController,
                                   decoration: InputDecoration(
-                                      labelText: 'Description',
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.r))),
+                                    labelText: 'Description',
+                                    border: OutlineInputBorder(),
+                                  ),
                                 ),
-                                SizedBox(
-                                  height: 24.h,
-                                ),
+                                SizedBox(height: 24.h),
+
+                                // 🔹 Submit Button
                                 GestureDetector(
                                   onTap: () async {
                                     try {
                                       isLoading = true;
                                       setDialogState(() {});
                                       await _uploadImage();
-                                      if (downloadURL != null) {
-                                        String title =
-                                            titleController.text.trim();
-                                        String description =
-                                            descController.text.trim();
 
-                                        // Post details
+                                      if (downloadURL != null) {
                                         Map<String, dynamic> postDetails = {
-                                          'title': title,
-                                          'description': description,
+                                          'title': titleController.text.trim(),
+                                          'description':
+                                              descController.text.trim(),
                                           'image': downloadURL,
                                         };
+
                                         final postDocRef = FirebaseFirestore
                                             .instance
                                             .collection('posts')
                                             .doc(userId);
                                         final docSnapshot =
                                             await postDocRef.get();
+
                                         if (docSnapshot.exists) {
-                                          // Update existing post details
                                           await postDocRef.update({
                                             'postDetails':
                                                 FieldValue.arrayUnion(
                                                     [postDetails]),
                                           });
                                         } else {
-                                          // Create a new document with post details
                                           await postDocRef.set({
                                             'userId': userId,
                                             'postDetails': [postDetails],
@@ -216,11 +170,9 @@ class _PhotographerManageProfileScreenState
                                         }
 
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  'Post added successfully')),
-                                        );
+                                            .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Post added successfully')));
                                         titleController.clear();
                                         descController.clear();
                                         setState(() {
@@ -230,11 +182,9 @@ class _PhotographerManageProfileScreenState
                                         Navigator.pop(context);
                                       }
                                     } catch (e) {
-                                      print(e);
                                       ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
+                                          .showSnackBar(SnackBar(
+                                              content: Text(e.toString())));
                                     } finally {
                                       isLoading = false;
                                       setDialogState(() {});
@@ -244,9 +194,9 @@ class _PhotographerManageProfileScreenState
                                     padding: EdgeInsets.all(10),
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(10.r),
-                                        color: Colors.blue[900]),
+                                      borderRadius: BorderRadius.circular(10.r),
+                                      color: Colors.blue[900],
+                                    ),
                                     child: Center(
                                       child: isLoading
                                           ? CircularProgressIndicator(
@@ -269,106 +219,100 @@ class _PhotographerManageProfileScreenState
                   );
                 },
                 child: Container(
-                  height: 200.h,
-                  width: double.infinity,
+                  height: 50.h,
                   decoration: BoxDecoration(
-                      color: Colors.blue[900],
-                      borderRadius: BorderRadius.circular(10.r)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.add,
-                        size: 60.h,
-                        color: Colors.white,
-                      ),
-                      SizedBox(
-                        width: 10.w,
-                      ),
-                      Text(
-                        'Add a new post',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 25.sp),
-                      )
-                    ],
+                    color: Colors.blue[900],
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Add a New Post',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18.sp),
+                    ),
                   ),
                 ),
               ),
-              SizedBox(
-                height: 20.h,
-              ),
+              SizedBox(height: 20.h),
+
+              // 🔹 Your Posts Section
               Text(
-                'Your Profile',
-                style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 22.sp,
-                    fontWeight: FontWeight.bold),
+                'Your Posts',
+                style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
-              SizedBox(
-                height: 20.h,
-              ),
+              SizedBox(height: 10.h),
+
               Expanded(
-                  child: StreamBuilder<DocumentSnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('posts')
-                          .doc(userId)
-                          .snapshots(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
+                child: StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('posts')
+                      .doc(userId)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || !snapshot.data!.exists) {
+                      return Center(child: Text('No posts found'));
+                    }
 
-                        if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        }
+                    List<Map<String, dynamic>> postDetails =
+                        List<Map<String, dynamic>>.from(
+                            snapshot.data!['postDetails'] ?? []);
 
-                        if (!snapshot.hasData || !snapshot.data!.exists) {
-                          return const Center(child: Text('No posts found'));
-                        }
+                    return postDetails.isEmpty
+                        ? Center(child: Text('No posts to display'))
+                        : GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 10,
+                              mainAxisSpacing: 10,
+                              childAspectRatio: 1,
+                            ),
+                            itemCount: postDetails.length,
+                            itemBuilder: (context, index) {
+                              final post = postDetails[index];
 
-                        // Extract the postDetails list
-                        List<Map<String, dynamic>> postDetails =
-                            List<Map<String, dynamic>>.from(
-                                snapshot.data!['postDetails'] ?? []);
-
-                        return postDetails.isEmpty
-                            ? const Center(child: Text('No posts to display'))
-                            : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: GridView.builder(
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2, // Number of columns
-                                    crossAxisSpacing: 10,
-                                    mainAxisSpacing: 10,
-                                    childAspectRatio:
-                                        0.75, // Adjust this to fit your design
+                              return Stack(
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10.r),
+                                    child: Image.network(
+                                      post['image'],
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
-                                  itemCount: postDetails.length,
-                                  itemBuilder: (context, index) {
-                                    final post = postDetails[index];
-                                    return ClipRRect(
-                                      borderRadius: BorderRadius.circular(10.r),
-                                      child: Image.network(
-                                        post['image'],
-                                        fit: BoxFit.cover,
-                                        height: 150.h,
-                                        width: double.infinity,
-                                      ),
-                                    );
-                                  },
-                                ),
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        FirebaseFirestore.instance
+                                            .collection('posts')
+                                            .doc(userId)
+                                            .update({
+                                          'postDetails':
+                                              FieldValue.arrayRemove([post])
+                                        });
+                                      },
+                                      child: Icon(Icons.delete,
+                                          color: Colors.red, size: 24),
+                                    ),
+                                  ),
+                                ],
                               );
-                      }))
+                            },
+                          );
+                  },
+                ),
+              ),
             ],
           ),
         ),
       ),
-    ));
+    );
   }
 }

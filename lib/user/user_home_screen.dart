@@ -19,6 +19,8 @@ class UserHomeScreen extends StatefulWidget {
 class _UserHomeScreenState extends State<UserHomeScreen> {
   bool isLoading = false;
   List<Map<String, dynamic>> studioData = [];
+  List<Map<String, dynamic>> filteredData = [];
+  String searchQuery = "";
   String _currentLocation = "Fetching location...";
   double lat = 0.0;
   double lng = 0.0;
@@ -32,13 +34,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     _fetchUserProfileImage();
   }
 
-  // Fetch User Profile Image from Firestore
   Future<void> _fetchUserProfileImage() async {
     try {
       String uid = FirebaseAuth.instance.currentUser!.uid;
       DocumentSnapshot<Map<String, dynamic>> userDoc =
           await FirebaseFirestore.instance.collection('users').doc(uid).get();
-
       if (userDoc.exists && userDoc.data() != null) {
         setState(() {
           profileImageUrl = userDoc.data()!['profileImage'] ?? "";
@@ -83,19 +83,44 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
   Future<void> getData() async {
     try {
       setState(() => isLoading = true);
-
       QuerySnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance.collection('photographer').get();
+          await FirebaseFirestore.instance.collection('photgrapher').get();
 
-      studioData = snapshot.docs
+      studioData = await Future.wait(snapshot.docs
           .where((doc) => doc.data()['isApproved'] == true)
-          .map((doc) => {'data': doc.data(), 'id': doc.id})
-          .toList();
+          .map((doc) async {
+        Map<String, dynamic> data = doc.data();
+        String photographerId = doc.id;
 
+        // Fetch reviews count
+        QuerySnapshot<Map<String, dynamic>> reviewsSnapshot =
+            await FirebaseFirestore.instance
+                .collection('reviews')
+                .where('photographerId', isEqualTo: photographerId)
+                .get();
+        int reviewsCount = reviewsSnapshot.size;
+
+        // Fetch starting price
+        data['startingPrice'] = data['startingPrice']?.toString() ?? "N/A";
+        data['reviewsCount'] = reviewsCount;
+        return {'data': data, 'id': photographerId};
+      }).toList());
+
+      filteredData = List.from(studioData);
       setState(() => isLoading = false);
     } catch (e) {
       setState(() => isLoading = false);
     }
+  }
+
+  void _filterSearchResults(String query) {
+    setState(() {
+      searchQuery = query;
+      filteredData = studioData.where((studio) {
+        final studioName = studio['data']['company'].toLowerCase();
+        return studioName.contains(query.toLowerCase());
+      }).toList();
+    });
   }
 
   @override
@@ -113,26 +138,16 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     children: [
                       Icon(Icons.location_pin, color: Colors.purple),
                       SizedBox(width: 5.w),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _currentLocation,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 18.sp),
-                          ),
-                        ],
-                      ),
+                      Text(_currentLocation,
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18.sp)),
                     ],
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UserProfileScreen()),
-                      );
-                    },
+                            builder: (context) => UserProfileScreen())),
                     child: CircleAvatar(
                       radius: 20.r,
                       backgroundImage:
@@ -145,13 +160,13 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 10.sp),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
               child: Row(
                 children: [
                   Expanded(
                     child: TextField(
+                      onChanged: _filterSearchResults,
                       decoration: InputDecoration(
                         hintText: "Search",
                         prefixIcon:
@@ -166,67 +181,163 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                     ),
                   ),
                   SizedBox(width: 10.w),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserGoogleMapScreen(
-                            latlnglist: [],
-                            latlong: LatLng(lat, lng),
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.green,
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 15),
-                      child: Icon(Icons.map),
+                  Container(
+                    height: 50.h, // Same height as the search bar
+                    width: 50.h, // Keep it square for a clean look
+                    decoration: BoxDecoration(
+                      color: Colors.green, // Green background
+                      borderRadius:
+                          BorderRadius.circular(10.r), // Same as search box
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.explore_rounded,
+                          color: Colors.white, size: 26.sp),
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => UserGoogleMapScreen(
+                                latlnglist: [],
+                                latlong: LatLng(lat, lng),
+                              ),
+                            ));
+                      },
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20.h),
             isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : studioData.isNotEmpty
+                : filteredData.isNotEmpty
                     ? Expanded(
                         child: GridView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                          padding: EdgeInsets.all(10.w),
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 5,
-                            mainAxisSpacing: 5,
-                            childAspectRatio: 0.7,
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2, // Two cards per row
+                            crossAxisSpacing: 12.w,
+                            mainAxisSpacing: 12.h,
+                            childAspectRatio: 0.9, // Slightly taller
                           ),
-                          itemCount: studioData.length,
+                          itemCount: filteredData.length,
                           itemBuilder: (context, index) {
-                            final photographer = studioData[index]['data'];
+                            final photographer = filteredData[index]['data'];
+                            final photographerId = filteredData[index]['id'];
+
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        PhotographerDetailsScreen(
-                                      studioDetails: photographer,
-                                      pid: studioData[index]['id'],
-                                    ),
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PhotographerDetailsScreen(
+                                    studioDetails: photographer,
+                                    pid: photographerId,
                                   ),
-                                );
-                              },
-                              child: Card(child: Text(photographer['company'])),
+                                ),
+                              ),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      15.r), // Rounded corners
+                                ),
+                                elevation: 4, // Soft shadow effect
+                                child: Padding(
+                                  padding: EdgeInsets.all(10.w),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment
+                                        .start, // Align text left
+                                    children: [
+                                      // Logo Container (Larger & Rounded)
+                                      Container(
+                                        width: double.infinity,
+                                        height: 100.h, // Increased image size
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[200],
+                                          borderRadius: BorderRadius.circular(
+                                              12.r), // Rounded corners
+                                        ),
+                                        child: photographer['companyLogo'] !=
+                                                    null &&
+                                                photographer['companyLogo']
+                                                    .isNotEmpty
+                                            ? ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.r),
+                                                child: Image.network(
+                                                  photographer['companyLogo'],
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : Center(
+                                                child: Text(
+                                                  "LOGO HERE",
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black54,
+                                                  ),
+                                                ),
+                                              ),
+                                      ),
+                                      SizedBox(height: 8.h),
+
+                                      // Studio Name (Aligned Left)
+                                      Text(
+                                        photographer['company'] ??
+                                            "Unknown Studio",
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.deepPurple,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+
+                                      SizedBox(height: 4.h),
+
+                                      // Price & Rating (Well-Aligned)
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "\₹${photographer['startingPrice']}",
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          // Row(
+                                          //   children: [
+                                          //     Icon(Icons.star,
+                                          //         color: Colors.amber,
+                                          //         size: 16.sp),
+                                          //     SizedBox(width: 2.w),
+                                          //     Text(
+                                          //       photographer['rating']
+                                          //               ?.toStringAsFixed(1) ??
+                                          //           "N/A",
+                                          //       style: TextStyle(
+                                          //         fontSize: 13.sp,
+                                          //         fontWeight: FontWeight.bold,
+                                          //       ),
+                                          //     ),
+                                          //   ],
+                                          // ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             );
                           },
                         ),
                       )
-                    : Center(child: Text('No data available'))
+                    : Center(child: Text('No results found')),
           ],
         ),
       ),

@@ -2,168 +2,216 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class PhotographerOrdersScreen extends StatefulWidget {
   const PhotographerOrdersScreen({super.key});
 
   @override
-  State<PhotographerOrdersScreen> createState() => _PhotographerOrdersScreenState();
+  State<PhotographerOrdersScreen> createState() =>
+      _PhotographerOrdersScreenState();
 }
 
 class _PhotographerOrdersScreenState extends State<PhotographerOrdersScreen> {
-
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
+  TextEditingController _dateController = TextEditingController();
 
-Future<List<Map<String, dynamic>>> fetchOrders() async {
-  // Fetch the orders for the current user
-  final ordersQuery = await FirebaseFirestore.instance
-      .collection('bookedProducts')
-      .where('userId', isEqualTo: currentUserId)
-      .get();
-
-  List<Map<String, dynamic>> orders = [];
-
-  for (var order in ordersQuery.docs) {
-    var orderData = order.data();
-
-    // Retrieve the product ID from the order document
-    final productId = orderData['productId'];
-
-    if (productId != null) {
-      try {
-        // Fetch the product details from the storeProducts collection
-        final productSnapshot = await FirebaseFirestore.instance
-            .collection('storeProducts')
-            .doc(productId)
-            .get();
-
-        if (productSnapshot.exists) {
-          final productData = productSnapshot.data() as Map<String, dynamic>;
-
-          // Combine the order data with the product data
-          orders.add({
-            'orderDetails': orderData,
-            'productDetails': productData,
-          });
-        } else {
-          print('Product with ID $productId does not exist');
-        }
-      } catch (e) {
-        print('Error fetching product with ID $productId: $e');
-      }
-    } else {
-      print('No product ID found in order: ${order.id}');
-    }
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
   }
 
-  return orders;
-}
+  Future<List<Map<String, dynamic>>> fetchOrders() async {
+    final ordersQuery = await FirebaseFirestore.instance
+        .collection('bookedProducts')
+        .where('userId', isEqualTo: currentUserId)
+        .get();
 
-  
+    List<Map<String, dynamic>> orders = [];
+
+    for (var order in ordersQuery.docs) {
+      var orderData = order.data();
+      final productId = orderData['productId'];
+      final bookingDate = orderData['bookingDate'] ?? 'No Date';
+
+      if (productId != null) {
+        try {
+          final productSnapshot = await FirebaseFirestore.instance
+              .collection('storeProducts')
+              .doc(productId)
+              .get();
+
+          if (productSnapshot.exists) {
+            final productData = productSnapshot.data() as Map<String, dynamic>;
+
+            orders.add({
+              'orderDetails': orderData,
+              'productDetails': productData,
+            });
+
+            // Set "From Date" in the TextEditingController
+            _dateController.text = bookingDate;
+          }
+        } catch (e) {
+          print('Error fetching product with ID $productId: $e');
+        }
+      }
+    }
+    return orders;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              transform: GradientRotation(11),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-                Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-                Colors.white, // White (Bottom)
-              ],
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'My Orders',
+          style: GoogleFonts.poppins(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.white),
+        ),
+        backgroundColor: Colors.blue[900],
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade900, Colors.blue.shade600],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 60, 15, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Orders',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.bold,
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: fetchOrders(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(color: Colors.blue[900]),
+                );
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error fetching data',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.red),
                   ),
-                ),
-                SizedBox(height: 10.h),
-                Expanded(
-                  child: FutureBuilder<List<Map<String, dynamic>>>( 
-                    future: fetchOrders(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error fetching data'));
-                      }
-                      if (snapshot.hasData && snapshot.data!.isEmpty) {
-                        return Center(child: Text('No orders found'));
-                      }
+                );
+              }
+              if (snapshot.hasData && snapshot.data!.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No orders found',
+                    style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                  ),
+                );
+              }
 
-                      final orderProducts = snapshot.data ?? [];
+              final orderProducts = snapshot.data ?? [];
 
-                      return ListView.builder(
-                        itemCount: orderProducts.length,
-                        itemBuilder: (context, index) {
-                          final productData = orderProducts[index];
-                          final productName = productData['productDetails']['productDetails'][0]['name'] ?? 'No Name';
-                          final price = productData['productDetails']['productDetails'][0]['price'] ?? 'No Price';
-                          final imageUrl = productData['productDetails']['productDetails'][0]['image'] ?? '';
-                          final bookingDays = productData['orderDetails']['bookingDays'] ?? '0';
-                          final bookingDate = productData['orderDetails']['bookingDate'] ?? 'No Date';
-                          final bookedToDate = productData['orderDetails']['bookedToDate']??'No Date';
+              return ListView.builder(
+                itemCount: orderProducts.length,
+                itemBuilder: (context, index) {
+                  final productData = orderProducts[index];
+                  final productName = productData['productDetails']
+                          ['productDetails'][0]['name'] ??
+                      'No Name';
+                  final price = productData['productDetails']['productDetails']
+                          [0]['price'] ??
+                      'No Price';
+                  final imageUrl = productData['productDetails']
+                          ['productDetails'][0]['image'] ??
+                      '';
+                  final bookingDays =
+                      productData['orderDetails']['bookingDays'] ?? '0';
 
-                          return Container(
-                            width: double.infinity,
-                            height: 100.h,
-                            margin: EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                            ),
-                            child: Row(
+                  return Card(
+                    margin: EdgeInsets.symmetric(vertical: 8.h),
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(12.r),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: imageUrl.isNotEmpty
+                                ? Image.network(
+                                    imageUrl,
+                                    height: 100.h,
+                                    width: 100.w,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Icon(Icons.image_not_supported, size: 50.sp),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(
-                                          imageUrl,
-                                          height: 100,
-                                          width: 100,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Icon(Icons.image_not_supported),
+                                Text(
+                                  productName,
+                                  style: TextStyle(
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                                SizedBox(width: 10.w),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                SizedBox(height: 4.h),
+                                Row(
                                   children: [
-                                    Text(
-                                      productName, // Show username instead of product name
-                                      style: TextStyle(fontSize: 18.sp),
+                                    Icon(FontAwesomeIcons.solidCalendarDays,
+                                        size: 14.sp, color: Colors.blue),
+                                    SizedBox(width: 6.w),
+                                    Expanded(
+                                      child: TextField(
+                                        controller: _dateController,
+                                        readOnly: true,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          isDense: true,
+                                        ),
+                                        style: TextStyle(fontSize: 14.sp),
+                                      ),
                                     ),
-                                    SizedBox(height: 5),
-                                    Text('Booking Days: $bookingDays'),
-                                    SizedBox(height: 5),
-                                    Text('Booked To: $bookedToDate'),
+                                  ],
+                                ),
+                                SizedBox(height: 4.h),
+                                Row(
+                                  children: [
+                                    Icon(FontAwesomeIcons.solidClock,
+                                        size: 14.sp, color: Colors.orange),
+                                    SizedBox(width: 6.w),
+                                    Text(
+                                      'Duration: $bookingDays days',
+                                      style: TextStyle(fontSize: 14.sp),
+                                    ),
                                   ],
                                 ),
                               ],
                             ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Text(
+                            '\₹$price',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[900],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),

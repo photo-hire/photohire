@@ -89,7 +89,7 @@ class UserBookingListScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              booking['studio'],
+                              booking['company'] ?? 'Photographer Name',
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -131,6 +131,20 @@ class UserBookingListScreen extends StatelessWidget {
                                   booking['phone'],
                                   style: TextStyle(
                                       fontSize: 16, color: Colors.black87),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 5),
+                            Row(
+                              children: [
+                                Icon(Icons.monetization_on,
+                                    color: Colors.green, size: 16),
+                                SizedBox(width: 5),
+                                Text(
+                                  '₹${booking['startingPrice'] ?? 'N/A'} / session',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ],
                             ),

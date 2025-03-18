@@ -34,7 +34,7 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
     super.initState();
     _pageController = PageController();
     _fetchPostDetails(); // Fetch the post details when the screen is initialized
-     _fetchReviews(); // Fetch reviews when the screen is initialized
+    _fetchReviews(); // Fetch reviews when the screen is initialized
   }
 
   @override
@@ -377,7 +377,6 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                       MaterialPageRoute(
                                           builder: (context) => ChatScreen(
                                                 studioId: widget.pid!,
-                                             
                                                 userId: FirebaseAuth
                                                     .instance.currentUser!.uid,
                                                 userName: 'hello',
@@ -476,13 +475,16 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                   width: double.infinity,
                                   child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(255, 11, 86, 147),
-                                      
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 11, 86, 147),
                                     ),
                                     onPressed: () {
                                       _showReviewDialog();
                                     },
-                                    child: Text('Add Review',style: TextStyle(color: Colors.white),),
+                                    child: Text(
+                                      'Add Review',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],
