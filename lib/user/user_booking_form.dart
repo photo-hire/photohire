@@ -9,8 +9,11 @@ class BookingForm extends StatefulWidget {
   final Map<String, dynamic> studioDetails;
   final String studioId;
 
-  const BookingForm(
-      {super.key, required this.studioDetails, required this.studioId});
+  const BookingForm({
+    super.key,
+    required this.studioDetails,
+    required this.studioId,
+  });
 
   @override
   State<BookingForm> createState() => _BookingFormState();
@@ -23,12 +26,13 @@ class _BookingFormState extends State<BookingForm> {
   final _notesController = TextEditingController();
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-
   late Razorpay _razorpay;
+  int _price = 0; // Store price dynamically
 
   @override
   void initState() {
     super.initState();
+    _fetchPrice();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
@@ -39,6 +43,22 @@ class _BookingFormState extends State<BookingForm> {
   void dispose() {
     _razorpay.clear();
     super.dispose();
+  }
+
+  // Fetch Photographer's Price from Firestore
+  Future<void> _fetchPrice() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('photgrapher')
+          .doc(widget.studioId)
+          .get();
+      setState(() {
+        _price =
+            (doc['startingPrice'] as num).toInt() * 100; // Convert ₹ to paisa
+      });
+    } catch (e) {
+      debugPrint('Error fetching price: $e');
+    }
   }
 
   // Select Date
@@ -63,8 +83,20 @@ class _BookingFormState extends State<BookingForm> {
     }
   }
 
+  // Check for existing bookings
+  Future<bool> _isAlreadyBooked() async {
+    QuerySnapshot bookingQuery = await FirebaseFirestore.instance
+        .collection('photographerbookings')
+        .where('studio', isEqualTo: widget.studioId)
+        .where('date',
+            isEqualTo: DateFormat('yyyy-MM-dd').format(_selectedDate!))
+        .get();
+
+    return bookingQuery.docs.isNotEmpty;
+  }
+
   // Proceed to Payment
-  void _proceedToPayment() {
+  void _proceedToPayment() async {
     if (!_formKey.currentState!.validate() ||
         _selectedDate == null ||
         _selectedTime == null) {
@@ -74,9 +106,16 @@ class _BookingFormState extends State<BookingForm> {
       return;
     }
 
+    if (await _isAlreadyBooked()) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('This date is already booked! Choose another.'),
+          backgroundColor: Colors.orange));
+      return;
+    }
+
     var options = {
-      'key': 'rzp_test_QLvdqmBfoYL2Eu', // Replace with your Razorpay Key
-      'amount': 50000, // Amount in paisa (₹500 = 50000)
+      'key': 'rzp_test_QLvdqmBfoYL2Eu', // Replace with actual Razorpay Key
+      'amount': _price, // Use dynamically fetched price
       'name': widget.studioDetails['company'],
       'description': 'Photography Booking',
       'prefill': {
@@ -128,8 +167,10 @@ class _BookingFormState extends State<BookingForm> {
       'paymentId': paymentId,
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text('Booking Successful!'), backgroundColor: Colors.green));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+          content: Text('Booking Successful!'), backgroundColor: Colors.green),
+    );
   }
 
   @override
@@ -142,8 +183,6 @@ class _BookingFormState extends State<BookingForm> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 100.h),
-            _buildStudioDetails(),
-            SizedBox(height: 24.h),
             _buildDateSelector(),
             SizedBox(height: 24.h),
             _buildTimeSelector(),
@@ -155,40 +194,6 @@ class _BookingFormState extends State<BookingForm> {
             _buildTextField(_notesController, 'Notes', Icons.note),
             SizedBox(height: 24.h),
             _buildSubmitButton(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStudioDetails() {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-      child: Padding(
-        padding: EdgeInsets.all(16.r),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 30.r,
-              backgroundImage: widget.studioDetails['companyLogo'] != null
-                  ? NetworkImage(widget.studioDetails['companyLogo'])
-                  : null,
-              child: widget.studioDetails['companyLogo'] == null
-                  ? Icon(Icons.camera_alt, size: 30.r)
-                  : null,
-            ),
-            SizedBox(width: 16.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(widget.studioDetails['company'],
-                    style: TextStyle(
-                        fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                Text('${widget.studioDetails['role']} Photographer',
-                    style: TextStyle(fontSize: 14.sp, color: Colors.grey)),
-              ],
-            ),
           ],
         ),
       ),
@@ -222,11 +227,12 @@ class _BookingFormState extends State<BookingForm> {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.9)),
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.r)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.9),
+      ),
       validator: (value) =>
           value == null || value.isEmpty ? 'Please enter $label' : null,
     );
@@ -236,20 +242,10 @@ class _BookingFormState extends State<BookingForm> {
     return Container(
       padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
-          borderRadius: BorderRadius.circular(8.r),
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                spreadRadius: 2,
-                offset: const Offset(0, 4))
-          ]),
-      child: Row(children: [
-        Icon(icon, color: Colors.blue[900]),
-        SizedBox(width: 16.w),
-        Text(text, style: TextStyle(fontSize: 16.sp))
-      ]),
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Row(children: [Icon(icon), SizedBox(width: 16.w), Text(text)]),
     );
   }
 
@@ -257,9 +253,7 @@ class _BookingFormState extends State<BookingForm> {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _proceedToPayment,
-        child: const Text('Proceed to Payment'),
-      ),
+          onPressed: _proceedToPayment, child: Text('Proceed to Payment')),
     );
   }
 }

@@ -140,7 +140,7 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
                       SizedBox(width: 5.w),
                       Text(_currentLocation,
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18.sp)),
+                              fontWeight: FontWeight.bold, fontSize: 20.sp)),
                     ],
                   ),
                   GestureDetector(

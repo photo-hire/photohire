@@ -1,9 +1,11 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'photographer_profile_screen.dart';
+import 'package:photohire/photographer/Detailscreen.dart';
+import 'package:photohire/photographer/photographer_profile_screen.dart';
 
 class PhotographerScreen extends StatefulWidget {
   @override
@@ -20,247 +22,238 @@ class _PhotographerScreenState extends State<PhotographerScreen> {
   String searchQuery = "";
   TextEditingController searchController = TextEditingController();
   String currentUserId = "";
+  String profileImageUrl = "";
+  String studioName = "Studio";
 
   @override
   void initState() {
     super.initState();
     User? user = auth.currentUser;
     if (user != null) {
-      setState(() {
-        currentUserId = user.uid;
-      });
+      currentUserId = user.uid;
+      fetchProfileImageAndName();
     }
   }
 
-  Stream<DocumentSnapshot<Object?>>? getStudioStream() {
-    if (currentUserId.isNotEmpty) {
-      return photographers.doc(currentUserId).snapshots();
-    } else {
-      return null;
+  void fetchProfileImageAndName() async {
+    DocumentSnapshot photographerDoc =
+        await photographers.doc(currentUserId).get();
+    if (photographerDoc.exists) {
+      setState(() {
+        profileImageUrl = photographerDoc.get('companyLogo') ?? "";
+        studioName = photographerDoc.get('company') ?? "Studio";
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Prevent bottom overflow
       appBar: AppBar(
-        title: StreamBuilder<DocumentSnapshot>(
-          stream: getStudioStream(),
-          builder: (context, snapshot) {
-            String studioName = "Studio";
-            if (snapshot.hasData && snapshot.data!.exists) {
-              var data = snapshot.data!.data() as Map<String, dynamic>;
-              studioName = data['company'] ?? "Studio";
-            }
-            return Text(
-              "Welcome, $studioName",
-              style: TextStyle(
-                  fontSize: 20.sp,
+        title: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: "Welcome\n",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16.sp, // Adjust size for the first line
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextSpan(
+                text: studioName,
+                style: TextStyle(
+                  color: Colors.deepPurple,
+                  fontSize: 22.sp, // Adjust size for the second line
                   fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple),
-            );
-          },
+                ),
+              ),
+            ],
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 1,
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16.w),
-            child: StreamBuilder<DocumentSnapshot>(
-              stream: getStudioStream(),
+            child: GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PhotographerProfileScreen(),
+                ),
+              ),
+              child: CircleAvatar(
+                radius: 20.r,
+                backgroundImage: profileImageUrl.isNotEmpty
+                    ? NetworkImage(profileImageUrl)
+                    : AssetImage('asset/image/avatar.png') as ImageProvider,
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by studio name...',
+                prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: posts.snapshots(),
               builder: (context, snapshot) {
-                String companyLogoUrl = "";
-                if (snapshot.hasData && snapshot.data!.exists) {
-                  var data = snapshot.data!.data() as Map<String, dynamic>;
-                  companyLogoUrl = data['companyLogo'] ?? "";
+                if (!snapshot.hasData) {
+                  return Center(child: CircularProgressIndicator());
                 }
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => PhotographerProfileScreen()),
+                List<Map<String, dynamic>> imageList = [];
+
+                for (var doc in snapshot.data!.docs) {
+                  var data = doc.data() as Map<String, dynamic>;
+                  var studioId = data['userId'] ?? "";
+                  if (studioId == currentUserId) continue;
+
+                  var images = (data['postDetails'] as List?) ?? [];
+                  for (var imageDoc in images) {
+                    if (imageDoc is Map<String, dynamic> &&
+                        imageDoc.containsKey('image')) {
+                      imageList.add({
+                        'imageUrl': imageDoc['image'],
+                        'studioId': studioId
+                      });
+                    }
+                  }
+                }
+
+                imageList.shuffle(Random()); // Shuffle images
+
+                imageList.sort((a, b) {
+                  var aStudioId = a['studioId'];
+                  var bStudioId = b['studioId'];
+                  bool aMatches = aStudioId.toLowerCase().contains(searchQuery);
+                  bool bMatches = bStudioId.toLowerCase().contains(searchQuery);
+                  return aMatches == bMatches ? 0 : (aMatches ? -1 : 1);
+                });
+
+                return GridView.builder(
+                  padding: EdgeInsets.all(10.w),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12.w,
+                    mainAxisSpacing: 12.h,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: imageList.length,
+                  itemBuilder: (context, index) {
+                    var imageData = imageList[index];
+                    var imageUrl = imageData['imageUrl'];
+                    var studioId = imageData['studioId'];
+
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: photographers.doc(studioId).get(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData ||
+                            !(snapshot.data?.exists ?? false)) {
+                          return SizedBox.shrink();
+                        }
+
+                        var studioData =
+                            snapshot.data!.data() as Map<String, dynamic>?;
+
+                        var studioName = studioData?['company'] ?? "Studio";
+
+                        if (searchQuery.isNotEmpty &&
+                            !studioName.toLowerCase().contains(searchQuery)) {
+                          return SizedBox.shrink();
+                        }
+
+                        return GestureDetector(
+                          onTap: () {
+                            if (studioData != null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DetailsScreen(
+                                    photographerId: studioId,
+                                    studioName:
+                                        studioData['company'] ?? "Studio",
+                                    companyLogo:
+                                        studioData['companyLogo'] ?? "",
+                                    startingPrice:
+                                        studioData['startingPrice'] ??
+                                            "Not Available",
+                                    email: studioData['email'] ?? "No Email",
+                                    phone: studioData['phone'] ?? "No Phone",
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content:
+                                        Text('Studio details not available')),
+                              );
+                            }
+                          },
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(15),
+                            child: Stack(
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => Center(
+                                      child: CircularProgressIndicator()),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.error),
+                                ),
+                                Positioned(
+                                  bottom: 8.h,
+                                  left: 8.w,
+                                  child: Text(
+                                    studioName,
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.black,
+                                      // backgroundColor:
+                                      //     Colors.black.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
-                  child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: companyLogoUrl.isNotEmpty
-                        ? NetworkImage(companyLogoUrl)
-                        : null,
-                    child: companyLogoUrl.isEmpty
-                        ? Icon(Icons.person, color: Colors.white)
-                        : null,
-                  ),
                 );
               },
             ),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-              child: TextField(
-                controller: searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search for photographers...',
-                  prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 15.h),
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value.toLowerCase();
-                  });
-                },
-              ),
-            ),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: posts.snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No Posts Found'));
-                  }
-
-                  var filteredDocs = snapshot.data!.docs.where((doc) {
-                    var data = doc.data() as Map<String, dynamic>?;
-                    var studioId = data?['userId'] ?? "";
-                    return studioId != currentUserId;
-                  }).toList();
-
-                  return GridView.builder(
-                    padding: EdgeInsets.all(10.w),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8.w,
-                      mainAxisSpacing: 8.h,
-                      childAspectRatio: 1,
-                    ),
-                    itemCount: filteredDocs.length,
-                    shrinkWrap: true,
-                    physics: BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      var post =
-                          filteredDocs[index].data() as Map<String, dynamic>?;
-
-                      if (post == null) return SizedBox.shrink();
-
-                      var imageUrl = post['imageUrl'] ?? '';
-                      var studioId = post['userId'] ?? '';
-
-                      return FutureBuilder<DocumentSnapshot>(
-                        future: photographers.doc(studioId).get(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return SizedBox();
-                          }
-                          if (!snapshot.hasData ||
-                              !(snapshot.data?.exists ?? false)) {
-                            return SizedBox.shrink();
-                          }
-
-                          var studioData =
-                              snapshot.data!.data() as Map<String, dynamic>?;
-
-                          if (studioData == null) return SizedBox.shrink();
-
-                          var studioName = studioData['company'] ?? "Studio";
-
-                          if (searchQuery.isNotEmpty &&
-                              !studioName.toLowerCase().contains(searchQuery)) {
-                            return SizedBox.shrink();
-                          }
-
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PhotoDetailScreen(imageUrl: imageUrl),
-                                ),
-                              );
-                            },
-                            child: Column(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: CachedNetworkImage(
-                                    imageUrl: imageUrl,
-                                    width: double.infinity,
-                                    height: 100.h,
-                                    fit: BoxFit.cover,
-                                    placeholder: (context, url) => Center(
-                                        child: CircularProgressIndicator()),
-                                    errorWidget: (context, url, error) =>
-                                        Icon(Icons.error, color: Colors.red),
-                                  ),
-                                ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  studioName,
-                                  style: TextStyle(
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.bold),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class PhotoDetailScreen extends StatelessWidget {
-  final String imageUrl;
-
-  PhotoDetailScreen({required this.imageUrl});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Photo Details"),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: Center(
-        child: CachedNetworkImage(
-          imageUrl: imageUrl,
-          width: double.infinity,
-          fit: BoxFit.contain,
-          placeholder: (context, url) =>
-              Center(child: CircularProgressIndicator()),
-          errorWidget: (context, url, error) =>
-              Icon(Icons.error, size: 50, color: Colors.red),
-        ),
       ),
     );
   }

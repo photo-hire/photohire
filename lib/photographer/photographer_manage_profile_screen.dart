@@ -58,21 +58,49 @@ class _PhotographerManageProfileScreenState
     }
   }
 
+  void _confirmDelete(Map<String, dynamic> post) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Post?'),
+        content: Text('Are you sure you want to delete this post?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel', style: TextStyle(color: Colors.black)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await FirebaseFirestore.instance
+                  .collection('posts')
+                  .doc(userId)
+                  .update({
+                'postDetails': FieldValue.arrayRemove([post])
+              });
+            },
+            child: Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-            title: Text(
-          'Manage Your Profile',
-          style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700),
-        )),
+          title: Text(
+            'Manage Your Profile',
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w700),
+          ),
+        ),
         body: Padding(
           padding: EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 🔹 Add New Post Button
               GestureDetector(
                 onTap: () {
                   showDialog(
@@ -85,21 +113,32 @@ class _PhotographerManageProfileScreenState
                             content: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                // 🔹 Image Picker
                                 GestureDetector(
                                   onTap: () async {
                                     await _pickImage();
                                     setDialogState(() {});
                                   },
                                   child: Container(
-                                    height: 150.h,
+                                    height: 160.h,
+                                    width: double.infinity,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.r),
-                                      border: Border.all(color: Colors.black),
+                                      border: Border.all(color: Colors.black26),
+                                      color: Colors.grey.shade200,
                                     ),
                                     child: imageFile == null
-                                        ? Center(
-                                            child: Icon(Icons.upload, size: 40),
+                                        ? Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.cloud_upload,
+                                                  size: 40, color: Colors.blue),
+                                              SizedBox(height: 10.h),
+                                              Text('Tap to upload image',
+                                                  style: TextStyle(
+                                                      fontSize: 14.sp,
+                                                      color: Colors.black54)),
+                                            ],
                                           )
                                         : ClipRRect(
                                             borderRadius:
@@ -112,8 +151,6 @@ class _PhotographerManageProfileScreenState
                                   ),
                                 ),
                                 SizedBox(height: 16.h),
-
-                                // 🔹 Title Input
                                 TextField(
                                   controller: titleController,
                                   decoration: InputDecoration(
@@ -122,8 +159,6 @@ class _PhotographerManageProfileScreenState
                                   ),
                                 ),
                                 SizedBox(height: 16.h),
-
-                                // 🔹 Description Input
                                 TextField(
                                   controller: descController,
                                   decoration: InputDecoration(
@@ -132,8 +167,6 @@ class _PhotographerManageProfileScreenState
                                   ),
                                 ),
                                 SizedBox(height: 24.h),
-
-                                // 🔹 Submit Button
                                 GestureDetector(
                                   onTap: () async {
                                     try {
@@ -200,16 +233,13 @@ class _PhotographerManageProfileScreenState
                                     child: Center(
                                       child: isLoading
                                           ? CircularProgressIndicator(
-                                              color: Colors.white,
-                                            )
-                                          : Text(
-                                              'Submit',
+                                              color: Colors.white)
+                                          : Text('Submit',
                                               style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
+                                                  color: Colors.white)),
                                     ),
                                   ),
-                                )
+                                ),
                               ],
                             ),
                           );
@@ -236,14 +266,11 @@ class _PhotographerManageProfileScreenState
                 ),
               ),
               SizedBox(height: 20.h),
-
-              // 🔹 Your Posts Section
               Text(
                 'Your Posts',
                 style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 10.h),
-
               Expanded(
                 child: StreamBuilder<DocumentSnapshot>(
                   stream: FirebaseFirestore.instance
@@ -251,9 +278,6 @@ class _PhotographerManageProfileScreenState
                       .doc(userId)
                       .snapshots(),
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
                     if (!snapshot.hasData || !snapshot.data!.exists) {
                       return Center(child: Text('No posts found'));
                     }
@@ -262,50 +286,26 @@ class _PhotographerManageProfileScreenState
                         List<Map<String, dynamic>>.from(
                             snapshot.data!['postDetails'] ?? []);
 
-                    return postDetails.isEmpty
-                        ? Center(child: Text('No posts to display'))
-                        : GridView.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 10,
-                              mainAxisSpacing: 10,
-                              childAspectRatio: 1,
-                            ),
-                            itemCount: postDetails.length,
-                            itemBuilder: (context, index) {
-                              final post = postDetails[index];
-
-                              return Stack(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(10.r),
-                                    child: Image.network(
-                                      post['image'],
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    right: 8,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        FirebaseFirestore.instance
-                                            .collection('posts')
-                                            .doc(userId)
-                                            .update({
-                                          'postDetails':
-                                              FieldValue.arrayRemove([post])
-                                        });
-                                      },
-                                      child: Icon(Icons.delete,
-                                          color: Colors.red, size: 24),
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          );
+                    return GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 8.w,
+                        mainAxisSpacing: 8.h,
+                        childAspectRatio: 1,
+                      ),
+                      itemCount: postDetails.length,
+                      itemBuilder: (context, index) {
+                        final post = postDetails[index];
+                        return GestureDetector(
+                          onLongPress: () => _confirmDelete(post),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child:
+                                Image.network(post['image'], fit: BoxFit.cover),
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
               ),

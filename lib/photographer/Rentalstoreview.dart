@@ -139,7 +139,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               });
                             },
                           )
-                        : Icon(Icons.tune, color: Colors.grey.shade700),
+                        : Icon(Icons.abc_outlined, color: Colors.transparent),
                   ),
                 ),
               ),
