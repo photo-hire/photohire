@@ -21,8 +21,8 @@ class _PhotographerRootScreenState extends State<PhotographerRootScreen> {
     PhotographerScreen(), // Photographer Idea Page
     ExploreScreen(), // Explore Page
     PhotographerManageProfileScreen(),
-    StudioChatListScreen(
-      studioId: FirebaseAuth.instance.currentUser!.uid,
+    ChatListScreen(
+      userId: FirebaseAuth.instance.currentUser!.uid,
     ),
   ];
 

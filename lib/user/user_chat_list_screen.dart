@@ -8,223 +8,103 @@ class UserChatListScreen extends StatefulWidget {
   const UserChatListScreen({super.key, required this.userId});
 
   @override
-  _UserChatListScreenState createState() => _UserChatListScreenState();
+  State<UserChatListScreen> createState() => _UserChatListScreenState();
 }
 
 class _UserChatListScreenState extends State<UserChatListScreen> {
-  TextEditingController _searchController = TextEditingController();
-  List<Map<String, dynamic>> _allChats = [];
-  List<Map<String, dynamic>> _filteredChats = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_filterChats);
-  }
-
-  @override
-  void dispose() {
-    _searchController.removeListener(_filterChats);
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  // Fetch studio details from Firestore
-  Future<Map<String, dynamic>?> _fetchStudioDetails(String studioId) async {
-    try {
-      DocumentSnapshot studioDoc = await FirebaseFirestore.instance
-          .collection('photographers')
-          .doc(studioId)
-          .get();
-      if (studioDoc.exists) {
-        return studioDoc.data() as Map<String, dynamic>;
-      }
-    } catch (e) {
-      print("Error fetching studio details: $e");
-    }
-    return null;
-  }
-
-  // Fetch last messages for chats the user is part of
-  Stream<List<Map<String, dynamic>>> fetchUserChats() {
-    return FirebaseFirestore.instance
-        .collection('chats')
-        .where('participants', arrayContains: widget.userId)
-        .snapshots()
-        .asyncMap((chatSnapshot) async {
-      List<Map<String, dynamic>> chatList = [];
-
-      for (var chatDoc in chatSnapshot.docs) {
-        String chatId = chatDoc.id;
-        String studioId = chatDoc['studioId'] ?? '';
-
-        var messageSnapshot = await FirebaseFirestore.instance
-            .collection('chats')
-            .doc(chatId)
-            .collection('messages')
-            .orderBy('timestamp', descending: true)
-            .limit(1)
-            .get();
-
-        String lastMessage = messageSnapshot.docs.isNotEmpty
-            ? messageSnapshot.docs.first['message']
-            : "No messages yet";
-        Timestamp? lastMessageTime = messageSnapshot.docs.isNotEmpty
-            ? messageSnapshot.docs.first['timestamp']
-            : null;
-
-        chatList.add({
-          'chatId': chatId,
-          'studioId': studioId,
-          'lastMessage': lastMessage,
-          'lastMessageTime': lastMessageTime,
-        });
-      }
-
-      _allChats = chatList;
-      _filteredChats = chatList;
-      return chatList;
-    });
-  }
-
-  // Filter chats based on search input
-  void _filterChats() {
-    String query = _searchController.text.toLowerCase();
-    if (query.isEmpty) {
-      setState(() {
-        _filteredChats = _allChats;
-      });
-      return;
-    }
-
-    setState(() {
-      _filteredChats = _allChats
-          .where((chat) =>
-              (chat['studioName'] ?? '').toLowerCase().contains(query) ||
-              (chat['lastMessage'] ?? '').toLowerCase().contains(query))
-          .toList();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+ Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: Text("Messages",
-            style: TextStyle(
-                color: Colors.black,
-                fontSize: 22,
-                fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
+        title: const Text('Chats'),
+        backgroundColor: Colors.blueAccent,
         elevation: 0,
-        centerTitle: false,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: "Search messages...",
-                prefixIcon: Icon(Icons.search, color: Colors.grey),
-                filled: true,
-                fillColor: Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.symmetric(vertical: 14),
-              ),
-            ),
-          ),
-          Expanded(
-            child: StreamBuilder<List<Map<String, dynamic>>>(
-              stream: fetchUserChats(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData || _filteredChats.isEmpty) {
-                  return Center(
-                    child: Text("No Messages Yet!",
-                        style: TextStyle(fontSize: 16, color: Colors.black54)),
-                  );
-                }
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('chats')
+            .where('participants', arrayContains: widget.userId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-                return ListView.builder(
-                  itemCount: _filteredChats.length,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  physics: BouncingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    var chatData = _filteredChats[index];
-                    String studioId = chatData['studioId'] ?? '';
-                    String lastMessage = chatData['lastMessage'];
-                    Timestamp? lastMessageTime = chatData['lastMessageTime'];
-                    String formattedTime = lastMessageTime != null
-                        ? "${lastMessageTime.toDate().hour}:${lastMessageTime.toDate().minute}"
-                        : "";
+          var chats = snapshot.data!.docs;
 
-                    return FutureBuilder<Map<String, dynamic>?>(
-                      future: _fetchStudioDetails(studioId),
-                      builder: (context, studioSnapshot) {
-                        if (!studioSnapshot.hasData) {
-                          return SizedBox.shrink();
-                        }
+          // Group chats by the other user's ID
+          Map<String, List<QueryDocumentSnapshot>> groupedChats = {};
+          for (var chat in chats) {
+            var participants = chat['participants'] as List<dynamic>;
+            var otherUserId = participants.firstWhere(
+              (id) => id != widget.userId,
+              orElse: () => null,
+            );
 
-                        var studio = studioSnapshot.data!;
-                        String studioName = studio['name'] ?? "Unknown";
-                        String? logoUrl = studio['companyLogo'];
+            if (otherUserId != null) {
+              if (!groupedChats.containsKey(otherUserId)) {
+                groupedChats[otherUserId] = [];
+              }
+              groupedChats[otherUserId]!.add(chat);
+            }
+          }
 
-                        chatData['studioName'] = studioName; // Store for search
+          // Display each user with their latest chat
+          return ListView.builder(
+            itemCount: groupedChats.length,
+            itemBuilder: (context, index) {
+              var otherUserId = groupedChats.keys.elementAt(index);
+              var userChats = groupedChats[otherUserId]!;
 
-                        return ListTile(
-                          leading: CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors
-                                .primaries[index % Colors.primaries.length],
-                            backgroundImage:
-                                logoUrl != null ? NetworkImage(logoUrl) : null,
-                            child: logoUrl == null
-                                ? Text(
-                                    studioName[0].toUpperCase(),
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white),
-                                  )
-                                : null,
-                          ),
-                          title: Text(studioName,
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600)),
-                          subtitle: Text(lastMessage,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.black54)),
-                          trailing: Text(formattedTime,
-                              style: TextStyle(
-                                  fontSize: 12, color: Colors.black38)),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatScreen(
-                                  userId: widget.userId,
-                                  studioId: studioId,
-                                  userName: "User",
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
+              // Get the latest chat for this user
+              var latestChat = userChats.last;
+              var lastMessage = latestChat['lastMessage'] ?? 'No messages yet';
+
+              return FutureBuilder<DocumentSnapshot>(
+                future: _firestore.collection('photgrapher').doc(otherUserId).get(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData) {
+                    return const ListTile(
+                      title: Text('Loading...'),
                     );
-                  },
-                );
-              },
-            ),
-          ),
-        ],
+                  }
+
+                  var userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                  var userName = userData?['company'] ?? 'Unknown User';
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.blueAccent,
+                      child: Text(
+                        userName.isNotEmpty ? userName[0] : 'U',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                    title: Text(userName),
+                    subtitle: Text(
+                      lastMessage,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            receiverId: otherUserId,
+                            senderId: widget.userId,
+                            userName: userName,
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
       ),
     );
   }
