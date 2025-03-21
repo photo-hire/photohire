@@ -236,7 +236,7 @@ class _PhotographerScreenState extends State<PhotographerScreen> {
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
-                                      color: Colors.black,
+                                      color: Colors.white,
                                       // backgroundColor:
                                       //     Colors.black.withOpacity(0.5),
                                     ),

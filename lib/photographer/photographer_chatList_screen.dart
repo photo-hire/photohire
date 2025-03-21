@@ -18,8 +18,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chats'),
-        backgroundColor: Colors.blueAccent,
+        title: const Text('Messages'),
+        backgroundColor: Colors.white,
         elevation: 0,
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -68,7 +68,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     );
                   }
 
-                  var userData = userSnapshot.data!.data() as Map<String, dynamic>?;
+                  var userData =
+                      userSnapshot.data!.data() as Map<String, dynamic>?;
                   var userName = userData?['name'] ?? 'Unknown User';
 
                   return ListTile(
