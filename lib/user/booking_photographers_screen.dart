@@ -47,13 +47,31 @@ class _UserBookingScreenState extends State<UserBookingScreen> {
 
   Future<void> _fetchPrice() async {
     try {
+      // Fetch the document from the 'users' collection
       DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('photgrapher')
+          .collection('users')
           .doc(widget.studioId)
           .get();
-      setState(() {
-        _price = (doc['startingPrice'] as num).toInt() * 100;
-      });
+
+      // Debug: Print the document data
+      debugPrint('Fetched Document: ${doc.data()}');
+
+      // Check if the document exists and contains the 'startingPrice' field
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('startingPrice')) {
+          setState(() {
+            _price = (data['startingPrice'] as num).toInt() *
+                100; // Convert to paise for Razorpay
+          });
+          debugPrint('Price fetched successfully: $_price');
+        } else {
+          debugPrint(
+              'Error: startingPrice field does not exist in the document');
+        }
+      } else {
+        debugPrint('Error: Document does not exist');
+      }
     } catch (e) {
       debugPrint('Error fetching price: $e');
     }
@@ -173,89 +191,24 @@ class _UserBookingScreenState extends State<UserBookingScreen> {
   }
 
   @override
-  Widget _buildDateSelector() {
-    return InkWell(
-      onTap: () => _selectDate(context),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'Select Date',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.calendar_today),
-        ),
-        child: Text(
-          _selectedDate == null
-              ? 'Choose a date'
-              : DateFormat('yyyy-MM-dd').format(_selectedDate!),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeSelector() {
-    return InkWell(
-      onTap: () => _selectTime(context),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'Select Time',
-          border: OutlineInputBorder(),
-          prefixIcon: Icon(Icons.access_time),
-        ),
-        child: Text(
-          _selectedTime == null ? 'Choose a time' : _formatTime(_selectedTime!),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-      TextEditingController controller, String label, IconData icon) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(),
-        prefixIcon: Icon(icon),
-      ),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter $label';
-        }
-        return null;
-      },
-    );
-  }
-
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         title: Text(
           'Book ${widget.studioDetails['company']}',
           style: TextStyle(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
-              color: Colors.white),
+              color: Colors.deepPurple),
         ),
         centerTitle: true,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.deepPurple),
       ),
-      extendBody: true,
-      extendBodyBehindAppBar: true,
       body: Container(
         height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            transform: GradientRotation(11),
-            begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 200, 148, 249),
-              Color.fromARGB(255, 162, 213, 255),
-              Colors.white,
-            ],
-          ),
-        ),
+        color: Colors.white, // Set background color to white
         child: SingleChildScrollView(
           padding: EdgeInsets.all(16.r),
           child: Column(
@@ -288,6 +241,66 @@ class _UserBookingScreenState extends State<UserBookingScreen> {
     );
   }
 
+  Widget _buildDateSelector() {
+    return InkWell(
+      onTap: () => _selectDate(context),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Select Date',
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurple),
+          ),
+          prefixIcon: Icon(Icons.calendar_today, color: Colors.deepPurple),
+        ),
+        child: Text(
+          _selectedDate == null
+              ? 'Choose a date'
+              : DateFormat('yyyy-MM-dd').format(_selectedDate!),
+          style: TextStyle(color: Colors.deepPurple),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimeSelector() {
+    return InkWell(
+      onTap: () => _selectTime(context),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: 'Select Time',
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.deepPurple),
+          ),
+          prefixIcon: Icon(Icons.access_time, color: Colors.deepPurple),
+        ),
+        child: Text(
+          _selectedTime == null ? 'Choose a time' : _formatTime(_selectedTime!),
+          style: TextStyle(color: Colors.deepPurple),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData icon) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.deepPurple),
+        ),
+        prefixIcon: Icon(icon, color: Colors.deepPurple),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
+    );
+  }
+
   Widget _buildSubmitButton() {
     return SizedBox(
       width: double.infinity,
@@ -313,12 +326,26 @@ class _UserBookingScreenState extends State<UserBookingScreen> {
 
   Widget _buildStudioCard() {
     return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      color: Colors.white,
       child: ListTile(
         leading: CircleAvatar(
           backgroundImage: NetworkImage(widget.studioDetails['companyLogo']),
         ),
-        title: Text(widget.studioDetails['company']),
-        subtitle: Text('Price: ₹${_price ~/ 100}'),
+        title: Text(
+          widget.studioDetails['company'],
+          style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple),
+        ),
+        subtitle: Text(
+          'Price: ₹${_price ~/ 100}',
+          style: TextStyle(fontSize: 16.sp, color: Colors.deepPurple),
+        ),
       ),
     );
   }

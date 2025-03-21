@@ -379,7 +379,8 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                                 receiverId: widget.pid!,
                                                 senderId: FirebaseAuth
                                                     .instance.currentUser!.uid,
-                                                userName: widget.studioDetails['company'],
+                                                userName: widget
+                                                    .studioDetails['company'],
                                               )));
                                 },
                                 icon:

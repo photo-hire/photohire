@@ -73,9 +73,26 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.studioName, style: TextStyle(fontSize: 20.sp)),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: NetworkImage(widget.studioLogo),
+              radius: 18.r,
+            ),
+            SizedBox(width: 10.w),
+            Text(
+              widget.studioName,
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
         backgroundColor: Colors.blue[900],
         elevation: 0,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -112,20 +129,31 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
                 return ListView.builder(
                   reverse: true,
                   controller: _scrollController,
-                  padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 8.h),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.r, vertical: 8.h),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    final message = messages[index].data() as Map<String, dynamic>;
-                    final isStudio = message['sender'] == FirebaseAuth.instance.currentUser!.uid;
+                    final message =
+                        messages[index].data() as Map<String, dynamic>;
+                    final isStudio = message['sender'] == widget.studioId;
 
                     return Align(
-                      alignment: isStudio ? Alignment.centerRight : Alignment.centerLeft,
+                      alignment: isStudio
+                          ? Alignment.centerRight
+                          : Alignment.centerLeft,
                       child: Container(
-                        margin: EdgeInsets.symmetric(vertical: 4.h, horizontal: 8.w),
-                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
+                        margin: EdgeInsets.symmetric(
+                            vertical: 4.h, horizontal: 8.w),
+                        padding: EdgeInsets.symmetric(
+                            vertical: 8.h, horizontal: 12.w),
                         decoration: BoxDecoration(
-                          color: isStudio ? Colors.blue[900] : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12.r),
+                          color: isStudio ? Colors.blue[900] : Colors.grey[200],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(isStudio ? 12.r : 0),
+                            topRight: Radius.circular(isStudio ? 0 : 12.r),
+                            bottomLeft: Radius.circular(12.r),
+                            bottomRight: Radius.circular(12.r),
+                          ),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +172,9 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
                               ),
                               style: TextStyle(
                                 fontSize: 12.sp,
-                                color: isStudio ? Colors.white70 : Colors.grey[700],
+                                color: isStudio
+                                    ? Colors.white70
+                                    : Colors.grey[700],
                               ),
                             ),
                           ],
@@ -157,32 +187,50 @@ class _StudioChatScreenState extends State<StudioChatScreen> {
             ),
           ),
           // Input Field and Send Button
-          Padding(
-            padding: EdgeInsets.all(16.r),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: TextField(
                     controller: _messageController,
                     decoration: InputDecoration(
-                      hintText: 'Type a message...',
+                      hintText: 'Type a message..',
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.r),
+                        borderRadius: BorderRadius.circular(24.r),
+                        borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.white.withOpacity(0.9),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 14.h),
+                      fillColor: Colors.grey[100],
+                      contentPadding: EdgeInsets.symmetric(
+                          horizontal: 16.r, vertical: 14.h),
                     ),
                     onSubmitted: (_) => _sendMessage(),
                   ),
                 ),
-                SizedBox(width: 16.w),
-                IconButton(
-                  onPressed: _sendMessage,
-                  icon: Icon(
-                    Icons.send,
-                    size: 28.r,
+                SizedBox(width: 8.w),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
                     color: Colors.blue[900],
+                  ),
+                  child: IconButton(
+                    onPressed: _sendMessage,
+                    icon: Icon(
+                      Icons.send,
+                      size: 24.r,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],

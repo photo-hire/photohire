@@ -18,9 +18,17 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: const Text(
+          'Messages',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore
@@ -30,7 +38,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              ),
+            );
           }
 
           var chats = snapshot.data!.docs;
@@ -52,8 +64,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
             }
           }
 
-          return ListView.builder(
+          return ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: 8),
             itemCount: groupedChats.length,
+            separatorBuilder: (context, index) => const Divider(
+              height: 1,
+              color: Colors.grey,
+            ),
             itemBuilder: (context, index) {
               var otherUserId = groupedChats.keys.elementAt(index);
               var chat = groupedChats[otherUserId]!;
@@ -71,19 +88,48 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   var userData =
                       userSnapshot.data!.data() as Map<String, dynamic>?;
                   var userName = userData?['name'] ?? 'Unknown User';
+                  var profileImage = userData?['profileImage'];
 
                   return ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blueAccent,
-                      child: Text(
-                        userName.isNotEmpty ? userName[0] : 'U',
-                        style: const TextStyle(color: Colors.white),
+                      radius: 24,
+                      backgroundImage: profileImage != null
+                          ? NetworkImage(profileImage)
+                          : null,
+                      child: profileImage == null
+                          ? Text(
+                              userName.isNotEmpty ? userName[0] : 'U',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            )
+                          : null,
+                      backgroundColor: profileImage == null
+                          ? Colors.blueAccent
+                          : Colors.transparent,
+                    ),
+                    title: Text(
+                      userName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
-                    title: Text(userName),
                     subtitle: Text(
                       lastMessage,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
                       overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.grey,
                     ),
                     onTap: () {
                       Navigator.push(

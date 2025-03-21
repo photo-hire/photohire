@@ -196,9 +196,9 @@ class _PhotographerProfileScreenState extends State<PhotographerProfileScreen> {
                                   ));
                             }),
                             SizedBox(height: 15),
-                            _buildProfileOption(
-                                Icons.schedule, "Manage Availability", () {}),
-                            SizedBox(height: 15),
+                            // _buildProfileOption(
+                            //     Icons.schedule, "Manage Availability", () {}),
+                            // SizedBox(height: 15),
                             _buildProfileOption(
                                 Icons.book_online, "My Bookings", () {
                               Navigator.push(

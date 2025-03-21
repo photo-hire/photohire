@@ -61,26 +61,23 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.userName),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      extendBodyBehindAppBar: true,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-              Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-              Colors.white, // White (Bottom)
-            ],
+        title: Text(
+          widget.userName,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onBackground,
+            fontWeight: FontWeight.bold,
           ),
         ),
+        backgroundColor: Theme.of(context).colorScheme.background,
+        elevation: 0,
+        iconTheme: IconThemeData(
+          color: Theme.of(context).colorScheme.onBackground,
+        ),
+      ),
+      body: Container(
+        color: Theme.of(context).colorScheme.background,
         child: Column(
           children: [
-            SizedBox(height: 100), // Space for the AppBar
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore
@@ -91,7 +88,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     .snapshots(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return Center(child: CircularProgressIndicator());
+                    return Center(
+                      child: CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    );
                   }
 
                   var messages = snapshot.data!.docs;
@@ -103,34 +104,36 @@ class _ChatScreenState extends State<ChatScreen> {
                       bool isSender = msg['senderId'] == widget.senderId;
 
                       // Align messages to the right if the sender is the current user, otherwise to the left
-                      return Align(
+                      return AnimatedContainer(
+                        duration: Duration(milliseconds: 300),
                         alignment: isSender
                             ? Alignment.centerRight
                             : Alignment.centerLeft,
+                        margin:
+                            EdgeInsets.symmetric(vertical: 6, horizontal: 10),
                         child: Container(
-                          margin: EdgeInsets.symmetric(
-                              vertical: 6, horizontal: 10),
                           padding: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 14),
+                              vertical: 12, horizontal: 16),
                           decoration: BoxDecoration(
                             color: isSender
-                                ? Colors.blueAccent
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(18),
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black12,
+                                color: Colors.black.withOpacity(0.1),
                                 blurRadius: 6,
                                 spreadRadius: 1,
-                                offset: Offset(2, 3)),
+                                offset: Offset(2, 3),
+                              ),
                             ],
                           ),
                           child: Text(
                             msg['message'],
                             style: TextStyle(
                               color: isSender
-                                  ? Colors.white
-                                  : Colors.black87,
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurface,
                               fontSize: 16,
                             ),
                           ),
@@ -142,21 +145,30 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _messageController,
-                      decoration: InputDecoration(
-                        hintText: "Type a message...",
-                        filled: true,
-                        fillColor: Colors.white,
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide.none,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                            offset: Offset(2, 3),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _messageController,
+                        decoration: InputDecoration(
+                          hintText: "Type a message...",
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
+                          border: InputBorder.none,
                         ),
                       ),
                     ),
@@ -164,10 +176,25 @@ class _ChatScreenState extends State<ChatScreen> {
                   SizedBox(width: 10),
                   GestureDetector(
                     onTap: _sendMessage,
-                    child: CircleAvatar(
-                      backgroundColor: Colors.blueAccent,
-                      radius: 24,
-                      child: Icon(Icons.send, color: Colors.white, size: 24),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                            offset: Offset(2, 3),
+                          ),
+                        ],
+                      ),
+                      padding: EdgeInsets.all(14),
+                      child: Icon(
+                        Icons.send,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        size: 24,
+                      ),
                     ),
                   ),
                 ],
