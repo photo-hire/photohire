@@ -70,102 +70,129 @@ class UserBookingListScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final booking =
                           bookings[index].data() as Map<String, dynamic>;
+                      final studioId = booking['studio'];
 
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 12),
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              booking['company'] ?? 'Photographer Name',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today,
-                                    color: Colors.grey, size: 16),
-                                SizedBox(width: 5),
-                                Text(
-                                  booking['date'],
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black87),
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('photgrapher')
+                            .doc(studioId)
+                            .get(),
+                        builder: (context, photographerSnapshot) {
+                          if (photographerSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return Center(child: CircularProgressIndicator());
+                          }
+
+                          if (!photographerSnapshot.hasData ||
+                              !photographerSnapshot.data!.exists) {
+                            return SizedBox();
+                          }
+
+                          final photographerData = photographerSnapshot.data!;
+                          final company = photographerData['company'] ??
+                              'Photographer Name';
+                          final startingPrice =
+                              photographerData['startingPrice'] ?? 'N/A';
+
+                          return Container(
+                            margin: EdgeInsets.only(bottom: 12),
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(15),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  spreadRadius: 2,
                                 ),
                               ],
                             ),
-                            SizedBox(height: 5),
-                            Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(Icons.access_time,
-                                    color: Colors.grey, size: 16),
-                                SizedBox(width: 5),
                                 Text(
-                                  booking['time'],
+                                  company,
                                   style: TextStyle(
-                                      fontSize: 16, color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              children: [
-                                Icon(Icons.phone, color: Colors.grey, size: 16),
-                                SizedBox(width: 5),
-                                Text(
-                                  booking['phone'],
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              children: [
-                                Icon(Icons.monetization_on,
-                                    color: Colors.green, size: 16),
-                                SizedBox(width: 5),
-                                Text(
-                                  '₹${booking['startingPrice'] ?? 'N/A'} / session',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              children: [
-                                Icon(Icons.note, color: Colors.grey, size: 16),
-                                SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    booking['notes'] ?? 'No notes',
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.grey),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blueAccent,
                                   ),
                                 ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Icon(Icons.calendar_today,
+                                        color: Colors.grey, size: 16),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      booking['date'],
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(Icons.access_time,
+                                        color: Colors.grey, size: 16),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      booking['time'],
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(Icons.phone,
+                                        color: Colors.grey, size: 16),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      booking['phone'],
+                                      style: TextStyle(
+                                          fontSize: 16, color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(Icons.monetization_on,
+                                        color: Colors.green, size: 16),
+                                    SizedBox(width: 5),
+                                    Text(
+                                      '₹$startingPrice / session',
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                Row(
+                                  children: [
+                                    Icon(Icons.note,
+                                        color: Colors.grey, size: 16),
+                                    SizedBox(width: 5),
+                                    Expanded(
+                                      child: Text(
+                                        booking['notes'] ?? 'No notes',
+                                        style: TextStyle(
+                                            fontSize: 14, color: Colors.grey),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       );
                     },
                   );

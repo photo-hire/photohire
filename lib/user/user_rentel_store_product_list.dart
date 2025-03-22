@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:photohire/user/user_product_details_screen.dart';
 import 'package:photohire/user/user_profile_screen.dart';
 
 class RentalStoreScreen extends StatefulWidget {
@@ -16,18 +17,20 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
   String _searchQuery = "";
   String? _profileImageUrl;
   bool _isMounted = false;
+  String? _currentUserId;
 
   @override
   void initState() {
     super.initState();
     _isMounted = true;
+    _currentUserId = FirebaseAuth.instance.currentUser?.uid;
     fetchProducts();
     fetchProfileImage();
   }
 
   @override
   void dispose() {
-    _isMounted = false; // Mark widget as disposed
+    _isMounted = false;
     super.dispose();
   }
 
@@ -42,7 +45,10 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
         if (doc['productDetails'] is List) {
           for (var product in doc['productDetails']) {
             if (product is Map<String, dynamic>) {
-              fetchedProducts.add(product);
+              fetchedProducts.add({
+                ...product,
+                'id': doc.id,
+              });
             }
           }
         }
@@ -61,9 +67,11 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
 
   Future<void> fetchProfileImage() async {
     try {
-      String uid = FirebaseAuth.instance.currentUser!.uid;
-      DocumentSnapshot userSnapshot =
-          await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (_currentUserId == null) return;
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(_currentUserId)
+          .get();
 
       if (userSnapshot.exists && _isMounted) {
         setState(() {
@@ -93,20 +101,18 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Text(
-            "Rental Products",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
+        title: Text(
+          "Rental Products",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 16.0),
+            padding: EdgeInsets.only(right: 16.w),
             child: GestureDetector(
               onTap: () {
                 Navigator.push(
@@ -115,7 +121,7 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
                         builder: (context) => UserProfileScreen()));
               },
               child: CircleAvatar(
-                radius: 22,
+                radius: 22.r,
                 backgroundImage: _profileImageUrl != null
                     ? NetworkImage(_profileImageUrl!)
                     : AssetImage('asset/image/avatar.png') as ImageProvider,
@@ -127,7 +133,7 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
             child: TextField(
               onChanged: _filterProducts,
               decoration: InputDecoration(
@@ -136,9 +142,9 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
                 filled: true,
                 fillColor: Colors.grey.shade200,
                 contentPadding:
-                    EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -146,13 +152,19 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
           ),
           Expanded(
             child: _filteredProducts.isEmpty
-                ? Center(child: Text("No products found"))
+                ? Center(
+                    child: Text(
+                      "No products found",
+                      style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                    ),
+                  )
                 : GridView.builder(
-                    padding: EdgeInsets.all(16),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 12.w,
+                      mainAxisSpacing: 12.h,
                       childAspectRatio: 0.75,
                     ),
                     itemCount: _filteredProducts.length,
@@ -168,100 +180,80 @@ class _RentalStoreScreenState extends State<RentalStoreScreen> {
   }
 
   Widget buildProductCard(Map<String, dynamic> product) {
-    String productName = product['name'] ?? 'No Name Available';
-    String productImage = product['image'] ?? 'https://via.placeholder.com/150';
-    String productPrice = product['price']?.toString() ?? '0';
-
-    // Fetch description if available
-    String? productDescription = product['description'];
-
     return GestureDetector(
       onTap: () {
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => ProductBookingScreen(product: product),
-        //   ),
-        // );
+        if (_currentUserId != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => UserProductDetailsScreen(
+                productId: product['id'] ?? '',
+                name: product['name'] ?? 'No Name Available',
+                image: product['image'] ?? 'https://via.placeholder.com/150',
+                desc: product['description'] ?? "No description available",
+                price: product['price']?.toString() ?? '0',
+                userId: _currentUserId!,
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("User not logged in")),
+          );
+        }
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15.r), // Rounded corners
+          borderRadius: BorderRadius.circular(15.r),
         ),
-        elevation: 4, // Soft shadow effect
-        child: Padding(
-          padding: EdgeInsets.all(10.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Container (Rounded & Centered)
-              Container(
-                width: double.infinity,
-                height: 100.h, // Adjusted height
-                decoration: BoxDecoration(
-                  color: Colors.grey[200], // Light grey background
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: productImage.isNotEmpty
-                    ? ClipRRect(
-                        borderRadius: BorderRadius.circular(12.r),
-                        child: Image.network(
-                          productImage,
-                          fit: BoxFit.cover, // Cover the container
-                        ),
-                      )
-                    : Center(
-                        child: Text(
-                          "NO IMAGE",
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black54,
-                          ),
-                        ),
-                      ),
-              ),
-              SizedBox(height: 8.h),
-
-              // Product Name
-              Text(
-                productName,
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-
-              SizedBox(height: 4.h),
-
-              // Price (Left-aligned)
-              Text(
-                "₹$productPrice",
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-
-              SizedBox(height: 4.h),
-
-              // Product Description (Only if available)
-              if (productDescription != null && productDescription.isNotEmpty)
-                Text(
-                  productDescription,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.black54,
+        elevation: 3,
+        shadowColor: Colors.black12,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              flex: 3,
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(15.r)),
+                child: CachedNetworkImage(
+                  imageUrl:
+                      product['image'] ?? 'https://via.placeholder.com/150',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey.shade300,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
-            ],
-          ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(10.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    product['name'] ?? 'No Name Available',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    "₹${product['price']}",
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.green.shade700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

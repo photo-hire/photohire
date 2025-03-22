@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photohire/user/user_rent_product_booking_screen.dart';
+import 'package:photohire/user/user_rental_view_booking.dart';
 import 'user_booking_list_screen.dart'; // Import the photographer bookings screen
 // import 'rental_product_booking_list_screen.dart'; // Import the rental store bookings screen
 

@@ -8,6 +8,7 @@ import 'package:photohire/features/auth/screens/splashcreen.dart';
 import 'package:photohire/photographer/photographer_edit_profile.dart';
 import 'package:photohire/photographer/photographer_orders_screen.dart';
 import 'package:photohire/photographer/photographers_bookings_list_screen.dart';
+import 'package:photohire/photographer/review_screen.dart';
 import 'package:photohire/user/change_password_screen.dart';
 
 class PhotographerProfileScreen extends StatefulWidget {
@@ -196,9 +197,6 @@ class _PhotographerProfileScreenState extends State<PhotographerProfileScreen> {
                                   ));
                             }),
                             SizedBox(height: 15),
-                            // _buildProfileOption(
-                            //     Icons.schedule, "Manage Availability", () {}),
-                            // SizedBox(height: 15),
                             _buildProfileOption(
                                 Icons.book_online, "My Bookings", () {
                               Navigator.push(
@@ -216,6 +214,19 @@ class _PhotographerProfileScreenState extends State<PhotographerProfileScreen> {
                                 MaterialPageRoute(
                                     builder: (context) =>
                                         PhotographerOrdersScreen()),
+                              );
+                            }),
+                            SizedBox(height: 15),
+                            _buildProfileOption(Icons.reviews, "View Reviews",
+                                () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ReviewScreen(
+                                    studioId:
+                                        userId, // Pass the logged-in photographer's ID
+                                  ),
+                                ),
                               );
                             }),
                             SizedBox(height: 15),

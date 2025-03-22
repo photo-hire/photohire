@@ -213,12 +213,12 @@ class ProductItem extends StatelessWidget {
     print(product);
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => UserProductDetailsScreen(
-                    pid: product['productId'],
-                    product: product['productDetails'][0])));
+        // Navigator.push(
+        //     context,
+        //     MaterialPageRoute(
+        //         builder: (context) => UserProductDetailsScreen(
+        //             pid: product['productId'],
+        //             product: product['productDetails'][0])));
       },
       child: Card(
         margin: EdgeInsets.only(bottom: 10),
