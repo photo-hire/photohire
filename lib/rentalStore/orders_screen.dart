@@ -13,160 +13,141 @@ class OrdersScreen extends StatefulWidget {
 class _OrdersScreenState extends State<OrdersScreen> {
   final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
 
-  Future<List<Map<String, dynamic>>> fetchRentalAndBookedProducts() async {
-    final rentalProductsQuery = await FirebaseFirestore.instance
-        .collection('storeProducts')
-        .where('userId', isEqualTo: currentUserId)
+  Future<Map<String, List<Map<String, dynamic>>>> fetchOrders() async {
+    List<Map<String, dynamic>> bookedProducts = [];
+    List<Map<String, dynamic>> rentalOrders = [];
+
+    // Fetch booked products
+    final bookedProductsQuery = await FirebaseFirestore.instance
+        .collection('bookedProducts')
+        .where('ownerId', isEqualTo: currentUserId)
         .get();
 
-    List<Map<String, dynamic>> rentalProducts = [];
-    for (var rentalProduct in rentalProductsQuery.docs) {
-      final productId = rentalProduct.id;
-      final bookedProductQuery = await FirebaseFirestore.instance
-          .collection('orders')
-          .where('productId', isEqualTo: productId)
-          .get();
-
-      if (bookedProductQuery.docs.isNotEmpty) {
-        for (var bookedProduct in bookedProductQuery.docs) {
-          // Get userId from booked product and fetch user data
-          final userId = bookedProduct['userId'];
-          final userQuery = await FirebaseFirestore.instance
-              .collection('photgrapher') // Assuming user data is stored in 'users' collection
-              .doc(userId)
-              .get();
-
-          if (userQuery.exists) {
-            final userData = userQuery.data();
-            
-            Map<String, dynamic> productData = rentalProduct.data();
-
-            productData['productId'] = productId;
-            
-            productData['userData'] = userData; // Add user data to the product data
-            
-            productData['bookingDays'] = bookedProduct['bookingDays'];
-            
-            productData['bookingDate'] = bookedProduct['bookedDate'];
-            productData['bookedToDate'] = bookedProduct['bookedToDate'];
-
-            rentalProducts.add(productData);
-          }
-        }
-      }
+    for (var doc in bookedProductsQuery.docs) {
+      bookedProducts.add({
+        'productName': doc['product'],
+        'productId': doc['productId'],
+        'userName': doc['userName'],
+        'bookingDays': doc['bookingDays'],
+        'bookedDate': doc['bookedDate'],
+        'bookedToDate': doc['bookedToDate'],
+      });
     }
-    return rentalProducts;
+
+    // Fetch rental orders
+    final rentalOrdersQuery = await FirebaseFirestore.instance
+        .collection('orders')
+        .where('ownerId', isEqualTo: currentUserId)
+        .get();
+
+    for (var doc in rentalOrdersQuery.docs) {
+      rentalOrders.add({
+        'productName': doc['product'],
+        'productId': doc['productId'],
+        'status': doc['status'],
+        'amount': doc['amount'],
+        'bookedDate': doc['bookedDate'],
+        'bookedToDate': doc['bookedToDate'],
+        'paymentId': doc['paymentId'],
+      });
+    }
+
+    return {'bookedProducts': bookedProducts, 'rentalOrders': rentalOrders};
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              transform: GradientRotation(11),
-              begin: Alignment.topLeft,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(255, 200, 148, 249), // Purple (Top-left)
-                Color.fromARGB(255, 162, 213, 255), // Blue (Top-right)
-                Colors.white, // White (Bottom)
-              ],
-            ),
+        appBar: AppBar(
+          title: Text('Orders',
+              style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+        ),
+        body: Padding(
+          padding: EdgeInsets.all(15.w),
+          child: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+            future: fetchOrders(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error fetching data'));
+              }
+
+              final bookedProducts = snapshot.data?['bookedProducts'] ?? [];
+              final rentalOrders = snapshot.data?['rentalOrders'] ?? [];
+
+              return ListView(
+                children: [
+                  if (bookedProducts.isNotEmpty) ...[
+                    Text('Booked Products',
+                        style: TextStyle(
+                            fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10.h),
+                    ...bookedProducts
+                        .map((data) => OrderTile(data: data))
+                        .toList(),
+                  ],
+                  if (rentalOrders.isNotEmpty) ...[
+                    SizedBox(height: 20.h),
+                    Text('Rental Orders',
+                        style: TextStyle(
+                            fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10.h),
+                    ...rentalOrders
+                        .map((data) => OrderTile(data: data))
+                        .toList(),
+                  ],
+                  if (bookedProducts.isEmpty && rentalOrders.isEmpty)
+                    Center(
+                        child: Text('No orders found',
+                            style: TextStyle(fontSize: 16.sp))),
+                ],
+              );
+            },
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(15, 60, 15, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Orders',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 25.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10.h),
-                Expanded(
-                  child: FutureBuilder<List<Map<String, dynamic>>>( 
-                    future: fetchRentalAndBookedProducts(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error fetching data'));
-                      }
-                      if (snapshot.hasData && snapshot.data!.isEmpty) {
-                        return Center(child: Text('No orders found'));
-                      }
+        ),
+      ),
+    );
+  }
+}
 
-                      final rentalProducts = snapshot.data ?? [];
+class OrderTile extends StatelessWidget {
+  final Map<String, dynamic> data;
+  const OrderTile({required this.data, Key? key}) : super(key: key);
 
-                      return ListView.builder(
-                        itemCount: rentalProducts.length,
-                        itemBuilder: (context, index) {
-                          final productData = rentalProducts[index];
-                          final userData = productData['userData'] ?? {};
-                          final userName = userData['name'] ?? 'No Name';
-                          final productName = productData['productDetails'][0]['name'] ?? 'No Name';
-                          final price = productData['productDetails'][0]['price'] ?? 'No Price';
-                          final imageUrl = productData['productDetails'][0]['image'] ?? '';
-                          final bookingDays = productData['bookingDays'] ?? '0';
-                          final bookingDate = productData['bookingDate'] ?? 'No Date';
-                          final bookedToDate = productData['bookedToDate']??'No Date';
-
-                          return Container(
-                            width: double.infinity,
-                            height: 100.h,
-                            margin: EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                            ),
-                            child: Row(
-                              children: [
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: imageUrl.isNotEmpty
-                                      ? Image.network(
-                                          imageUrl,
-                                          height: 100,
-                                          width: 100,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : Icon(Icons.image_not_supported),
-                                ),
-                                SizedBox(width: 10.w),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      userName, // Show username instead of product name
-                                      style: TextStyle(fontSize: 18.sp),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text('Product: $productName'),
-                                    SizedBox(height: 5),
-                                    Text('Booking Days: $bookingDays'),
-                                    SizedBox(height: 5),
-                                    Text('Booked To: $bookedToDate'),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: EdgeInsets.all(10.w),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(data['productName'] ?? 'No Name',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+            SizedBox(height: 5.h),
+            if (data.containsKey('userName'))
+              Text('Booked by: ${data['userName']}',
+                  style: TextStyle(fontSize: 14.sp)),
+            if (data.containsKey('status'))
+              Text('Status: ${data['status']}',
+                  style: TextStyle(fontSize: 14.sp)),
+            if (data.containsKey('amount'))
+              Text('Amount: ₹${data['amount']}',
+                  style: TextStyle(fontSize: 14.sp)),
+            SizedBox(height: 5.h),
+            Text('Booked Date: ${data['bookedDate']}',
+                style: TextStyle(fontSize: 14.sp)),
+            Text('Booked To: ${data['bookedToDate']}',
+                style: TextStyle(fontSize: 14.sp)),
+          ],
         ),
       ),
     );

@@ -102,40 +102,39 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
 
   // Submit a review to Firestore
   Future<void> _submitReview(String reviewText, double rating) async {
-  try {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Fetch user document from Firestore
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        // Fetch user document from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
 
-      String userName = 'Anonymous'; // Default name
-      String profileImage = ''; // Default name
-      if (userDoc.exists) {
-        userName = userDoc.data()?['name'] ?? 'Anonymous';
-        profileImage =userDoc.data()?['profileImage'] ??'';
+        String userName = 'Anonymous'; // Default name
+        String profileImage = ''; // Default name
+        if (userDoc.exists) {
+          userName = userDoc.data()?['name'] ?? 'Anonymous';
+          profileImage = userDoc.data()?['profileImage'] ?? '';
+        }
+
+        final reviewData = {
+          'userId': user.uid,
+          'userName': userName,
+          'reviewText': reviewText,
+          'rating': rating,
+          'timestamp': DateTime.now(),
+          'studioId': widget.pid,
+          'image': profileImage
+        };
+
+        await FirebaseFirestore.instance.collection('reviews').add(reviewData);
+        _fetchReviews(); // Refresh the reviews after submission
       }
-
-      final reviewData = {
-        'userId': user.uid,
-        'userName': userName,
-        'reviewText': reviewText,
-        'rating': rating,
-        'timestamp': DateTime.now(),
-        'studioId': widget.pid,
-        'image' : profileImage
-      };
-
-      await FirebaseFirestore.instance.collection('reviews').add(reviewData);
-      _fetchReviews(); // Refresh the reviews after submission
+    } catch (e) {
+      print("Error submitting review: $e");
     }
-  } catch (e) {
-    print("Error submitting review: $e");
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -462,8 +461,13 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                                           children: reviews.map((review) {
                                             return ListTile(
                                               leading: CircleAvatar(
-                                                backgroundImage: review['image']!=null || review['image'] != '' ? NetworkImage(
-                                                    review['image']) : null,
+                                                backgroundImage:
+                                                    review['image'] != null ||
+                                                            review['image'] !=
+                                                                ''
+                                                        ? NetworkImage(
+                                                            review['image'])
+                                                        : null,
                                               ),
                                               title: Text(review['userName']),
                                               subtitle:

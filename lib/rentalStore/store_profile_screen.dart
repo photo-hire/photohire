@@ -80,8 +80,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
         emailController.text = storeData?['email'] ?? '';
         descController.text = storeData?['description'] ?? '';
         phoneController.text = storeData?['phone'] ?? '';
-        _latitudeController.text = storeData?['latitude']??'';
-        _longitudeController.text = storeData?['longitude']??'';
+        _latitudeController.text = storeData?['latitude'] ?? '';
+        _longitudeController.text = storeData?['longitude'] ?? '';
 
         setState(() {});
       }
@@ -89,8 +89,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
       print("Error fetching store data: $e");
     }
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -165,31 +163,33 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                             borderRadius:
                                                 BorderRadius.circular(10.r))),
                                   ),
-                                  SizedBox(height: 16.h,),
+                                  SizedBox(
+                                    height: 16.h,
+                                  ),
                                   TextField(
-              controller: _latitudeController,
-              decoration: InputDecoration(
-                labelText: 'Latitude',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.location_on),
-                  onPressed: _getCurrentLocation,
-                ),
-              ),
-              readOnly: true,
-            ),
-            SizedBox(height: 16.h),
-            // Longitude TextField
-            TextField(
-              controller: _longitudeController,
-              decoration: InputDecoration(
-                labelText: 'Longitude',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.location_on),
-                  onPressed: _getCurrentLocation,
-                ),
-              ),
-              readOnly: true,
-            ),
+                                    controller: _latitudeController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Latitude',
+                                      suffixIcon: IconButton(
+                                        icon: Icon(Icons.location_on),
+                                        onPressed: _getCurrentLocation,
+                                      ),
+                                    ),
+                                    readOnly: true,
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  // Longitude TextField
+                                  TextField(
+                                    controller: _longitudeController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Longitude',
+                                      suffixIcon: IconButton(
+                                        icon: Icon(Icons.location_on),
+                                        onPressed: _getCurrentLocation,
+                                      ),
+                                    ),
+                                    readOnly: true,
+                                  ),
                                   SizedBox(
                                     height: 24.h,
                                   ),
@@ -207,8 +207,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         Map<String, dynamic> editedData = {
                                           'email': email,
                                           'description': description,
-                                          'latitude':latitude,
-                                          'longitude':longitude
+                                          'latitude': latitude,
+                                          'longitude': longitude
                                         };
 
                                         final storeDocRef = FirebaseFirestore
