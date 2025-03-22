@@ -102,25 +102,40 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
 
   // Submit a review to Firestore
   Future<void> _submitReview(String reviewText, double rating) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final reviewData = {
-          'userId': user.uid,
-          'userName': user.displayName ?? 'Anonymous',
-          'reviewText': reviewText,
-          'rating': rating,
-          'timestamp': DateTime.now(),
-          'studioId': widget.pid,
-        };
+  try {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Fetch user document from Firestore
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-        await FirebaseFirestore.instance.collection('reviews').add(reviewData);
-        _fetchReviews(); // Refresh the reviews after submission
+      String userName = 'Anonymous'; // Default name
+      String profileImage = ''; // Default name
+      if (userDoc.exists) {
+        userName = userDoc.data()?['name'] ?? 'Anonymous';
+        profileImage =userDoc.data()?['profileImage'] ??'';
       }
-    } catch (e) {
-      print("Error submitting review: $e");
+
+      final reviewData = {
+        'userId': user.uid,
+        'userName': userName,
+        'reviewText': reviewText,
+        'rating': rating,
+        'timestamp': DateTime.now(),
+        'studioId': widget.pid,
+        'image' : profileImage
+      };
+
+      await FirebaseFirestore.instance.collection('reviews').add(reviewData);
+      _fetchReviews(); // Refresh the reviews after submission
     }
+  } catch (e) {
+    print("Error submitting review: $e");
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -149,12 +164,12 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           : 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQdASyvwmzMDS7ddjV87hv1QW1K3OWL05JHuw&s';
 
                       return Container(
-                        height: MediaQuery.of(context).size.height / 2,
+                        height: MediaQuery.of(context).size.height / 3,
                         width: double.infinity,
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fitHeight,
                           ),
                         ),
                       );
@@ -423,72 +438,73 @@ class _PhotographerDetailsScreenState extends State<PhotographerDetailsScreen> {
                           ),
                           SizedBox(height: 16.h),
                           // Reviews Section
-                          Align(
-                            alignment: Alignment.topLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Reviews',
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.topLeft,
+                              child: ListView(
+                                children: [
+                                  Text(
+                                    'Reviews',
+                                    style: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                ),
-                                SizedBox(height: 8.h),
-                                reviews.isEmpty
-                                    ? Text(
-                                        'No reviews yet.',
-                                        style: TextStyle(
-                                            fontSize: 14.sp,
-                                            color: Colors.grey),
-                                      )
-                                    : Column(
-                                        children: reviews.map((review) {
-                                          return ListTile(
-                                            leading: CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                  review['userName']),
-                                            ),
-                                            title: Text(review['userName']),
-                                            subtitle:
-                                                Text(review['reviewText']),
-                                            trailing: RatingBar.builder(
-                                              initialRating: review['rating'],
-                                              minRating: 1,
-                                              direction: Axis.horizontal,
-                                              allowHalfRating: true,
-                                              itemCount: 5,
-                                              itemSize: 16,
-                                              itemBuilder: (context, _) =>
-                                                  const Icon(
-                                                Icons.star,
-                                                color: Colors.amber,
+                                  SizedBox(height: 8.h),
+                                  reviews.isEmpty
+                                      ? Text(
+                                          'No reviews yet.',
+                                          style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: Colors.grey),
+                                        )
+                                      : Column(
+                                          children: reviews.map((review) {
+                                            return ListTile(
+                                              leading: CircleAvatar(
+                                                backgroundImage: review['image']!=null || review['image'] != '' ? NetworkImage(
+                                                    review['image']) : null,
                                               ),
-                                              ignoreGestures:
-                                                  true, // Disable user interaction
-                                              onRatingUpdate: (rating) {},
-                                            ),
-                                          );
-                                        }).toList(),
+                                              title: Text(review['userName']),
+                                              subtitle:
+                                                  Text(review['reviewText']),
+                                              trailing: RatingBar.builder(
+                                                initialRating: review['rating'],
+                                                minRating: 1,
+                                                direction: Axis.horizontal,
+                                                allowHalfRating: true,
+                                                itemCount: 5,
+                                                itemSize: 16,
+                                                itemBuilder: (context, _) =>
+                                                    const Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                ),
+                                                ignoreGestures:
+                                                    true, // Disable user interaction
+                                                onRatingUpdate: (rating) {},
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color.fromARGB(
+                                            255, 11, 86, 147),
                                       ),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color.fromARGB(
-                                          255, 11, 86, 147),
-                                    ),
-                                    onPressed: () {
-                                      _showReviewDialog();
-                                    },
-                                    child: Text(
-                                      'Add Review',
-                                      style: TextStyle(color: Colors.white),
+                                      onPressed: () {
+                                        _showReviewDialog();
+                                      },
+                                      child: Text(
+                                        'Add Review',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
