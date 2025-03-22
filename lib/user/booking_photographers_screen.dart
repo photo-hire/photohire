@@ -32,7 +32,10 @@ class _UserBookingScreenState extends State<UserBookingScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchPrice();
+    _price = int.parse(widget.studioDetails['startingPrice'].toString()) *
+                100;
+    
+    
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
